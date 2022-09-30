@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+set -e
+
+exec 1>&2 # Send any output to stderr, to not alter the action response protocol
+
+#Get the module id of the default Loki instance.
+
+install -m 644 "${AGENT_INSTALL_DIR}/crowdsec.service" "/etc/systemd/system/${MODULE_ID}.service"
+systemctl daemon-reload
+systemctl enable --now "${MODULE_ID}.service"
