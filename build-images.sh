@@ -13,19 +13,19 @@ images=()
 # The image will be pushed to GitHub container registry
 repobase="${REPOBASE:-ghcr.io/nethserver}"
 # Configure the image name
-reponame="kickstart"
+reponame="crowdsec"
 
 # Create a new empty container image
 container=$(buildah from scratch)
 
-# Reuse existing nodebuilder-kickstart container, to speed up builds
-if ! buildah containers --format "{{.ContainerName}}" | grep -q nodebuilder-kickstart; then
+# Reuse existing nodebuilder-crowdsec container, to speed up builds
+if ! buildah containers --format "{{.ContainerName}}" | grep -q nodebuilder-crowdsec; then
     echo "Pulling NodeJS runtime..."
-    buildah from --name nodebuilder-kickstart -v "${PWD}:/usr/src:Z" docker.io/library/node:lts
+    buildah from --name nodebuilder-crowdsec -v "${PWD}:/usr/src:Z" docker.io/library/node:lts
 fi
 
 echo "Build static UI files with node..."
-buildah run nodebuilder-kickstart sh -c "cd /usr/src/ui && yarn install && yarn build"
+buildah run nodebuilder-crowdsec sh -c "cd /usr/src/ui && yarn install && yarn build"
 
 # Add imageroot directory to the container image
 buildah add "${container}" imageroot /imageroot
@@ -33,9 +33,9 @@ buildah add "${container}" ui/dist /ui
 # Setup the entrypoint, ask to reserve one TCP port with the label and set a rootless container
 buildah config --entrypoint=/ \
     --label="org.nethserver.authorizations=traefik@any:routeadm" \
-    --label="org.nethserver.tcp-ports-demand=1" \
-    --label="org.nethserver.rootfull=0" \
-    --label="org.nethserver.images=docker.io/jmalloc/echo-server:latest" \
+    --label="org.nethserver.tcp-ports-demand=0" \
+    --label="org.nethserver.rootfull=1" \
+    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.4.1-debian" \
     "${container}"
 # Commit the image
 buildah commit "${container}" "${repobase}/${reponame}"
