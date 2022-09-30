@@ -5,10 +5,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
+import os
 import json
 import sys
 import agent
 
+# Prepare return variable
 config = {}
 
+config["crowdsec_collections"] = os.environ["CROWDSEC_COLLECTIONS"]
+
+# Dump the configuratio to stdout
 json.dump(config, fp=sys.stdout)
