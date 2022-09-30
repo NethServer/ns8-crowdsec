@@ -7,15 +7,12 @@
 # This systemd unit starts a crowdsec instance using Podman.
 # Most parts of this file come from podman-generate-systemd.
 #
+
 [Unit]
 Description=crowdsec server
-ConditionPathExists=/var/lib/nethserver/%N/state/environment
-After=network-online.target
-Wants=network-online.target
 
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
-EnvironmentFile=/etc/nethserver/agent.env
 EnvironmentFile=/var/lib/nethserver/%N/state/environment
 WorkingDirectory=/var/lib/nethserver/%N/state
 SyslogIdentifier=%N
