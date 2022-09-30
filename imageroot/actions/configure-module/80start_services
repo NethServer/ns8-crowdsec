@@ -5,6 +5,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-# If the control reaches this step, the service can be enabled and started
+set -e
 
-systemctl --user enable --now crowdsec.service
+exec 1>&2 # Send any output to stderr, to not alter the action response protocol
+
+# Enable and restart the promtail service
+systemctl enable "${MODULE_ID}.service"
+systemctl stop "${MODULE_ID}.service"
+systemctl start "${MODULE_ID}.service"
