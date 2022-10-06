@@ -14,6 +14,7 @@ Description=crowdsec server
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=/var/lib/nethserver/%N/state/environment
+EnvironmentFile=-/var/lib/nethserver/%N/state/secrets/bouncer_keys_firewall.secret
 WorkingDirectory=/var/lib/nethserver/%N/state
 SyslogIdentifier=%N
 Restart=on-failure
@@ -31,6 +32,7 @@ ExecStart=/usr/bin/podman run \
     --volume ${MODULE_ID}_data:/var/lib/crowdsec/data:Z \
     --volume /run/log/journal/:/run/log/journal:Z \
     --env COLLECTIONS="${CROWDSEC_COLLECTIONS}" \
+    --env USE_TLS="true" \
     ${CROWDSEC_IMAGE}
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
