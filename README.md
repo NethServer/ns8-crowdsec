@@ -39,7 +39,13 @@ Launch `configure-module`, by setting the following parameters:
 
 Example:
 
-    api-cli run module/crowdsec1/configure-module --data '{}'
+```
+ api-cli run configure-module --agent module/crowdsec6 --data - <<EOF
+{
+      "crowdsec_collections": "crowdsecurity/sshd,crowdsecurity/sshd"
+    }
+EOF
+```
 
 The above command will:
 - start and configure the crowdsec instance
