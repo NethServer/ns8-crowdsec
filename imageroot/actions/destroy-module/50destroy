@@ -10,6 +10,6 @@ exec 1>&2 # Send any output to stderr, to not alter the action response protocol
 #
 # We must stop and clean up what we installed in the "create-module" action
 #
-systemctl disable --now "${MODULE_ID}-crowdsec.service"
-rm -vf "/etc/systemd/system/${MODULE_ID}-crowdsec.service"
+systemctl disable --now "${MODULE_ID}.service"
+rm -vf "/etc/systemd/system/${MODULE_ID}.service"
 systemctl daemon-reload

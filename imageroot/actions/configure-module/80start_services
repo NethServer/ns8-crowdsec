@@ -10,6 +10,6 @@ set -e
 exec 1>&2 # Send any output to stderr, to not alter the action response protocol
 
 # Enable and restart the promtail service
-systemctl enable "${MODULE_ID}-crowdsec.service"
-systemctl stop "${MODULE_ID}-crowdsec.service"
-systemctl start "${MODULE_ID}-crowdsec.service"
+systemctl enable "${MODULE_ID}.service"
+systemctl stop "${MODULE_ID}.service"
+systemctl start "${MODULE_ID}.service"
