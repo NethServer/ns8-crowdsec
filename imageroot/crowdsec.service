@@ -31,7 +31,6 @@ ExecStart=/usr/bin/podman run \
     --volume  /var/lib/nethserver/%N/state/crowdsec_config:/etc/crowdsec:Z \
     --volume ${MODULE_ID}_data:/var/lib/crowdsec/data:Z \
     --volume /run/log/journal/:/run/log/journal:Z \
-    --env COLLECTIONS="${CROWDSEC_COLLECTIONS}" \
     ${CROWDSEC_IMAGE}
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
