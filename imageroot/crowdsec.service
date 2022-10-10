@@ -21,6 +21,7 @@ SyslogIdentifier=%N
 Restart=on-failure
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
+ExecStartPre=/usr/local/bin/runagent -m ${MODULE_ID} expand-configuration
 ExecStart=/usr/bin/podman run \
     --detach \
     --conmon-pidfile %t/%N.pid \

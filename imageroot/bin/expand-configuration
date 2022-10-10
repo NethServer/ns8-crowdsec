@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import os
+import json
+import agent
+import agent.tasks
+
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+files =["crowdsec_config/acquis.yaml"]
+for f in files:
+    os.remove(f) if os.path.exists(f) else None
+
+jenv = Environment(
+    loader=FileSystemLoader(os.getenv("AGENT_INSTALL_DIR")+"/templates"),
+    autoescape=select_autoescape(),
+    keep_trailing_newline=True,
+)
+
+rdb = agent.redis_connect()
+modules=[]
+
+for kenv in rdb.scan_iter(match='module/*/environment'):
+    modules.append(kenv.removeprefix("module/").removesuffix("/environment"))
+
+properties = {
+    "modules" : modules
+}
+
+json_properties = json.dumps(properties)
+
+template = jenv.get_template('acquis.yaml')
+output = template.render(json.loads(json_properties))
+with open("crowdsec_config/acquis.yaml","w") as f:
+    f.write(output)
