@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+set -e
+
+exec 1>&2 # Send any output to stderr, to not alter the action response protocol
+
+systemctl restart "${MODULE_ID}.service"
+systemctl enable --now crowdsec-firewall-bouncer.service

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+set -e
+source /etc/os-release
+
+echo "Remove the bouncer:"
+if [[ "${PLATFORM_ID}" == "platform:el9" ]] ; then
+    dnf remove -y crowdsec-firewall-bouncer-iptables
+elif [[ "${ID}" == "debian" ]]; then
+    apt-get -y remove crowdsec-firewall-bouncer-iptables
+else
+    echo "The platform is not compatible, we exit"
+    exit 0
+fi
+
+echo "Remove ipset firewall rules"
+firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists
+firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
+
+echo "Restart firewalld"
+systemctl restart firewalld
