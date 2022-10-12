@@ -28,7 +28,7 @@ ExecStart=/usr/bin/podman run \
     --cgroups=no-conmon \
     --replace --name=%N \
     --publish 127.0.0.1:8080:8080 \
-    --publish 6060:6060 \
+    --publish 127.0.0.1:6060:6060 \
     --volume  /var/lib/nethserver/%N/state/crowdsec_config:/etc/crowdsec:Z \
     --volume ${MODULE_ID}_data:/var/lib/crowdsec/data:Z \
     --volume /run/log/journal/:/run/log/journal:Z \
