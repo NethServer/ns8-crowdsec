@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Create a wrapper to use the container : crowdsec1 cscli metrics
+
+cat <<EOF > /usr/bin/${MODULE_ID}
+#!/bin/bash
+if [[  -z \$1 ]];then
+    echo "
+#
+# usage : crowdsec1 cscli -h
+#
+"
+    exit 0
+fi
+
+podman exec -ti ${MODULE_ID} \$@
+EOF
+
+chmod a+x /usr/bin/${MODULE_ID}
