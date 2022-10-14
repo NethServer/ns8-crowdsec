@@ -20,7 +20,7 @@ SyslogIdentifier=%N
 Restart=on-failure
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
-ExecStartPre=/usr/local/bin/runagent -m ${MODULE_ID} expand-configuration
+ExecStartPre=/usr/local/bin/runagent -m %N expand-configuration
 ExecStart=/usr/bin/podman run \
     --detach \
     --conmon-pidfile %t/%N.pid \
@@ -30,13 +30,13 @@ ExecStart=/usr/bin/podman run \
     --publish 127.0.0.1:8080:8080 \
     --publish 127.0.0.1:6060:6060 \
     --volume  /var/lib/nethserver/%N/state/crowdsec_config:/etc/crowdsec:Z \
-    --volume ${MODULE_ID}_data:/var/lib/crowdsec/data:Z \
+    --volume %N-data:/var/lib/crowdsec/data:Z \
     --volume /run/log/journal/:/run/log/journal:Z \
     ${CROWDSEC_IMAGE}
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
-ExecReload=/usr/local/bin/runagent -m ${MODULE_ID} expand-configuration
-ExecReload=/usr/bin/podman kill -s HUP ${MODULE_ID}
+ExecReload=/usr/local/bin/runagent -m %N expand-configuration
+ExecReload=/usr/bin/podman kill -s HUP %N
 PIDFile=%t/%N.pid
 Type=forking
 
