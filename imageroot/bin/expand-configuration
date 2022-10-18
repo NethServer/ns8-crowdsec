@@ -38,3 +38,22 @@ template = jenv.get_template('acquis.yaml')
 output = template.render(json.loads(json_properties))
 with open("crowdsec_config/acquis.yaml","w") as f:
     f.write(output)
+
+
+# smtp = agent.get_smarthost_settings(agent.redis_connect())
+# if smtp['enabled'] == True and os.environ.get('receiver_emails'):
+#     properties = {
+#         "smtp_host" : smtp['host'],
+#         "smtp_username": smtp['username'],
+#         "smtp_password": smtp['password'],
+#         "smtp_port": smtp['port'],
+#         "sender_email": smtp['username'],
+#         "receiver_emails": os.getenv('receiver_emails'),
+#         "encryption_type": "none" if smtp['encrypt_smtp'] == "none" else "ssltls",
+#         "auth_type": "login",
+#     }
+#     template = jenv.get_template('email.yaml')
+#     output = template.render(json.loads(json_properties))
+#     with open("crowdsec_config/notifications/email.yaml","w") as f:
+#         f.write(output)
+

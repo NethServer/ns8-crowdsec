@@ -28,6 +28,16 @@ Output example:
 
     {"module_id": "crowdsec1", "image_name": "crowdsec", "image_url": "ghcr.io/nethserver/crowdsec:latest"}
 
+## Configure email
+
+```
+api-cli run configure-email-notification --agent module/crowdsec1 --data - <<EOF
+{
+    "receiver_emails":"toto@gmail.com,tata@tata.com"
+}
+EOF
+```
+
 ## Configure
 
 Let's assume that the crowdsec instance is named `crowdsec1`.

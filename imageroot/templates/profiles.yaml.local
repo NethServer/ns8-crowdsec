@@ -1,0 +1,3 @@
+notifications:
+  - email_default  # Set the required email parameters in /etc/crowdsec/notifications/email.yaml before enabling this.
+on_success: break
