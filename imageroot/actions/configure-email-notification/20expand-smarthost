@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+set -e
+
+exec 1>&2 # Send any output to stderr, to not alter the action response protocol
+
+${AGENT_INSTALL_DIR}/bin/expand-smarthost
