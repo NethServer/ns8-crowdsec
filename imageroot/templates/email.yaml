@@ -24,6 +24,7 @@ format: |
   {{end -}}
 {% endraw %}
 
+helo_host: {{helo_host}}
 smtp_host: {{smtp_host}} # example:smtp.gmail.com
 smtp_username: {{smtp_username}}       # Replace with your actual username
 smtp_password: {{smtp_password}}      # Replace with your actual password
@@ -37,5 +38,5 @@ receiver_emails:
   - {{email}}
 {% endfor %}
 
-# One of "ssltls", "none"
+# One of "ssltls", "none", "starttls"
 encryption_type: {{encryption_type}}

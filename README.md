@@ -32,11 +32,13 @@ Firstable you need to set the smarthost credential in the settings/smarthost pan
 then trigger the action
 
 - `receiver_emails`: all emails account you want to notice when decisions or alert come
+- `helo_host`: set a fully qualified domain name to use the relevant helo with postfix. 
 
 ```
 api-cli run configure-email-notification --agent module/crowdsec1 --data - <<EOF
 {
     "receiver_emails":"foo@domain.com,contact@domain.com"
+    "helo_host":"myfqdn.domain.com"
 }
 EOF
 ```
