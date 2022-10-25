@@ -1,9 +1,0 @@
-#!/bin/bash
-
-#
-# Copyright (C) 2022 Nethesis S.r.l.
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
-
-# removing this file causes and error in the actions, we exit
-exit 0

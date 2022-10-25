@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-# to install : curl https://raw.githubusercontent.com/stephdl/ns8-crowdsec/initialWork/bouncer-install.sh | bash
 set -e
 source /etc/os-release
 
