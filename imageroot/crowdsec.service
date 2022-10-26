@@ -1,0 +1,44 @@
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+#
+# This systemd unit starts a crowdsec instance using Podman.
+# Most parts of this file come from podman-generate-systemd.
+#
+
+[Unit]
+Description=crowdsec server
+After=network.target
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=/var/lib/nethserver/%N/state/environment
+WorkingDirectory=/var/lib/nethserver/%N/state
+SyslogIdentifier=%N
+Restart=on-failure
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
+ExecStartPre=/usr/local/bin/runagent -m %N expand-configuration
+ExecStart=/usr/bin/podman run \
+    --detach \
+    --conmon-pidfile %t/%N.pid \
+    --cidfile %t/%N.cid \
+    --cgroups=no-conmon \
+    --replace --name=%N \
+    --publish 127.0.0.1:8080:8080 \
+    --publish 127.0.0.1:6060:6060 \
+    --volume  /var/lib/nethserver/%N/state/crowdsec_config:/etc/crowdsec:Z \
+    --volume %N-data:/var/lib/crowdsec/data:Z \
+    --volume /run/log/journal/:/run/log/journal:Z \
+    ${CROWDSEC_IMAGE}
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
+ExecReload=/usr/local/bin/runagent -m %N expand-configuration
+ExecReload=/usr/bin/podman kill -s HUP %N
+PIDFile=%t/%N.pid
+Type=forking
+
+[Install]
+WantedBy=default.target
