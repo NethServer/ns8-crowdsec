@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+set -e
+
+exec 1>&2 # Send any output to stderr, to not alter the action response protocol
+
+install -m 644 "${AGENT_INSTALL_DIR}/crowdsec.service" "/etc/systemd/system/${MODULE_ID}.service"
+systemctl daemon-reload
+systemctl enable --now "${MODULE_ID}.service"
+
+
+# we need to start again to expand configuration
+systemctl restart "${MODULE_ID}.service"
+
+# Install default collections
+podman exec -ti ${MODULE_ID} cscli hub upgrade
+
+podman exec -ti ${MODULE_ID} cscli collections install \
+    crowdsecurity/apache2 \
+    crowdsecurity/base-http-scenarios \
+    crowdsecurity/dovecot \
+    crowdsecurity/http-cve \
+    crowdsecurity/linux \
+    crowdsecurity/mariadb \
+    crowdsecurity/nextcloud \
+    crowdsecurity/nginx \
+    crowdsecurity/nginx-proxy-manager \
+    crowdsecurity/pgsql \
+    crowdsecurity/postfix \
+    crowdsecurity/proftpd \
+    crowdsecurity/sshd \
+    crowdsecurity/traefik \
+    crowdsecurity/vsftpd \
+    crowdsecurity/wordpress
