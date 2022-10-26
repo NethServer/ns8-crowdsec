@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import os
+import json
+import agent
+import agent.tasks
+import sys
+
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+helo_host = os.environ.get("HELO_HOST")
+receiver_emails = os.environ.get("RECEIVER_EMAILS")
+
+smtp = agent.get_smarthost_settings(agent.redis_connect())
+if receiver_emails:
+    files =["crowdsec_config/notifications/email.yaml", "crowdsec_config/profiles.yaml.local"]
+    for f in files:
+        os.remove(f) if os.path.exists(f) else None
+
+    jenv = Environment(
+        loader=FileSystemLoader(os.getenv("AGENT_INSTALL_DIR")+"/templates"),
+        autoescape=select_autoescape(),
+        keep_trailing_newline=True,
+    )
+    properties = {
+        "smtp_host" : smtp['host'],
+        "smtp_username": smtp['username'],
+        "smtp_password": smtp['password'],
+        "smtp_port": smtp['port'],
+        "sender_email": smtp['username'],
+        "receiver_emails": receiver_emails.split(","),
+        "encryption_type": "none" if smtp['encrypt_smtp'] == "none" else "starttls" if smtp['encrypt_smtp'] == "starttls" else "ssltls",
+        "auth_type": "login",
+        "helo_host": helo_host,
+    }
+    json_properties = json.dumps(properties)
+    template = jenv.get_template('email.yaml')
+    output = template.render(json.loads(json_properties))
+    with open("crowdsec_config/notifications/email.yaml","w") as f:
+        f.write(output)
+
+if smtp['enabled'] and receiver_emails:
+    template = jenv.get_template('profiles.yaml.local')
+    output = template.render()
+    with open("crowdsec_config/profiles.yaml.local","w") as f:
+        f.write(output)
+else:
+    if os.path.isfile("crowdsec_config/profiles.yaml.local"):
+        os.remove("crowdsec_config/profiles.yaml.local")
