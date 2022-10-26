@@ -1,0 +1,11 @@
+name: default_ip_remediation
+#debug: true
+filters:
+ - Alert.Remediation == true && Alert.GetScope() == "Ip"
+decisions:
+ - type: ban
+   duration: 4h
+#duration_expr: Sprintf('%dh', (GetDecisionsCount(Alert.GetValue()) + 1) * 4)
+notifications:
+ - email_default  # Set the required email parameters in /etc/crowdsec/notifications/email.yaml before enabling this.
+on_success: break
