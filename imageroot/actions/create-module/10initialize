@@ -18,6 +18,7 @@ systemctl enable --now "${MODULE_ID}.service"
 systemctl restart "${MODULE_ID}.service"
 
 # Install default collections
+podman exec -ti ${MODULE_ID} cscli hub update
 podman exec -ti ${MODULE_ID} cscli hub upgrade
 
 podman exec -ti ${MODULE_ID} cscli collections install \
