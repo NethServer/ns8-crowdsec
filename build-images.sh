@@ -21,7 +21,7 @@ container=$(buildah from scratch)
 # Reuse existing nodebuilder-crowdsec container, to speed up builds
 if ! buildah containers --format "{{.ContainerName}}" | grep -q nodebuilder-crowdsec; then
     echo "Pulling NodeJS runtime..."
-    buildah from --name nodebuilder-crowdsec -v "${PWD}:/usr/src:Z" docker.io/library/node:lts
+    buildah from --name nodebuilder-crowdsec -v "${PWD}:/usr/src:Z" docker.io/library/node:18-slim
 fi
 
 echo "Build static UI files with node..."
