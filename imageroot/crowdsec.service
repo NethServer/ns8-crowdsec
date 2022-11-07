@@ -21,6 +21,7 @@ Restart=on-failure
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
 ExecStartPre=/usr/local/bin/runagent -m %N expand-configuration
+ExecStartPre=/usr/local/bin/runagent -m %N expand-smarthost
 ExecStart=/usr/bin/podman run \
     --detach \
     --conmon-pidfile %t/%N.pid \
@@ -36,6 +37,7 @@ ExecStart=/usr/bin/podman run \
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
 ExecReload=/usr/local/bin/runagent -m %N expand-configuration
+ExecReload=/usr/local/bin/runagent -m %N expand-smarthost
 ExecReload=/usr/bin/podman kill -s HUP %N
 PIDFile=%t/%N.pid
 Type=forking
