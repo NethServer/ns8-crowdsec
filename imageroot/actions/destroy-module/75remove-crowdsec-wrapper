@@ -7,5 +7,5 @@
 
 # remove the wrapper to use the container
 
-rm -f /usr/bin/${MODULE_ID}
+rm -f /usr/local/sbin/cscli
 

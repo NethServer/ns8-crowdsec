@@ -5,20 +5,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-# Create a wrapper to use the container : crowdsec1 cscli metrics
+# Create a wrapper to use the container : cscli metrics
 
-cat <<EOF > /usr/bin/${MODULE_ID}
+cat <<EOF > /usr/local/sbin/cscli
 #!/bin/bash
 if [[  -z \$1 ]];then
     echo "
 #
-# usage : crowdsec1 cscli -h
+# usage : cscli -h
 #
 "
     exit 0
 fi
 
-podman exec -ti ${MODULE_ID} \$@
+podman exec -ti ${MODULE_ID} cscli \$@
 EOF
 
-chmod a+x /usr/bin/${MODULE_ID}
+chmod a+x /usr/local/sbin/cscli
