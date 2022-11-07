@@ -7,7 +7,6 @@
 
 import json
 import agent
-import agent.tasks
 import sys
 
 # Try to parse the stdin as JSON.
