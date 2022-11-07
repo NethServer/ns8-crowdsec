@@ -38,7 +38,7 @@ firewall-cmd --permanent --zone=drop --add-source=ipset:crowdsec6-blacklists
 echo "Restart firewalld"
 systemctl restart firewalld
 
-echo "register the localhost bouncer"
+echo "Register the localhost bouncer"
 s=$(cat /var/lib/nethserver/${MODULE_ID}/state/secrets/bouncer_keys_firewall.secret)
 podman exec -ti ${MODULE_ID} cscli bouncers add localhost -k $s
 
