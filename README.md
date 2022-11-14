@@ -57,10 +57,10 @@ then restart the container : `systemctl restart crowdsec1`
 crowdsec come with a cli, do `crowdsec1 cscli --help`, if yopu want to know on a specific command  `crowdsec1 cscli <command> --help`
 
 - get a glance : `crowdsec1 cscli metrics`
-- see the state of installed bouncers : `crowdsec1 cscli bouncers list`
-- see the active decisions(ban): `crowdsec1 cscli decisions list`
-- see the alerts (discovered IP): `crowdsec1 cscli alerts list`
-- see installed collections : `crowdsec1 cscli collections list` or `crowdsec1 cscli collections list --all`
+- see the state of installed bouncers : `cscli bouncers list`
+- see the active decisions(ban): `cscli decisions list`
+- see the alerts (discovered IP): `cscli alerts list`
+- see installed collections : `cscli collections list` or `cscli collections list --all`
 
 ## Uninstall
 
