@@ -32,9 +32,7 @@ properties = {
     "modules" : modules
 }
 
-json_properties = json.dumps(properties)
-
 template = jenv.get_template('acquis.yaml')
-output = template.render(json.loads(json_properties))
+output = template.render(properties)
 with open("crowdsec_config/acquis.yaml","w") as f:
     f.write(output)
