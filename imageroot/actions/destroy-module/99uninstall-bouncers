@@ -5,7 +5,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
+exec 1>&2 # Send any output to stderr, to not alter the action response protocol
 set -e
+
 source /etc/os-release
 
 echo "Remove the bouncer:"
@@ -17,10 +19,3 @@ else
     echo "The platform is not compatible, we exit"
     exit 0
 fi
-
-echo "Remove ipset firewall rules"
-firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists
-firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
-
-echo "Restart firewalld"
-systemctl restart firewalld

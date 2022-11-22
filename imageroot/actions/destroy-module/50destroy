@@ -6,6 +6,7 @@
 #
 
 exec 1>&2 # Send any output to stderr, to not alter the action response protocol
+set -e
 
 #
 # We must stop and clean up what we installed in the "create-module" action
