@@ -38,9 +38,8 @@ if receiver_emails:
         "auth_type": "login",
         "helo_host": helo_host,
     }
-    json_properties = json.dumps(properties)
     template = jenv.get_template('email.yaml')
-    output = template.render(json.loads(json_properties))
+    output = template.render(properties)
     with open("crowdsec_config/notifications/email.yaml","w") as f:
         f.write(output)
 
