@@ -24,11 +24,11 @@ jenv = Environment(
 
 # read secret
 f = open(os.environ["AGENT_STATE_DIR"]+"/secrets/bouncer_keys_firewall.secret")
-s = f.read()
+secret = f.read()
 f.close()
 
 properties = {
-    "secret": s
+    "secret": secret
 }
 
 json_properties = json.dumps(properties)
