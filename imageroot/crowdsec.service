@@ -31,7 +31,7 @@ ExecStart=/usr/bin/podman run \
     --replace --name=%N \
     --publish 127.0.0.1:8085:8080 \
     --publish 127.0.0.1:6060:6060 \
-    --volume  /var/lib/nethserver/%N/state/crowdsec_config:/etc/crowdsec:Z \
+    --volume  ./crowdsec_config:/etc/crowdsec:Z \
     --volume %N-data:/var/lib/crowdsec/data:Z \
     --volume /run/log/journal/:/run/log/journal \
     ${CROWDSEC_IMAGE}
