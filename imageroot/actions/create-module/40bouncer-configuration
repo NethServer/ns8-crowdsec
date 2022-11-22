@@ -31,9 +31,7 @@ properties = {
     "secret": secret
 }
 
-json_properties = json.dumps(properties)
-
 template = jenv.get_template('crowdsec-firewall-bouncer.yaml')
-output = template.render(json.loads(json_properties))
+output = template.render(properties)
 with open("/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml","w") as f:
     f.write(output)

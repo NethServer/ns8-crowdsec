@@ -4,21 +4,14 @@
 # Copyright (C) 2022 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
+exec 1>&2 # never generate action output. Write to stderr instead.
+set -e  # stop at the first error
 
 # Create a wrapper to use the container : cscli metrics
 
 cat <<EOF > /usr/local/sbin/cscli
 #!/bin/bash
-if [[  -z \$1 ]];then
-    echo "
-#
-# usage : cscli -h
-#
-"
-    exit 0
-fi
 
-podman exec -ti ${MODULE_ID} cscli \$@
+podman exec -ti ${MODULE_ID} cscli "\${@}"
 EOF
-
-chmod a+x /usr/local/sbin/cscli
+install -v -m 0755 "${tmpfile}" /usr/local/sbin/cscli

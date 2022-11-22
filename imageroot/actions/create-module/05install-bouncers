@@ -28,17 +28,3 @@ else
     echo "The platform is not compatible, we exit"
     exit 0
 fi
-
-echo "Create IPSET (ipv4/ipv6) in Firewalld"
-firewall-cmd --permanent --new-ipset=crowdsec6-blacklists --type=hash:net --option="timeout=0" --option="maxelem=150000"
-firewall-cmd --permanent --new-ipset=crowdsec-blacklists --type=hash:net --option="timeout=0" --option="maxelem=150000"
-firewall-cmd --permanent --zone=drop --add-source=ipset:crowdsec-blacklists
-firewall-cmd --permanent --zone=drop --add-source=ipset:crowdsec6-blacklists
-
-echo "Restart firewalld"
-systemctl restart firewalld
-
-echo "Register the localhost bouncer"
-s=$(cat /var/lib/nethserver/${MODULE_ID}/state/secrets/bouncer_keys_firewall.secret)
-podman exec -ti ${MODULE_ID} cscli bouncers add localhost -k $s
-
