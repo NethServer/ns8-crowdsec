@@ -27,7 +27,7 @@ Output example:
 
 ns8-crowdsec detects changes in the event smarthost-changed and adapt to the new settings to send email when the alerts or decisions come.
 
-Firstable you need to set the smarthost credential in the settings/smarthost panel of the user interface of https://<host>/cluster-admin
+First of all, you need to set the smarthost credentials in the `Settings > Smarthost` panel of the cluster-admin UI
 
 then trigger the action
 
