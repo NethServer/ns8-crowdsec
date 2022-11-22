@@ -20,7 +20,10 @@ smtp = agent.get_smarthost_settings(agent.redis_connect())
 if receiver_emails:
     files =["crowdsec_config/notifications/email.yaml", "crowdsec_config/profiles.yaml.local"]
     for f in files:
-        os.remove(f) if os.path.exists(f) else None
+        try:
+            os.remove(f)
+        except FileNotFoundError:
+            pass
 
     jenv = Environment(
         loader=FileSystemLoader(os.getenv("AGENT_INSTALL_DIR")+"/templates"),
