@@ -9,7 +9,9 @@ set -e  # stop at the first error
 
 # Create a wrapper to use the container : cscli metrics
 
-cat <<EOF > /usr/local/sbin/cscli
+tmpfile=$(mktemp)
+trap "rm -f \${tmpfile}" EXIT
+cat <<EOF >${tmpfile}
 #!/bin/bash
 
 podman exec -ti ${MODULE_ID} cscli "\${@}"
