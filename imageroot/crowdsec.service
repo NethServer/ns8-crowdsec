@@ -17,7 +17,7 @@ Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=/var/lib/nethserver/%N/state/environment
 WorkingDirectory=/var/lib/nethserver/%N/state
 SyslogIdentifier=%N
-Restart=on-failure
+Restart=always
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
 ExecStartPre=/usr/local/bin/runagent -m %N expand-configuration
