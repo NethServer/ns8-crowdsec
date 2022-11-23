@@ -48,15 +48,15 @@ EOF
 Let's assume that the crowdsec instance is named `crowdsec1`. Once installed the container is up, nothing is needed, customisation can be done :
 
 - by editing a file inside /var/lib/nethserver/crowdsec1/state/crowdsec_config where all config files are stored
-- by editing a file inside the container use the wrapper with the name of the container : `crowdsec1 bash`
+- by editing a file inside the container use the wrapper with the name of the container : `podman exec -ti crowdsec1 bash`
 
 then restart the container : `systemctl restart crowdsec1`
 
 ### cscli
 
-crowdsec come with a cli, do `crowdsec1 cscli --help`, if yopu want to know on a specific command  `crowdsec1 cscli <command> --help`
+crowdsec come with a cli, do `cscli --help`, if you want to know on a specific command  `cscli <command> --help`
 
-- get a glance : `crowdsec1 cscli metrics`
+- get a glance : `cscli metrics`
 - see the state of installed bouncers : `cscli bouncers list`
 - see the active decisions(ban): `cscli decisions list`
 - see the alerts (discovered IP): `cscli alerts list`
