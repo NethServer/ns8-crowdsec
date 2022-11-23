@@ -23,24 +23,3 @@ supported_decisions_types:
 blacklists_ipv4: crowdsec-blacklists
 blacklists_ipv6: crowdsec6-blacklists
 #if present, insert rule in those chains
-iptables_chains:
-  - INPUT
-#  - FORWARD
-#  - DOCKER-USER
-
-## nftables
-nftables:
-  ipv4:
-    enabled: true
-    set-only: false
-    table: crowdsec
-    chain: crowdsec-chain
-  ipv6:
-    enabled: true
-    set-only: false
-    table: crowdsec6
-    chain: crowdsec6-chain
-# packet filter
-pf:
-  # an empty string disables the anchor
-  anchor_name: ""
