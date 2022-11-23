@@ -10,4 +10,4 @@ set -e
 
 echo "Register the localhost bouncer"
 secret=$(cat /var/lib/nethserver/${MODULE_ID}/state/secrets/bouncer_keys_firewall.secret)
-podman exec -ti ${MODULE_ID} cscli bouncers add localhost -k $secret
+podman exec -ti ${MODULE_ID} cscli bouncers add localhost -k "$secret"
