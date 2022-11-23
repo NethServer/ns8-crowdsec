@@ -8,5 +8,5 @@
 set -e
 exec 1>&2 # Send any output to stderr, to not alter the action response protocol
 
-systemctl restart "${MODULE_ID}.service"
 systemctl enable --now crowdsec-firewall-bouncer.service
+systemctl restart "${MODULE_ID}.service"

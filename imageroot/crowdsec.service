@@ -35,6 +35,8 @@ ExecStart=/usr/bin/podman run \
     --volume %N-data:/var/lib/crowdsec/data:Z \
     --volume ${CROWDSEC_JOURNAL}:/run/log/journal \
     ${CROWDSEC_IMAGE}
+# Wait until some TCP ports is ready
+ExecStartPost=/usr/bin/bash -c "while ! exec 3<>/dev/tcp/127.0.0.1/8085; do sleep 5 ; done"
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
 ExecReload=/usr/local/bin/runagent -m %N expand-configuration
