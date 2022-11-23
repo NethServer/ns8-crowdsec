@@ -8,19 +8,15 @@
 set -e
 source /etc/os-release
 
+if [[ -x "$(which crowdsec-firewall-bouncer)" ]]; then
+    exit 0 # Skip bouncer installation if executable is already found in PATH
+fi
+
 echo "Install the bouncer:"
 if [[ "${PLATFORM_ID}" == "platform:el9" ]] ; then
-    if dnf list --installed crowdsec-firewall-bouncer-iptables; then
-        echo "crowdsec-firewall-bouncer-iptables is already installed"
-        exit 0
-    fi
     curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.rpm.sh | bash
     dnf install -y crowdsec-firewall-bouncer-iptables
 elif [[ "${ID}" == "debian" ]]; then
-    if dpkg -l crowdsec-firewall-bouncer-iptables; then
-        echo "crowdsec-firewall-bouncer-iptables already installed"
-        exit 0
-    fi
     curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.deb.sh | bash
     apt-get update
     apt-get -y install crowdsec-firewall-bouncer-iptables
