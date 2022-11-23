@@ -22,7 +22,7 @@ TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
 ExecStartPre=/usr/local/bin/runagent -m %N expand-configuration
 ExecStartPre=/usr/local/bin/runagent -m %N expand-smarthost
-ExecStartPre=mkdir -vp crowdsec_config
+ExecStartPre=/bin/mkdir -vp crowdsec_config
 ExecStart=/usr/bin/podman run \
     --detach \
     --conmon-pidfile %t/%N.pid \
