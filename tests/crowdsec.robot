@@ -10,12 +10,12 @@ Check if crowdsec is installed correctly
     Set Suite Variable    ${module_id}    ${output.module_id}
 
 Check if crowdsec can be configured
-    ${rc} =    Execute Command    api-cli run module/${module_id}/configure-module --data '{}'
+    ${rc} =    Execute Command    api-cli run module/${module_id}/configure-module --data '{"receiver_emails":"foo@domain.com","helo_host":"myfqdn.domain.com"}'
     ...    return_rc=True  return_stdout=False
     Should Be Equal As Integers    ${rc}  0
 
 Check if crowdsec works as expected
-    ${rc} =    Execute Command    curl -f http://127.0.0.1/crowdsec/
+    ${rc} =    Execute Command    exec 3<>/dev/tcp/127.0.0.1/8085
     ...    return_rc=True  return_stdout=False
     Should Be Equal As Integers    ${rc}  0
 
