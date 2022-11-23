@@ -14,7 +14,10 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 files =["/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml"]
 for f in files:
-    os.remove(f) if os.path.exists(f) else None
+    try:
+        os.remove(f)
+    except FileNotFoundError:
+        pass
 
 jenv = Environment(
     loader=FileSystemLoader(os.getenv("AGENT_INSTALL_DIR")+"/templates"),
