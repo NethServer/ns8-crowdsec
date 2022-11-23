@@ -13,4 +13,4 @@ firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists
 firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
 
 echo "Restart firewalld"
-systemctl restart firewalld
+systemctl reload firewalld
