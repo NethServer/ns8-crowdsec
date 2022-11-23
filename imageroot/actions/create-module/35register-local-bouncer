@@ -9,5 +9,5 @@ exec 1>&2 # never generate action output. Write to stderr instead.
 set -e
 
 echo "Register the localhost bouncer"
-secret=$(cat /var/lib/nethserver/${MODULE_ID}/state/secrets/bouncer_keys_firewall.secret)
+secret=$(cat secrets/bouncer_keys_firewall.secret)
 podman exec -ti ${MODULE_ID} cscli bouncers add localhost -k "$secret"
