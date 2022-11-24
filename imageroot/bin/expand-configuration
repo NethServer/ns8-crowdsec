@@ -12,6 +12,9 @@ import agent.tasks
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+# retrieve where crowdsec runs to sort the module for watching only them
+node_id = os.environ['NODE_ID']
+
 files =["crowdsec_config/acquis.yaml"]
 for f in files:
     try:
@@ -28,8 +31,11 @@ jenv = Environment(
 rdb = agent.redis_connect()
 modules=[]
 
+# we list all modules, then we search in which node they run and 
+# we filter only relevant module on the node
 for kenv in rdb.scan_iter(match='module/*/environment'):
-    modules.append(kenv.removeprefix("module/").removesuffix("/environment"))
+    if rdb.hget(kenv, "NODE_ID") == node_id:
+        modules.append(kenv.removeprefix("module/").removesuffix("/environment"))
 
 properties = {
     "modules" : modules
