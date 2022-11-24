@@ -1,0 +1,15 @@
+---
+source: journalctl
+journalctl_filter:
+  - "_SYSTEMD_UNIT=sshd.service"
+labels:
+  type: syslog
+---
+{% for tag in modules %}
+source: journalctl
+journalctl_filter:
+  - "SYSLOG_IDENTIFIER={{tag}}"
+labels:
+  type: syslog
+---
+{% endfor %}

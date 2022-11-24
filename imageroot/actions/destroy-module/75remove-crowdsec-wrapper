@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+exec 1>&2 # Send any output to stderr, to not alter the action response protocol
+set -e
+
+# remove the wrapper to use the container
+
+rm -f /usr/local/sbin/cscli
+

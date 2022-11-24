@@ -1,23 +1,18 @@
 # ns8-crowdsec
 
-This is a template module for [NethServer 8](https://github.com/NethServer/ns8-core).
-To start a new module from it:
+CrowdSec is an open-source and lightweight software that allows you to detect peers with malevolent behaviors and block them from accessing your systems at various levels (infrastructural, system, applicative).
+To achieve this, CrowdSec reads logs from different sources (files, streams ...) to parse, normalize and enrich them before matching them to threats patterns called scenarios.
 
-1. Click on [Use this template](https://github.com/NethServer/ns8-crowdsec/generate).
-   Name your repo with `ns8-` prefix (e.g. `ns8-mymodule`). 
-   Do not end your module name with a number, like ~~`ns8-baaad2`~~!
+ns8-crowdsec installs the LAPI (local api) on the node, composed of agent (to read logs) and a list of collections to parse them (scenarios, parsers...), the notifications can be sent by email.
+When crowdsec detects an IP which is abusing it triggers an alert and then a decision (ban) to block the IP with a bouncer (iptable with IPSET). The bouncer is installed on the node however it could be installed to another Linux machine.
 
-1. An automated initialization workflow starts: wait for its completion.
-   You can follow the run inside the "Actions" tab, the workflow is named "Initial commit"
+## Documentation
 
-1. You can now clone the repository
-
-1. Edit this `README.md` file, by replacing this section with your module
-   description
-
-1. Commit and push your local changes
+https://docs.crowdsec.net/docs/intro
 
 ## Install
+
+**You can install only one crowdsec instance on the node**, other crowdsec instance will conflict with crowdsec1 and fail to start
 
 Instantiate the module with:
 
@@ -28,27 +23,44 @@ Output example:
 
     {"module_id": "crowdsec1", "image_name": "crowdsec", "image_url": "ghcr.io/nethserver/crowdsec:latest"}
 
+## Configure email notification
+
+ns8-crowdsec detects changes in the event smarthost-changed and adapt to the new settings to send email when the alerts or decisions come.
+
+First of all, you need to set the smarthost credentials in the `Settings > Smarthost` panel of the cluster-admin UI
+
+then trigger the action
+
+- `receiver_emails`: all emails account you want to notice when decisions or alert come
+- `helo_host`: set a fully qualified domain name to use the relevant helo with postfix. 
+
+```
+api-cli run configure-email-notification --agent module/crowdsec1 --data - <<EOF
+{
+    "receiver_emails":"foo@domain.com,contact@domain.com"
+    "helo_host":"myfqdn.domain.com"
+}
+EOF
+```
+
 ## Configure
 
-Let's assume that the crowdsec instance is named `crowdsec1`.
+Let's assume that the crowdsec instance is named `crowdsec1`. Once installed the container is up, nothing is needed, customisation can be done :
 
-Launch `configure-module`, by setting the following parameters:
-- `<MODULE_PARAM1_NAME>`: <MODULE_PARAM1_DESCRIPTION>
-- `<MODULE_PARAM2_NAME>`: <MODULE_PARAM2_DESCRIPTION>
-- ...
+- by editing a file inside /var/lib/nethserver/crowdsec1/state/crowdsec_config where all config files are stored
+- by editing a file inside the container use the wrapper with the name of the container : `podman exec -ti crowdsec1 bash`
 
-Example:
+then restart the container : `systemctl restart crowdsec1`
 
-    api-cli run module/crowdsec1/configure-module --data '{}'
+### cscli
 
-The above command will:
-- start and configure the crowdsec instance
-- (describe configuration process)
-- ...
+crowdsec come with a cli, do `cscli --help`, if you want to know on a specific command  `cscli <command> --help`
 
-Send a test HTTP request to the crowdsec backend service:
-
-    curl http://127.0.0.1/crowdsec/
+- get a glance : `cscli metrics`
+- see the state of installed bouncers : `cscli bouncers list`
+- see the active decisions(ban): `cscli decisions list`
+- see the alerts (discovered IP): `cscli alerts list`
+- see installed collections : `cscli collections list` or `cscli collections list --all`
 
 ## Uninstall
 

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+exec 1>&2 # Send any output to stderr, to not alter the action response protocol
+set -e
+
+echo "Remove ipset firewall rules"
+firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists
+firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
+
+echo "Restart firewalld"
+systemctl reload firewalld

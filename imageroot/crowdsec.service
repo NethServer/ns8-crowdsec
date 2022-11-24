@@ -1,0 +1,50 @@
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+#
+# This systemd unit starts a crowdsec instance using Podman.
+# Most parts of this file come from podman-generate-systemd.
+#
+
+[Unit]
+Description=crowdsec server
+After=network.target
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=/var/lib/nethserver/%N/state/environment
+WorkingDirectory=/var/lib/nethserver/%N/state
+SyslogIdentifier=%N
+Restart=always
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
+ExecStartPre=/usr/local/bin/runagent -m %N expand-configuration
+ExecStartPre=/usr/local/bin/runagent -m %N expand-smarthost
+ExecStartPre=/bin/mkdir -vp crowdsec_config
+ExecStart=/usr/bin/podman run \
+    --detach \
+    --privileged \
+    --conmon-pidfile %t/%N.pid \
+    --cidfile %t/%N.cid \
+    --cgroups=no-conmon \
+    --replace --name=%N \
+    --publish 127.0.0.1:8085:8080 \
+    --publish 127.0.0.1:6060:6060 \
+    --volume  ./crowdsec_config:/etc/crowdsec:Z \
+    --volume %N-data:/var/lib/crowdsec/data:Z \
+    --volume ${CROWDSEC_JOURNAL}:/run/log/journal \
+    ${CROWDSEC_IMAGE}
+# Wait until some TCP ports is ready
+ExecStartPost=/usr/bin/bash -c "while ! exec 3<>/dev/tcp/127.0.0.1/8085; do sleep 5 ; done"
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
+ExecReload=/usr/local/bin/runagent -m %N expand-configuration
+ExecReload=/usr/local/bin/runagent -m %N expand-smarthost
+ExecReload=/usr/bin/podman kill -s HUP %N
+PIDFile=%t/%N.pid
+Type=forking
+
+[Install]
+WantedBy=default.target

@@ -25,17 +25,16 @@ if ! buildah containers --format "{{.ContainerName}}" | grep -q nodebuilder-crow
 fi
 
 echo "Build static UI files with node..."
-buildah run nodebuilder-crowdsec sh -c "cd /usr/src/ui && yarn install && yarn build"
+buildah run --env="NODE_OPTIONS=--openssl-legacy-provider" nodebuilder-crowdsec sh -c "cd /usr/src/ui && yarn install && yarn build"
 
 # Add imageroot directory to the container image
 buildah add "${container}" imageroot /imageroot
 buildah add "${container}" ui/dist /ui
 # Setup the entrypoint, ask to reserve one TCP port with the label and set a rootless container
 buildah config --entrypoint=/ \
-    --label="org.nethserver.authorizations=traefik@any:routeadm" \
-    --label="org.nethserver.tcp-ports-demand=1" \
-    --label="org.nethserver.rootfull=0" \
-    --label="org.nethserver.images=docker.io/jmalloc/echo-server:latest" \
+    --label="org.nethserver.authorizations=traefik@node:routeadm" \
+    --label="org.nethserver.rootfull=1" \
+    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.4.2-debian" \
     "${container}"
 # Commit the image
 buildah commit "${container}" "${repobase}/${reponame}"
