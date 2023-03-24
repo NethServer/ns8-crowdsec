@@ -34,7 +34,7 @@ buildah add "${container}" ui/dist /ui
 buildah config --entrypoint=/ \
     --label="org.nethserver.authorizations=traefik@node:routeadm" \
     --label="org.nethserver.rootfull=1" \
-    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.4.2-debian" \
+    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.4.6-debian" \
     "${container}"
 # Commit the image
 buildah commit "${container}" "${repobase}/${reponame}"

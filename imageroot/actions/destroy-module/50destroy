@@ -13,4 +13,9 @@ set -e
 #
 systemctl disable --now "${MODULE_ID}.service"
 rm -vf "/etc/systemd/system/${MODULE_ID}.service"
+# remove the timer
+systemctl disable --now "${MODULE_ID}-upgrade-hub.timer"
+rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.service
+rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.timer
+
 systemctl daemon-reload
