@@ -15,5 +15,5 @@ firewall-cmd --permanent --zone=drop --add-source=ipset:crowdsec-blacklists
 firewall-cmd --permanent --zone=drop --add-source=ipset:crowdsec6-blacklists
 
 echo "Restart firewalld"
-systemctl reload firewalld
+systemctl restart firewalld
 
