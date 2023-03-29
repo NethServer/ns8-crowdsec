@@ -12,5 +12,6 @@ echo "Remove ipset firewall rules"
 firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists
 firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
 
+# after IPSET deletion, we need to restart firewalld
 echo "Restart firewalld"
-systemctl reload firewalld
+systemctl restart firewalld
