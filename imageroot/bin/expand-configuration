@@ -45,3 +45,48 @@ template = jenv.get_template('acquis.yaml')
 output = template.render(properties)
 with open("crowdsec_config/acquis.yaml","w") as f:
     f.write(output)
+
+# The first start crowdsec expects other configuration files
+# if these files are not present then the service fails to start
+# we start the first time with the default configuration
+if os.path.isfile("crowdsec_config/config.yaml"):
+    files =["crowdsec_config/config.yaml"]
+    for f in files:
+        try:
+            os.remove(f)
+        except FileNotFoundError:
+            pass
+
+    jenv = Environment(
+        loader=FileSystemLoader(os.getenv("AGENT_INSTALL_DIR")+"/templates"),
+        autoescape=select_autoescape(),
+        keep_trailing_newline=True,
+    )
+    # placeholder for later
+    properties = {}
+
+    template = jenv.get_template('config.yaml')
+    output = template.render(properties)
+    with open("crowdsec_config/config.yaml","w") as f:
+        f.write(output)
+
+
+# expand profiles.yaml.local
+smtp = agent.get_smarthost_settings(agent.redis_connect())
+
+files =["crowdsec_config/profiles.yaml.local"]
+for f in files:
+    try:
+        os.remove(f)
+    except FileNotFoundError:
+        pass
+
+properties = {
+    "email": smtp['enabled'],
+    "bantime": os.environ.get('BANTIME','1m'),
+    "dyn_bantime": os.environ.get('DYN_BANTIME',True)
+}
+template = jenv.get_template('profiles.yaml.local')
+output = template.render(properties)
+with open("crowdsec_config/profiles.yaml.local","w") as f:
+    f.write(output)
