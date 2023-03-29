@@ -17,14 +17,15 @@ helo_host = os.environ.get("HELO_HOST")
 receiver_emails = os.environ.get("RECEIVER_EMAILS")
 
 smtp = agent.get_smarthost_settings(agent.redis_connect())
-if receiver_emails:
-    files =["crowdsec_config/notifications/email.yaml", "crowdsec_config/profiles.yaml.local"]
-    for f in files:
-        try:
-            os.remove(f)
-        except FileNotFoundError:
-            pass
 
+files =["crowdsec_config/notifications/email.yaml"]
+for f in files:
+    try:
+        os.remove(f)
+    except FileNotFoundError:
+        pass
+
+if receiver_emails:
     jenv = Environment(
         loader=FileSystemLoader(os.getenv("AGENT_INSTALL_DIR")+"/templates"),
         autoescape=select_autoescape(),
@@ -45,12 +46,3 @@ if receiver_emails:
     output = template.render(properties)
     with open("crowdsec_config/notifications/email.yaml","w") as f:
         f.write(output)
-
-if smtp['enabled'] and receiver_emails:
-    template = jenv.get_template('profiles.yaml.local')
-    output = template.render()
-    with open("crowdsec_config/profiles.yaml.local","w") as f:
-        f.write(output)
-else:
-    if os.path.isfile("crowdsec_config/profiles.yaml.local"):
-        os.remove("crowdsec_config/profiles.yaml.local")
