@@ -13,8 +13,8 @@ import sys
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-helo_host = os.environ.get("HELO_HOST")
-receiver_emails = os.environ.get("RECEIVER_EMAILS")
+helo_host = os.environ.get("HELO_HOST", "")
+receiver_emails = os.environ.get("RECEIVER_EMAILS", "")
 
 smtp = agent.get_smarthost_settings(agent.redis_connect())
 
