@@ -84,7 +84,8 @@ for f in files:
 properties = {
     "email": smtp['enabled'],
     "bantime": os.environ.get('BANTIME','1m'),
-    "dyn_bantime": os.environ.get('DYN_BANTIME',True)
+    "dyn_bantime": os.environ.get('DYN_BANTIME',True),
+    "dyn_ban_value": '%d' + ''.join(filter(lambda x: not x.isdigit(), os.environ.get('BANTIME','1m')))
 }
 template = jenv.get_template('profiles.yaml.local')
 output = template.render(properties)
