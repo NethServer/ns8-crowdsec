@@ -64,7 +64,7 @@ crowdsec come with a cli, do `cscli --help`, if you want to know on a specific c
 
 ## Instance enroll request
 
-You can see the metrics of crowdsec at https://app.crowdsec.net/, for this purpose you need to create a login for a single user or an organisation in the website, then in the top righ menu click in `enroll an instance` and retrieve the keys, then enroll your container and restart it.
+You can see the metrics of crowdsec at https://app.crowdsec.net/, for this purpose you need to create a login for a single user or an organization in the website, then in the top right menu click in `enroll an instance` and retrieve the keys, then enroll your container and restart it.
 
     cscli console enroll <key>
     systemctl restart crowdsec1
