@@ -62,6 +62,21 @@ crowdsec come with a cli, do `cscli --help`, if you want to know on a specific c
 - see the alerts (discovered IP): `cscli alerts list`
 - see installed collections : `cscli collections list` or `cscli collections list --all`
 
+## Instance enroll request
+
+You can see the metrics of crowdsec at https://app.crowdsec.net/, for this purpose you need to create a login for a single user or an organization in the website, then in the top right menu click in `enroll an instance` and retrieve the keys, then enroll your container and restart it.
+
+    cscli console enroll <key>
+    systemctl restart crowdsec1
+
+you can force the enrollment with another key
+
+    cscli console enroll --overwrite <key>
+    systemctl restart crowdsec1
+
+Once done you need to accept inside the website the `Instance enroll request`
+
+
 ## Uninstall
 
 To uninstall the instance:
