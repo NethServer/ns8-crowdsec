@@ -25,7 +25,7 @@ for f in files:
     except FileNotFoundError:
         pass
 
-if receiver_emails:
+if receiver_emails and smtp['enabled']:
     jenv = Environment(
         loader=FileSystemLoader(os.getenv("AGENT_INSTALL_DIR")+"/templates"),
         autoescape=select_autoescape(),

@@ -73,6 +73,7 @@ if os.path.isfile("crowdsec_config/config.yaml"):
 
 # expand profiles.yaml.local
 smtp = agent.get_smarthost_settings(agent.redis_connect())
+receiver_emails = os.environ.get("RECEIVER_EMAILS")
 
 files =["crowdsec_config/profiles.yaml.local"]
 for f in files:
@@ -82,7 +83,7 @@ for f in files:
         pass
 
 properties = {
-    "email": smtp['enabled'],
+    "email": True if smtp['enabled'] and receiver_emails else False,
     "bantime": os.environ.get('BANTIME','1m'),
     "dyn_bantime": os.environ.get('DYN_BANTIME',True),
     "dyn_ban_value": '%d' + ''.join(filter(lambda x: not x.isdigit(), os.environ.get('BANTIME','1m')))
