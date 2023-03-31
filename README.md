@@ -51,10 +51,10 @@ You can also modify settings with the configure-module action
     }
     EOF
 
-`bantime`: set the ban time `m` for minute, `h` for hours
-`dyn_bantime`: enable a dynamic ban_time ((number of ban +1) *4) (same unit as ban_time)
-`receiver_emails`: all emails account you want to notice when decisions or alert come
-`helo_host`: set a fully qualified domain name to use the relevant helo with postfix.(could be empty `""`)
+- `bantime`: set the ban time `m` for minute, `h` for hours
+- `dyn_bantime`: enable a dynamic ban_time ((number of ban +1) *4) (same unit as ban_time)
+- `receiver_emails`: all emails account you want to notice when decisions or alert come
+- `helo_host`: set a fully qualified domain name to use the relevant helo with postfix.(could be empty `""`)
 
 ## disable whitelist
 
