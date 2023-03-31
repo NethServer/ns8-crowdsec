@@ -29,19 +29,7 @@ ns8-crowdsec detects changes in the event smarthost-changed and adapt to the new
 
 First of all, you need to set the smarthost credentials in the `Settings > Smarthost` panel of the cluster-admin UI
 
-then trigger the action
-
-- `receiver_emails`: all emails account you want to notice when decisions or alert come
-- `helo_host`: set a fully qualified domain name to use the relevant helo with postfix. 
-
-```
-api-cli run configure-email-notification --agent module/crowdsec1 --data - <<EOF
-{
-    "receiver_emails":"foo@domain.com,contact@domain.com"
-    "helo_host":"myfqdn.domain.com"
-}
-EOF
-```
+then trigger the action configure-module (see below)
 
 ## Configure
 
@@ -52,6 +40,29 @@ Let's assume that the crowdsec instance is named `crowdsec1`. Once installed the
 
 then restart the container : `systemctl restart crowdsec1`
 
+You can also modify settings with the configure-module action
+
+    api-cli run configure-module --agent module/crowdsec1 --data - <<EOF
+    {
+        "helo_host": "foo.domain.com",
+        "receiver_emails": "user@domain.com,user@domain.org",
+        "bantime": "1m",
+        "dyn_bantime": true
+    }
+    EOF
+
+`bantime`: set the ban time `m` for minute, `h` for hours
+`dyn_bantime`: enable a dynamic ban_time ((number of ban +1) *4) (same unit as ban_time)
+`receiver_emails`: all emails account you want to notice when decisions or alert come
+`helo_host`: set a fully qualified domain name to use the relevant helo with postfix.(could be empty `""`)
+
+## disable whitelist
+
+by default whitelist is enabled to never ban IP on the local network, for test purpose you could disable it
+
+    cscli parsers remove  crowdsecurity/whitelists
+    systemctl restart crowdsec1
+
 ### cscli
 
 crowdsec come with a cli, do `cscli --help`, if you want to know on a specific command  `cscli <command> --help`
@@ -60,8 +71,17 @@ crowdsec come with a cli, do `cscli --help`, if you want to know on a specific c
 - see the state of installed bouncers : `cscli bouncers list`
 - see the active decisions(ban): `cscli decisions list`
 - see the alerts (discovered IP): `cscli alerts list`
+- see the details of an alert: `cscli alerts inspect <alert_ID> -d`
 - see installed collections : `cscli collections list` or `cscli collections list --all`
+- upgrade collections (a systemd timer does upgrade the collection every 15 days): `cscli hub update && cscli hub upgrade`
 
+- ban manually an IP: `cscli decision add -i 1.2.3.4`
+- unban an IP `cscli decision remove -i 1.2.3.4`
+
+- inspect a collection: `cscli collections inspect crowdsecurity/sshd`
+- inspect a scenario: `cscli scenarios inspect crowdsecurity/ssh-bf`
+- inspect a parser: `cscli parsers inspect crowdsecurity/sshd-logs`
+  
 ## Uninstall
 
 To uninstall the instance:
