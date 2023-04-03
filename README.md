@@ -56,9 +56,9 @@ You can also modify settings with the configure-module action
 - `receiver_emails`: all emails account you want to notice when decisions or alert come
 - `helo_host`: set a fully qualified domain name to use the relevant helo with postfix.(could be empty `""`)
 
-## disable whitelist
+## Disable whitelist
 
-by default whitelist is enabled to never ban IP on the local network, for test purpose you could disable it
+By default whitelist is enabled to never ban IP on the local network, for test purpose you could disable it
 
     cscli parsers remove  crowdsecurity/whitelists
     systemctl restart crowdsec1

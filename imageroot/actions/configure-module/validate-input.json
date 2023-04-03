@@ -24,10 +24,10 @@
                 {
                     "type": "string",
                     "format": "idn-hostname",
-                    "description": "Helo host value for smtp"
+                    "description": "Helo host value for SMTP"
                 },
                 {
-                    "description": "Helo host value for smtp",
+                    "description": "Helo host value for SMTP",
                     "type": "string",
                     "maxLength": 0
                 }
@@ -41,7 +41,7 @@
         "bantime": {
             "type": "string",
             "title": "bantime",
-            "description": "ban time duration of bots (m:minute, h:hour)"
+            "description": "Ban time duration of bots (m:minute, h:hour)"
         },
         "dyn_bantime": {
             "type": "boolean",
