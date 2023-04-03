@@ -45,7 +45,7 @@ You can also modify settings with the configure-module action
     api-cli run configure-module --agent module/crowdsec1 --data - <<EOF
     {
         "helo_host": "foo.domain.com",
-        "receiver_emails": "user@domain.com,user@domain.org",
+        "receiver_emails": ["user@domain.com","user@domain.org"],
         "bantime": "1m",
         "dyn_bantime": true
     }

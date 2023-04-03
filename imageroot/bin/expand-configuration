@@ -73,7 +73,7 @@ if os.path.isfile("crowdsec_config/config.yaml"):
 
 # expand profiles.yaml.local
 smtp = agent.get_smarthost_settings(agent.redis_connect())
-receiver_emails = os.environ.get("RECEIVER_EMAILS")
+receiver_emails = os.environ.get("RECEIVER_EMAILS", "")
 
 files =["crowdsec_config/profiles.yaml.local"]
 for f in files:
