@@ -17,9 +17,9 @@ After=${MODULE_ID}.service
 
 [Service]
 Restart=always
-ExecStartPre=/bin/bash -c "/usr/local/sbin/firewall-rules create-ipset"
-ExecStartPost=/bin/bash -c "/usr/local/sbin/firewall-rules add-rule"
-ExecStopPost=/bin/bash -c "/usr/local/sbin/firewall-rules remove-rule"
+ExecStartPre=/usr/local/sbin/firewall-rules create-ipset
+ExecStartPost=/usr/local/sbin/firewall-rules add-rule
+ExecStopPost=/usr/local/sbin/firewall-rules remove-rule
 EOF
 mkdir -vp /etc/systemd/system/crowdsec-firewall-bouncer.service.d/
 install -v -m 644 "${tmpfile}" /etc/systemd/system/crowdsec-firewall-bouncer.service.d/crowdsec-firewall-bouncer-override.conf
