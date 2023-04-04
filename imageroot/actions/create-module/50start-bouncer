@@ -17,17 +17,14 @@ After=${MODULE_ID}.service
 
 [Service]
 Restart=always
-ExecStartPre=/usr/local/sbin/firewall-rules create-ipset
-ExecStartPost=/usr/local/sbin/firewall-rules add-rule
-ExecStopPost=/usr/local/sbin/firewall-rules remove-rule
+ExecStartPre=runagent -m ${MODULE_ID} firewall-rules create-ipset
+ExecStartPost=runagent -m ${MODULE_ID} firewall-rules add-rule
+ExecStopPost=runagent -m ${MODULE_ID} firewall-rules remove-rule
 EOF
 mkdir -vp /etc/systemd/system/crowdsec-firewall-bouncer.service.d/
-install -v -m 644 "${tmpfile}" /etc/systemd/system/crowdsec-firewall-bouncer.service.d/crowdsec-firewall-bouncer-override.conf
+install -v -m 644 "${tmpfile}" "/etc/systemd/system/crowdsec-firewall-bouncer.service.d/${MODULE_ID}-override.conf"
 
+# reload and start service
 systemctl daemon-reload
-
-# create the firewall wrapper (copy it from bin/firewall-rules)
-install -v -m 0755 ../bin/firewall-rules /usr/local/sbin/firewall-rules
-
 systemctl enable --now crowdsec-firewall-bouncer.service
 systemctl restart "${MODULE_ID}.service"
