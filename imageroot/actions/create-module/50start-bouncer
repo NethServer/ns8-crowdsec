@@ -27,4 +27,3 @@ install -v -m 644 "${tmpfile}" "/etc/systemd/system/crowdsec-firewall-bouncer.se
 # reload and start service
 systemctl daemon-reload
 systemctl enable --now crowdsec-firewall-bouncer.service
-systemctl restart "${MODULE_ID}.service"
