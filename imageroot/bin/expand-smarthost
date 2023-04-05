@@ -13,8 +13,8 @@ import sys
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-helo_host = os.environ.get("HELO_HOST")
-receiver_emails = os.environ.get("RECEIVER_EMAILS")
+helo_host = os.environ.get("HELO_HOST", "")
+receiver_emails = os.environ.get("RECEIVER_EMAILS", "")
 
 smtp = agent.get_smarthost_settings(agent.redis_connect())
 
@@ -25,7 +25,7 @@ for f in files:
     except FileNotFoundError:
         pass
 
-if receiver_emails:
+if receiver_emails and smtp['enabled']:
     jenv = Environment(
         loader=FileSystemLoader(os.getenv("AGENT_INSTALL_DIR")+"/templates"),
         autoescape=select_autoescape(),

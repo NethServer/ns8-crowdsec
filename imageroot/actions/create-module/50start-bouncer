@@ -17,18 +17,13 @@ After=${MODULE_ID}.service
 
 [Service]
 Restart=always
-ExecStartPre=/usr/bin/bash -c "if ! ipset list crowdsec-blacklists > /dev/null; then firewall-cmd --permanent --new-ipset=crowdsec-blacklists --type=hash:ip --option="timeout=0" --option="maxelem=150000"; fi"
-ExecStartPre=/usr/bin/bash -c "if ! ipset list crowdsec6-blacklists > /dev/null; then firewall-cmd --permanent --new-ipset=crowdsec6-blacklists --option=family=inet6 --type=hash:ip --option="timeout=0" --option="maxelem=150000"; fi"
-ExecStartPre=firewall-cmd --reload
-ExecStartPost=firewall-cmd --direct --add-rule ipv4 filter INPUT 0 -p all -m set --match-set crowdsec-blacklists src -j DROP
-ExecStartPost=firewall-cmd --direct --add-rule ipv6 filter INPUT 0 -p all -m set --match-set crowdsec6-blacklists src -j DROP
-ExecStopPost=firewall-cmd --direct --remove-rule ipv4 filter INPUT 0  -p all -m set --match-set crowdsec-blacklists src -j DROP
-ExecStopPost=firewall-cmd --direct --remove-rule ipv6 filter INPUT 0  -p all -m set --match-set crowdsec6-blacklists src -j DROP
+ExecStartPre=runagent -m ${MODULE_ID} firewall-rules create-ipset
+ExecStartPost=runagent -m ${MODULE_ID} firewall-rules add-rule
+ExecStopPost=runagent -m ${MODULE_ID} firewall-rules remove-rule
 EOF
 mkdir -vp /etc/systemd/system/crowdsec-firewall-bouncer.service.d/
-install -v -m 644 "${tmpfile}" /etc/systemd/system/crowdsec-firewall-bouncer.service.d/crowdsec-firewall-bouncer-override.conf
+install -v -m 644 "${tmpfile}" "/etc/systemd/system/crowdsec-firewall-bouncer.service.d/${MODULE_ID}-override.conf"
 
+# reload and start service
 systemctl daemon-reload
-
 systemctl enable --now crowdsec-firewall-bouncer.service
-systemctl restart "${MODULE_ID}.service"

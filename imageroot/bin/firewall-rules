@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# Copyright (C) 2023 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# following actions, create SET in ipset, add rules (ipv4 and ipv6) to firewall or remove them
+
+action=$1
+if [[ $action == 'create-ipset' ]]; then
+    if ! ipset list crowdsec-blacklists > /dev/null; then
+        firewall-cmd --permanent --new-ipset=crowdsec-blacklists --type=hash:ip --option="timeout=0" --option="maxelem=150000"
+    fi
+    if ! ipset list crowdsec6-blacklists > /dev/null; then
+        firewall-cmd --permanent --new-ipset=crowdsec6-blacklists --option=family=inet6 --type=hash:ip --option="timeout=0" --option="maxelem=150000"
+    fi
+    firewall-cmd --reload
+elif [[ $action == 'add-rule' ]]; then
+    firewall-cmd --direct --add-rule ipv4 filter INPUT 0 -p all -m set --match-set crowdsec-blacklists src -j DROP
+    firewall-cmd --direct --add-rule ipv6 filter INPUT 0 -p all -m set --match-set crowdsec6-blacklists src -j DROP
+elif [[ $action == 'remove-rule' ]]; then
+    firewall-cmd --direct --remove-rule ipv4 filter INPUT 0  -p all -m set --match-set crowdsec-blacklists src -j DROP
+    firewall-cmd --direct --remove-rule ipv6 filter INPUT 0  -p all -m set --match-set crowdsec6-blacklists src -j DROP
+else
+        echo 'No actions to do in firewall for crowdsec-firewall-bouncer.service'
+fi

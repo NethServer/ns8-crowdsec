@@ -1,8 +1,56 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "configure-module input",
-    "$id": "http://schema.nethserver.org/crowdsec/configure-module-input.json",
+    "title": "Configure crowdsec",
+    "$id": "http://nethserver.org/json-schema/task/input/crowdsec/configure-module",
     "description": "Configure crowdsec",
-    "examples": [],
-    "type": "object"
+    "examples": [
+        {
+            "helo_host": "foo.domain.com",
+            "receiver_emails": ["user@domain.com", "user@domain.org"],
+            "bantime": "1m",
+            "dyn_bantime": true
+        }
+    ],
+    "type": "object",
+    "required": [
+        "helo_host",
+        "receiver_emails",
+        "bantime",
+        "dyn_bantime"
+    ],
+    "properties": {
+        "helo_host": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "idn-hostname",
+                    "description": "Helo host value for SMTP"
+                },
+                {
+                    "description": "Helo host value for SMTP",
+                    "type": "string",
+                    "maxLength": 0
+                }
+            ]
+        },
+        "receiver_emails": {
+            "type": "array",
+            "title": "receiver_emails",
+            "description": "List of administrator to send crowdsec alerts",
+            "items": {
+                "type": "string",
+                "format": "idn-email"
+            }
+        },
+        "bantime": {
+            "type": "string",
+            "title": "bantime",
+            "description": "Ban time duration of bots (m:minute, h:hour)"
+        },
+        "dyn_bantime": {
+            "type": "boolean",
+            "title": "dyn_bantime",
+            "description": "Allow to ban with a dynamic bantime value (each ban increase the time)"
+        }
+    }
 }
