@@ -47,7 +47,8 @@ You can also modify settings with the configure-module action
         "helo_host": "foo.domain.com",
         "receiver_emails": ["user@domain.com","user@domain.org"],
         "bantime": "1m",
-        "dyn_bantime": true
+        "dyn_bantime": true,
+        "whitelists":["10.10.10.0/8","1.2.3.4","foo.com","foo.foo.org","12123564.org"]
     }
     EOF
 
@@ -55,6 +56,7 @@ You can also modify settings with the configure-module action
 - `dyn_bantime`: enable a dynamic ban_time ((number of ban +1) *4) (same unit as ban_time)
 - `receiver_emails`: all emails account you want to notice when decisions or alert come
 - `helo_host`: set a fully qualified domain name to use the relevant helo with postfix.(could be empty `""`)
+- `whitelists`: whitelist domain, ip or network to crowdsec, no ban will occurs for that list
 
 ## Disable whitelist
 
