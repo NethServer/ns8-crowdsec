@@ -1,0 +1,9 @@
+name: nethserver/whitlist-reverse-dns
+description: "Whitelist postoverflows from reverse dns"
+whitelist:
+  reason: "do not ban nethserver whitelistings rdns"
+  expression:
+  #this is the reverse of my ip (PTR), you can get it by performing a "host" command on your public IP for example
+{% for reversedns in whitelist_reversedns %}
+    - evt.Enriched.reverse_dns endsWith '{{reversedns}}'
+{% endfor %}

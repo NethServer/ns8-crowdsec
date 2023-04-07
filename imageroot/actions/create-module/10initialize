@@ -67,3 +67,7 @@ podman exec -ti ${MODULE_ID} cscli collections install \
     crowdsecurity/traefik \
     crowdsecurity/vsftpd \
     crowdsecurity/wordpress
+# TODO https://hub.crowdsec.net/author/crowdsecurity/collections/whitelist-good-actors
+#podman exec -ti ${MODULE_ID} cscli collections install crowdsecurity/whitelist-good-actors
+podman exec -ti ${MODULE_ID} cscli postoverflows install crowdsecurity/rdns
+podman exec -ti ${MODULE_ID} cscli parsers install crowdsecurity/geoip-enrich
