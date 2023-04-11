@@ -51,6 +51,36 @@
             "type": "boolean",
             "title": "dyn_bantime",
             "description": "Allow to ban with a dynamic bantime value (each ban increase the time)"
+        },
+        "whitelists": {
+            "type": "array",
+            "title": "receiver_emails",
+            "description": "List of administrator to send crowdsec alerts",
+            "items": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "format": "idn-hostname",
+                        "description": "FQDN"
+                    },
+                    {
+                        "description": "IPV4",
+                        "type": "string",
+                        "format": "ipv4"
+                    },
+                    {
+                        "description": "IPV6",
+                        "type": "string",
+                        "format": "ipv6"
+                    },
+                    {
+                        "title": "IPv4 CIDR",
+                        "description": "IPv4 with netmask in CIDR notation",
+                        "type": "string",
+                        "pattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$"
+                    }
+                ]
+            }
         }
     }
 }
