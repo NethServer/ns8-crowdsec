@@ -96,12 +96,18 @@ with open("crowdsec_config/profiles.yaml.local","w") as f:
 
 # whitelist
 
-files =["crowdsec_config/parsers/s02-enrich/nethserver-whitelists.yaml"]
+# remove file if exists first
+files = [
+            "crowdsec_config/parsers/s02-enrich/nethserver-whitelists.yaml",
+            "crowdsec_config/postoverflows/s01-whitelists/nethserver-postoverflows-whitelists.yaml"
+        ]
+
 for f in files:
     try:
         os.remove(f)
     except FileNotFoundError:
         pass
+# if the Env var exists then write the configuration files
 whitelists = os.environ.get("WHITELISTS", "")
 if whitelists:
     # we want to sort ip, network and reversedns name
@@ -137,10 +143,22 @@ if whitelists:
         "whitelists_cidr": whitelists_cidr,
         "whitelist_reversedns": whitelist_reversedns,
     }
+    # create the folder if not exists
+    try:
+        os.mkdir("crowdsec_config/parsers/s02-enrich")
+    except OSError:
+       pass
+    # write the template
     template = jenv.get_template('nethserver-parsers-whitelists.yaml')
     output = template.render(properties)
     with open("crowdsec_config/parsers/s02-enrich/nethserver-parsers-whitelists.yaml","w") as f:
         f.write(output)
+    # create the folder if not exists
+    try:
+        os.mkdir("crowdsec_config/postoverflows/s01-whitelists")
+    except OSError:
+       pass
+    # write the template
     template = jenv.get_template('nethserver-postoverflows-whitelists.yaml')
     output = template.render(properties)
     with open("crowdsec_config/postoverflows/s01-whitelists/nethserver-postoverflows-whitelists.yaml","w") as f:
