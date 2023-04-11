@@ -1,9 +1,9 @@
-name: nethserver/whitlist-reverse-dns
-description: "Whitelist postoverflows from reverse dns"
+name: nethserver/whitlist-FQDN
+description: "Whitelist postoverflows from FQDN"
 whitelist:
-  reason: "do not ban nethserver whitelistings rdns"
+  reason: "do not ban nethserver whitelistings FQDN"
   expression:
-  #this is the reverse of my ip (PTR), you can get it by performing a "host" command on your public IP for example
+  #see https://discord.com/channels/921520481163673640/1003971753200074752/threads/1007633491690786866
 {% for reversedns in whitelist_reversedns %}
-    - evt.Enriched.reverse_dns endsWith '{{reversedns}}'
+    - evt.Overflow.Alert.Source.IP in LookupHost("{{reversedns}}")
 {% endfor %}
