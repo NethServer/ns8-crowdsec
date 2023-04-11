@@ -2,11 +2,15 @@ name: nethserver/whitelists-ip-or-network
 description: "Whitelist events from my ip or network addresses"
 whitelist:
   reason: "do not ban nethserver ip or network whitelistings"
+{% if whitelists_ip %}
   ip:
 {% for ip in whitelists_ip %}
     - "{{ip}}"
 {% endfor %}
+{%endif%}
+{% if whitelists_cidr %}
   cidr:
 {% for cidr in whitelists_cidr %}
     - "{{cidr}}"
 {% endfor %}
+{%endif%}
