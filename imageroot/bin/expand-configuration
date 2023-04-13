@@ -97,13 +97,28 @@ with open("crowdsec_config/profiles.yaml.local","w") as f:
 # whitelist
 
 # remove file if exists first
-files =["crowdsec_config/parsers/s02-enrich/nethserver-parsers-whitelists.yaml","crowdsec_config/postoverflows/s01-whitelists/nethserver-postoverflows-whitelists.yaml"]
+files = [
+            "crowdsec_config/parsers/s02-enrich/nethserver-parsers-whitelists.yaml",
+            "crowdsec_config/postoverflows/s01-whitelists/nethserver-postoverflows-whitelists.yaml"
+        ]
 
 for f in files:
     try:
         os.remove(f)
     except FileNotFoundError:
         pass
+
+# create the folder if not exists
+try:
+    os.mkdir("crowdsec_config/parsers/s02-enrich")
+except OSError:
+    pass
+# create the folder if not exists
+try:
+    os.mkdir("crowdsec_config/postoverflows/s01-whitelists")
+except OSError:
+    pass
+
 # if the Env var exists then write the configuration files
 whitelists = os.environ.get("WHITELISTS", "")
 if whitelists:
@@ -118,46 +133,27 @@ if whitelists:
     # <re.Match object; span=(0, 8), match='foo.com'>
     # <re.Match object; span=(0, 12), match='12123564.com'>
     # <re.Match object; span=(0, 13), match='foo.foo.com'>
-
     for test in whitelists.split(','):
-        reversedns = re.search(r'([A-Za-z0-9-.]+.[A-Za-z]+)', test)
-        if reversedns:
+        if re.search(r'([A-Za-z0-9-.]+.[A-Za-z]+)', test):
             whitelist_reversedns.append(test)
-            continue
-
-        network = re.search(r'([0-9]+.[0-9]+.[0-9]+.[0-9]+/[0-9])', test)
-        if network:
+        elif re.search(r'([0-9]+.[0-9]+.[0-9]+.[0-9]+/[0-9])', test):
             whitelists_cidr.append(test)
-            continue
-
-        ip = re.search(r'([0-9]+.[0-9]+.[0-9]+.[0-9]+)', test)
-        if ip:
+        elif re.search(r'([0-9]+.[0-9]+.[0-9]+.[0-9]+)', test):
             whitelists_ip.append(test)
-            continue
 
     properties = {
         "whitelists_ip": whitelists_ip,
         "whitelists_cidr": whitelists_cidr,
         "whitelist_reversedns": whitelist_reversedns,
     }
-    # create the folder if not exists
-    try:
-        os.mkdir("crowdsec_config/parsers/s02-enrich")
-    except OSError:
-       pass
-    # write the template
+
+    # write the templates
     if properties['whitelists_ip'] or  properties['whitelists_cidr']:
         template = jenv.get_template('nethserver-parsers-whitelists.yaml')
         output = template.render(properties)
         with open("crowdsec_config/parsers/s02-enrich/nethserver-parsers-whitelists.yaml","w") as f:
             f.write(output)
 
-    # create the folder if not exists
-    try:
-        os.mkdir("crowdsec_config/postoverflows/s01-whitelists")
-    except OSError:
-       pass
-    # write the template
     if properties['whitelist_reversedns']:
         template = jenv.get_template('nethserver-postoverflows-whitelists.yaml')
         output = template.render(properties)
