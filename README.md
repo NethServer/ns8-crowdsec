@@ -80,7 +80,11 @@ crowdsec come with a cli, do `cscli --help`, if you want to know on a specific c
 - upgrade collections (a systemd timer does upgrade the collection every 15 days): `cscli hub update && cscli hub upgrade`
 
 - ban manually an IP: `cscli decision add -i 1.2.3.4`
-- unban an IP `cscli decision remove -i 1.2.3.4`
+- unban an IP `cscli decision delete -i 1.2.3.4`
+- ban a network `cscli decision add -r 1.2.3.0/24`
+- unban a network `cscli decision delete -r 1.2.3.0/24`
+- unban from a scenario `cscli decisions delete -s crowdsecurity/ssh-bfcscli`
+- unban all decisions `cscli decisions delete --all`
 
 - inspect a collection: `cscli collections inspect crowdsecurity/sshd`
 - inspect a scenario: `cscli scenarios inspect crowdsecurity/ssh-bf`
