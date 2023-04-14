@@ -4,6 +4,6 @@ whitelist:
   reason: "do not ban nethserver whitelistings FQDN"
   expression:
   #see https://discord.com/channels/921520481163673640/1003971753200074752/threads/1007633491690786866
-{% for reversedns in whitelist_reversedns %}
-    - evt.Overflow.Alert.Source.IP in LookupHost("{{reversedns}}")
+{% for fqdn in whitelist_fqdn %}
+    - evt.Overflow.Alert.Source.IP in LookupHost("{{fqdn}}")
 {% endfor %}

@@ -122,10 +122,10 @@ except OSError:
 # if the Env var exists then write the configuration files
 whitelists = os.environ.get("WHITELISTS", "")
 if whitelists:
-    # we want to sort ip, network and reversedns name
+    # we want to sort ip, network and fqdn name
     whitelists_ip = []
     whitelists_cidr = []
-    whitelist_reversedns = []
+    whitelist_fqdn = []
 
     # we whitelist
     # <re.Match object; span=(0, 12), match='10.10.10.0/8'>
@@ -135,7 +135,7 @@ if whitelists:
     # <re.Match object; span=(0, 13), match='foo.foo.com'>
     for test in whitelists.split(','):
         if re.search(r'([A-Za-z0-9-.]+.[A-Za-z]+)', test):
-            whitelist_reversedns.append(test)
+            whitelist_fqdn.append(test)
         elif re.search(r'([0-9]+.[0-9]+.[0-9]+.[0-9]+/[0-9])', test):
             whitelists_cidr.append(test)
         elif re.search(r'([0-9]+.[0-9]+.[0-9]+.[0-9]+)', test):
@@ -144,7 +144,7 @@ if whitelists:
     properties = {
         "whitelists_ip": whitelists_ip,
         "whitelists_cidr": whitelists_cidr,
-        "whitelist_reversedns": whitelist_reversedns,
+        "whitelist_fqdn": whitelist_fqdn,
     }
 
     # write the templates
@@ -154,7 +154,7 @@ if whitelists:
         with open("crowdsec_config/parsers/s02-enrich/nethserver-parsers-whitelists.yaml","w") as f:
             f.write(output)
 
-    if properties['whitelist_reversedns']:
+    if properties['whitelist_fqdn']:
         template = jenv.get_template('nethserver-postoverflows-whitelists.yaml')
         output = template.render(properties)
         with open("crowdsec_config/postoverflows/s01-whitelists/nethserver-postoverflows-whitelists.yaml","w") as f:
