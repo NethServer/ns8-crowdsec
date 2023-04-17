@@ -99,7 +99,7 @@ with open("crowdsec_config/profiles.yaml.local","w") as f:
 # remove file if exists first
 files = [
             "crowdsec_config/parsers/s02-enrich/nethserver-parsers-whitelists.yaml",
-            "crowdsec_config/postoverflows/s01-whitelists/nethserver-postoverflows-whitelists.yaml"
+            "crowdsec_config/postoverflows/s01-whitelist/nethserver-postoverflows-whitelists.yaml"
         ]
 
 for f in files:
@@ -146,5 +146,5 @@ if whitelists:
     if properties['whitelist_fqdn']:
         template = jenv.get_template('nethserver-postoverflows-whitelists.yaml')
         output = template.render(properties)
-        with open("crowdsec_config/postoverflows/s01-whitelists/nethserver-postoverflows-whitelists.yaml","w") as f:
+        with open("crowdsec_config/postoverflows/s01-whitelist/nethserver-postoverflows-whitelists.yaml","w") as f:
             f.write(output)
