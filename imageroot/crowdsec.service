@@ -20,9 +20,10 @@ SyslogIdentifier=%N
 Restart=always
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
+ExecStartPre=/bin/mkdir -vp crowdsec_config/postoverflows/s01-whitelists
+ExecStartPre=/bin/mkdir -vp crowdsec_config/parsers/s02-enrich
 ExecStartPre=/usr/local/bin/runagent -m %N expand-configuration
 ExecStartPre=/usr/local/bin/runagent -m %N expand-smarthost
-ExecStartPre=/bin/mkdir -vp crowdsec_config
 ExecStart=/usr/bin/podman run \
     --detach \
     --privileged \
