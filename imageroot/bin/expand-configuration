@@ -123,17 +123,23 @@ if whitelists:
     # <re.Match object; span=(0, 12), match='12123564.com'>
     # <re.Match object; span=(0, 13), match='foo.foo.com'>
     for test in whitelists.split(','):
-        if re.search(r'([A-Za-z0-9-.]+.[A-Za-z]+)', test):
+        # test domain name
+        if re.search(r'([A-Za-z0-9-\.]+\.[A-Za-z]+$)', test):
             whitelist_fqdn.append(test)
-        elif re.search(r'([0-9]+.[0-9]+.[0-9]+.[0-9]+/[0-9])', test):
+        # test cidr
+        elif re.search("./[0-9]+$", test):
             whitelists_cidr.append(test)
-        elif re.search(r'([0-9]+.[0-9]+.[0-9]+.[0-9]+)', test):
+        # test ipv4
+        elif re.search(r'([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', test):
+            whitelists_ip.append(test)
+        # test ipv6
+        elif re.search(r'(?:[a-zA-Z0-9]{0,4}:?){1,8}|(?:[a-zA-Z0-9]{0,4}:?){1,4}(?:[0-9]{1,3}\.){3}[0-9]{1,3}', test):
             whitelists_ip.append(test)
 
     properties = {
-        "whitelists_ip": whitelists_ip,
-        "whitelists_cidr": whitelists_cidr,
-        "whitelist_fqdn": whitelist_fqdn,
+        "whitelists_ip": sorted(set(whitelists_ip)),
+        "whitelists_cidr": sorted(set(whitelists_cidr)),
+        "whitelist_fqdn": sorted(set(whitelist_fqdn)),
     }
 
     # write the templates
