@@ -7,7 +7,7 @@
         {
             "helo_host": "foo.domain.com",
             "receiver_emails": ["user@domain.com", "user@domain.org"],
-            "bantime": "1m",
+            "bantime": "1",
             "dyn_bantime": true
         }
     ],
@@ -34,13 +34,28 @@
             ]
         },
         "receiver_emails": {
-            "type": "array",
-            "title": "receiver_emails",
-            "description": "List of administrator to send crowdsec alerts",
-            "items": {
-                "type": "string",
-                "format": "idn-email"
-            }
+            "anyOf": [
+                {
+                    "type": "array",
+                    "title": "receiver_emails",
+                    "minItems": 1,
+                    "description": "List of administrator to send crowdsec alerts",
+                    "items": {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                },
+                {
+                    "type": "array",
+                    "title": "receiver_emails",
+                    "minItems": 1,
+                    "description": "List of administrator to send crowdsec alerts",
+                    "items": {
+                        "type": "string",
+                        "format": "idn-email"
+                    }
+                }
+            ]
         },
         "bantime": {
             "type": "string",

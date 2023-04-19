@@ -85,9 +85,9 @@ for f in files:
 
 properties = {
     "email": True if smtp['enabled'] and receiver_emails else False,
-    "bantime": os.environ.get('BANTIME','1m'),
+    "bantime": os.environ.get('BANTIME','1')+'m',
     "dyn_bantime": os.environ.get('DYN_BANTIME',"True") == "True",
-    "dyn_ban_value": '%d' + ''.join(filter(lambda x: not x.isdigit(), os.environ.get('BANTIME','1m')))
+    "dyn_ban_value": '%d' + ''.join(filter(lambda x: not x.isdigit(), os.environ.get('BANTIME','1')+'m'))
 }
 template = jenv.get_template('profiles.yaml.local')
 output = template.render(properties)

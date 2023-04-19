@@ -13,9 +13,9 @@ config = {}
 
 # Read current configuration from the environment file
 config["helo_host"] = os.getenv("HELO_HOST","")
-config["receiver_emails"] = os.getenv("RECEIVER_EMAILS",[])
-config["bantime"] = os.getenv("BANTIME",'1m')
+config["receiver_emails"] = os.getenv("RECEIVER_EMAILS",[]).split(",")
+config["bantime"] = os.getenv("BANTIME",'1')
 config["dyn_bantime"] = os.getenv("DYN_BANTIME",'True') == "True"
-config["whitelists"] = os.getenv("WHITELISTS",[])
+config["whitelists"] = os.getenv("WHITELISTS",[]).split(",")
 config["disable_online_api"] = os.getenv("DISABLE_ONLINE_API",'True') == "True"
 json.dump(config, fp=sys.stdout)

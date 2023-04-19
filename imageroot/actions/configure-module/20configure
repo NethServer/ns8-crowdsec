@@ -19,9 +19,9 @@ data = json.load(sys.stdin)
 helo_host = data.get("helo_host", "")
 receiver_emails = data.get("receiver_emails", [])
 whitelists = data.get("whitelists", [])
-bantime =data.get("bantime", "1m")
+bantime =data.get("bantime", "1")
 dyn_bantime = data.get("dyn_bantime", True)
-disable_online_api = data.get("DISABLE_ONLINE_API", True)
+disable_online_api = data.get("disable_online_api", True)
 
 # Setup default values
 agent.set_env("HELO_HOST", helo_host)
