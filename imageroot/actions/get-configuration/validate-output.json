@@ -3,6 +3,72 @@
     "title": "get-configuration output",
     "$id": "http://schema.nethserver.org/crowdsec/get-configuration-output.json",
     "description": "Get crowdsec configuration",
-    "examples": [],
-    "type": "object"
+    "examples": [
+        {
+            "helo_host": "foo.domain.com",
+            "receiver_emails": [
+                "user@domain.com",
+                "user@domain.org"
+            ],
+            "bantime": "1m",
+            "dyn_bantime": true,
+            "whitelists": [
+                "10.10.10.0/8",
+                "1.2.3.4",
+                "foo.com",
+                "foo.foo.org",
+                "12123564.org"
+            ],
+            "disable_online_api": false
+        }
+    ],
+    "type": "object",
+    "required": [
+        "helo_host",
+        "receiver_emails",
+        "bantime",
+        "dyn_bantime",
+        "whitelists",
+        "disable_online_api"
+    ],
+    "properties": {
+        "helo_host": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "idn-hostname",
+                    "description": "Helo host value for SMTP"
+                },
+                {
+                    "description": "Helo host value for SMTP",
+                    "type": "string",
+                    "maxLength": 0
+                }
+            ]
+        },
+        "receiver_emails": {
+            "type": "array",
+            "title": "receiver_emails",
+            "description": "List of administrator to send crowdsec alerts",
+            "items": {
+                "type": "string",
+                "format": "idn-email"
+            }
+        },
+        "bantime": {
+            "type": "string",
+            "title": "bantime",
+            "description": "Ban time duration of bots (m:minute, h:hour)"
+        },
+        "dyn_bantime": {
+            "type": "boolean",
+            "title": "dyn_bantime",
+            "description": "Allow to ban with a dynamic bantime value (each ban increase the time)"
+        },
+        "whitelists": {
+            "type": "array",
+            "title": "whitelists",
+            "description": "Whitelists array of IP, network or hostname"
+        }
+    }
 }
