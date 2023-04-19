@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2023 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import agent
+import os
+
+action = "install" if os.getenv("BAN_LOCAL_NETWORK", "True") == "True" else "remove"
+agent.run_helper("cscli", "parsers", action, "crowdsecurity/whitelists").check_returncode()

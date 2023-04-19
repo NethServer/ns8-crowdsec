@@ -61,6 +61,27 @@
                 <template slot="title">{{ $t("settings.advanced") }}</template>
                 <template slot="content">
                   <NsToggle
+                    :label="$t('settings.ban_local_network')"
+                    class="mg-left"
+                    value="ban_local_network"
+                    :form-item="true"
+                    v-model="ban_local_network"
+                    :disabled="
+                      loading.getConfiguration || loading.configureModule
+                    "
+                    ref="ban_local_network"
+                  >
+                    <template slot="tooltip">
+                      <span v-html="$t('settings.ban_local_network_tips')"></span>
+                    </template>
+                    <template slot="text-left">{{
+                      $t("settings.disabled")
+                    }}</template>
+                    <template slot="text-right">{{
+                      $t("settings.enabled")
+                    }}</template>
+                  </NsToggle>
+                  <NsToggle
                     :label="$t('settings.dyn_bantime')"
                     class="mg-left"
                     value="dyn_bantime"
@@ -200,6 +221,7 @@ export default {
         page: "settings",
       },
       urlCheckInterval: null,
+      ban_local_network: false,
       helo_host: "",
       receiver_emails: [],
       bantime: "1m",
@@ -213,6 +235,7 @@ export default {
       error: {
         getConfiguration: "",
         configureModule: "",
+        ban_local_network: "",
         helo_host: "",
         receiver_emails: "",
         bantime: "",
@@ -294,6 +317,7 @@ export default {
       this.disable_online_api = config.disable_online_api;
       this.loading.getConfiguration = false;
       this.focusElement("receiver_emails");
+      this.ban_local_network = config.ban_local_network;
     },
     validateConfigureModule() {
       this.clearErrors(this);
@@ -406,6 +430,7 @@ export default {
             dyn_bantime: this.dyn_bantime,
             whitelists: this.whitelists.toLowerCase().split("\n"),
             disable_online_api: this.disable_online_api,
+            ban_local_network: this.ban_local_network,
           },
           extra: {
             title: this.$t("settings.configure_instance", {

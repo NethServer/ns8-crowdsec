@@ -12,6 +12,7 @@
             ],
             "bantime": "1",
             "dyn_bantime": true,
+            "ban_local_network": true,
             "whitelists": [
                 "10.10.10.0/8",
                 "1.2.3.4",
@@ -29,7 +30,8 @@
         "bantime",
         "dyn_bantime",
         "whitelists",
-        "disable_online_api"
+        "disable_online_api",
+        "ban_local_network"
     ],
     "properties": {
         "helo_host": {
@@ -79,6 +81,11 @@
             "type": "boolean",
             "title": "dyn_bantime",
             "description": "Allow to ban with a dynamic bantime value (each ban increase the time)"
+        },
+        "ban_local_network": {
+            "type": "boolean",
+            "title": "ban_local_network",
+            "description": "Allow to ban on the local network"
         },
         "whitelists": {
             "type": "array",

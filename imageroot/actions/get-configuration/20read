@@ -18,4 +18,5 @@ config["bantime"] = os.getenv("BANTIME",'1')
 config["dyn_bantime"] = os.getenv("DYN_BANTIME",'True') == "True"
 config["whitelists"] = os.getenv("WHITELISTS","").split(",")
 config["disable_online_api"] = os.getenv("DISABLE_ONLINE_API",'True') == "True"
+config["ban_local_network"] = os.getenv("BAN_LOCAL_NETWORK", "False") == "True"
 json.dump(config, fp=sys.stdout)
