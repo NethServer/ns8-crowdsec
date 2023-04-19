@@ -14,4 +14,4 @@ if os.listdir('/run/log/journal'):
 else:
     agent.set_env("CROWDSEC_JOURNAL", "/var/log/journal")
 
-agent.dump_env()
+agent.set_env("DISABLE_ONLINE_API", False)

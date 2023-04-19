@@ -20,9 +20,10 @@ SyslogIdentifier=%N
 Restart=always
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
+ExecStartPre=/bin/mkdir -vp crowdsec_config/postoverflows/s01-whitelist
+ExecStartPre=/bin/mkdir -vp crowdsec_config/parsers/s02-enrich
 ExecStartPre=/usr/local/bin/runagent -m %N expand-configuration
 ExecStartPre=/usr/local/bin/runagent -m %N expand-smarthost
-ExecStartPre=/bin/mkdir -vp crowdsec_config
 ExecStart=/usr/bin/podman run \
     --detach \
     --privileged \
@@ -31,6 +32,7 @@ ExecStart=/usr/bin/podman run \
     --cgroups=no-conmon \
     --replace --name=%N \
     --network=host \
+    --env DISABLE_ONLINE_API=${DISABLE_ONLINE_API} \
     --volume  ./crowdsec_config:/etc/crowdsec:Z \
     --volume %N-data:/var/lib/crowdsec/data:Z \
     --volume ${CROWDSEC_JOURNAL}:/run/log/journal \

@@ -51,6 +51,11 @@
             "type": "boolean",
             "title": "dyn_bantime",
             "description": "Allow to ban with a dynamic bantime value (each ban increase the time)"
+        },
+        "whitelists": {
+            "type": "array",
+            "title": "whitelists",
+            "description": "Whitelists array of IP, network or hostname"
         }
     }
 }

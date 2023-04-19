@@ -9,6 +9,7 @@ import os
 import json
 import agent
 import agent.tasks
+import re
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -85,10 +86,65 @@ for f in files:
 properties = {
     "email": True if smtp['enabled'] and receiver_emails else False,
     "bantime": os.environ.get('BANTIME','1m'),
-    "dyn_bantime": os.environ.get('DYN_BANTIME',True),
+    "dyn_bantime": os.environ.get('DYN_BANTIME',"True") == "True",
     "dyn_ban_value": '%d' + ''.join(filter(lambda x: not x.isdigit(), os.environ.get('BANTIME','1m')))
 }
 template = jenv.get_template('profiles.yaml.local')
 output = template.render(properties)
 with open("crowdsec_config/profiles.yaml.local","w") as f:
     f.write(output)
+
+# whitelist
+
+# remove file if exists first
+files = [
+            "crowdsec_config/parsers/s02-enrich/nethserver-parsers-whitelists.yaml",
+            "crowdsec_config/postoverflows/s01-whitelist/nethserver-postoverflows-whitelists.yaml"
+        ]
+
+for f in files:
+    try:
+        os.remove(f)
+    except FileNotFoundError:
+        pass
+
+# if the Env var exists then write the configuration files
+whitelists = os.environ.get("WHITELISTS", "")
+if whitelists:
+    # we want to sort ip, network and fqdn name
+    whitelists_ip = []
+    whitelists_cidr = []
+    whitelist_fqdn = []
+
+    # we whitelist
+    # <re.Match object; span=(0, 12), match='10.10.10.0/8'>
+    # <re.Match object; span=(0, 7), match='8.8.8.8'>
+    # <re.Match object; span=(0, 8), match='foo.com'>
+    # <re.Match object; span=(0, 12), match='12123564.com'>
+    # <re.Match object; span=(0, 13), match='foo.foo.com'>
+    for test in whitelists.split(','):
+        if re.search(r'([A-Za-z0-9-.]+.[A-Za-z]+)', test):
+            whitelist_fqdn.append(test)
+        elif re.search(r'([0-9]+.[0-9]+.[0-9]+.[0-9]+/[0-9])', test):
+            whitelists_cidr.append(test)
+        elif re.search(r'([0-9]+.[0-9]+.[0-9]+.[0-9]+)', test):
+            whitelists_ip.append(test)
+
+    properties = {
+        "whitelists_ip": whitelists_ip,
+        "whitelists_cidr": whitelists_cidr,
+        "whitelist_fqdn": whitelist_fqdn,
+    }
+
+    # write the templates
+    if properties['whitelists_ip'] or  properties['whitelists_cidr']:
+        template = jenv.get_template('nethserver-parsers-whitelists.yaml')
+        output = template.render(properties)
+        with open("crowdsec_config/parsers/s02-enrich/nethserver-parsers-whitelists.yaml","w") as f:
+            f.write(output)
+
+    if properties['whitelist_fqdn']:
+        template = jenv.get_template('nethserver-postoverflows-whitelists.yaml')
+        output = template.render(properties)
+        with open("crowdsec_config/postoverflows/s01-whitelist/nethserver-postoverflows-whitelists.yaml","w") as f:
+            f.write(output)

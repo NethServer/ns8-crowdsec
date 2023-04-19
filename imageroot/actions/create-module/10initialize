@@ -66,4 +66,8 @@ podman exec -ti ${MODULE_ID} cscli collections install \
     crowdsecurity/sshd \
     crowdsecurity/traefik \
     crowdsecurity/vsftpd \
-    crowdsecurity/wordpress
+    crowdsecurity/wordpress \
+    crowdsecurity/whitelist-good-actors
+
+# we need it if we want to ban with IP from country
+podman exec -ti ${MODULE_ID} cscli parsers install crowdsecurity/geoip-enrich
