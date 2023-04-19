@@ -81,23 +81,25 @@
                       $t("settings.enabled")
                     }}</template>
                   </NsToggle>
-                  <NsSlider
-                    :disabled="
-                      loading.getConfiguration || loading.configureModule
-                    "
-                    :label="$t('settings.bantime')"
-                    class="mg-left"
-                    v-model="bantime"
-                    min="1"
-                    max="600"
-                    step="1"
-                    stepMultiplier="10"
-                    minLabel=""
-                    maxLabel=""
-                    :limitedLabel="$t('settings.specify_duration')"
-                    :invalidMessage="error.bantime"
-                    :unitLabel="$t('settings.minutes')"
-                  />
+                  <template v-if="!dyn_bantime">
+                    <NsSlider
+                      :disabled="
+                        loading.getConfiguration || loading.configureModule
+                      "
+                      :label="$t('settings.bantime')"
+                      class="mg-left"
+                      v-model="bantime"
+                      min="1"
+                      max="600"
+                      step="1"
+                      stepMultiplier="10"
+                      minLabel=""
+                      maxLabel=""
+                      :limitedLabel="$t('settings.specify_duration')"
+                      :invalidMessage="error.bantime"
+                      :unitLabel="$t('settings.minutes')"
+                    />
+                  </template>
                   <NsToggle
                     :label="$t('settings.disable_online_api')"
                     class="mg-left"
