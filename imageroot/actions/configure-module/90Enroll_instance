@@ -7,8 +7,15 @@
 
 import agent
 import os
+import json
+import sys
 
+data = json.load(sys.stdin)
+new_token = data.get("enroll_instance", "")
 token = os.getenv("ENROLL_INSTANCE", "")
+if new_token == token:
+    # we have no need to register again
+    sys.exit(0)
 online_api = os.getenv("DISABLE_ONLINE_API", "True") == "True"
 if token and not online_api:
     agent.run_helper("cscli", "console", "enroll", "--overwrite", token).check_returncode()
