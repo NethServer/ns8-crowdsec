@@ -20,7 +20,8 @@
                 "foo.foo.org",
                 "12123564.org"
             ],
-            "disable_online_api": false
+            "disable_online_api": false,
+            "enroll_instance": "cl7ze8xdn00030vl70tyutuxjj"
         }
     ],
     "type": "object",
@@ -31,7 +32,8 @@
         "dyn_bantime",
         "whitelists",
         "disable_online_api",
-        "ban_local_network"
+        "ban_local_network",
+        "enroll_instance"
     ],
     "properties": {
         "helo_host": {
@@ -91,6 +93,11 @@
             "type": "array",
             "title": "whitelists",
             "description": "Whitelists array of IP, network or hostname"
+        },
+        "enroll_instance": {
+            "type": "string",
+            "title": "enroll_instance",
+            "description": "Enroll a crowdsec instance to app.crowdsec.net"
         }
     }
 }

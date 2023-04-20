@@ -23,6 +23,7 @@ bantime =data.get("bantime", "1")
 dyn_bantime = data.get("dyn_bantime", True)
 disable_online_api = data.get("disable_online_api", True)
 ban_local_network = data.get("ban_local_network", False)
+enroll_instance = data.get("enroll_instance", "")
 
 # Setup default values
 agent.set_env("HELO_HOST", helo_host)
@@ -32,3 +33,4 @@ agent.set_env("BANTIME", bantime)
 agent.set_env("DYN_BANTIME", dyn_bantime)
 agent.set_env("DISABLE_ONLINE_API", disable_online_api)
 agent.set_env("BAN_LOCAL_NETWORK", ban_local_network)
+agent.set_env("ENROLL_INSTANCE", enroll_instance)

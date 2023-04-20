@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2023 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import agent
+import os
+
+token = os.getenv("ENROLL_INSTANCE", "")
+online_api = os.getenv("DISABLE_ONLINE_API", "True") == "True"
+if token and not online_api:
+    agent.run_helper("cscli", "console", "enroll", "--overwrite", token).check_returncode()

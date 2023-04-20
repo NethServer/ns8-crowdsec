@@ -72,7 +72,9 @@
                     ref="ban_local_network"
                   >
                     <template slot="tooltip">
-                      <span v-html="$t('settings.ban_local_network_tips')"></span>
+                      <span
+                        v-html="$t('settings.ban_local_network_tips')"
+                      ></span>
                     </template>
                     <template slot="text-left">{{
                       $t("settings.disabled")
@@ -144,6 +146,38 @@
                       $t("settings.enabled")
                     }}</template>
                   </NsToggle>
+                  <template v-if="!disable_online_api">
+                    <NsButton
+                      kind="ghost"
+                      class="mg-left"
+                      :icon="Launch20"
+                      :disabled="loading.getConfiguration"
+                      @click="goToAppCrowdsec"
+                    >
+                      {{ $t("settings.open_app_crowdsec") }}
+                    </NsButton>
+                    <NsTextInput
+                      :label="$t('settings.enroll_instance')"
+                      :placeholder="$t('settings.enroll_instance_placeholder')"
+                      v-model="enroll_instance"
+                      class="mg-bottom mg-left"
+                      :invalid-message="error.enroll_instance"
+                      :disabled="
+                        loading.getConfiguration || loading.configureModule
+                      "
+                      ref="enroll_instance"
+                      tooltipAlignment="center"
+                      tooltipDirection="right"
+                    >
+                      <template slot="tooltip">
+                        <div
+                          v-html="
+                            $t('settings.enroll_instance_must_be_real_token')
+                          "
+                        ></div>
+                      </template>
+                    </NsTextInput>
+                  </template>
                   <NsTextInput
                     :label="$t('settings.helo_host')"
                     :placeholder="$t('settings.helo_host_placeholder')"
@@ -221,6 +255,7 @@ export default {
         page: "settings",
       },
       urlCheckInterval: null,
+      enroll_instance: "",
       ban_local_network: false,
       helo_host: "",
       receiver_emails: [],
@@ -235,6 +270,7 @@ export default {
       error: {
         getConfiguration: "",
         configureModule: "",
+        enroll_instance: "",
         ban_local_network: "",
         helo_host: "",
         receiver_emails: "",
@@ -262,8 +298,8 @@ export default {
     this.getConfiguration();
   },
   methods: {
-    goToEjabberdWebAdmin() {
-      window.open(`https://${this.hostname}` + ":5280/admin/", "_blank");
+    goToAppCrowdsec() {
+      window.open("https://app.crowdsec.net/", "_blank");
     },
     async getConfiguration() {
       this.loading.getConfiguration = true;
@@ -318,6 +354,7 @@ export default {
       this.loading.getConfiguration = false;
       this.focusElement("receiver_emails");
       this.ban_local_network = config.ban_local_network;
+      this.enroll_instance = config.enroll_instance;
     },
     validateConfigureModule() {
       this.clearErrors(this);
@@ -431,6 +468,7 @@ export default {
             whitelists: this.whitelists.toLowerCase().split("\n"),
             disable_online_api: this.disable_online_api,
             ban_local_network: this.ban_local_network,
+            enroll_instance: this.enroll_instance,
           },
           extra: {
             title: this.$t("settings.configure_instance", {

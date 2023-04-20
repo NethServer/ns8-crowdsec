@@ -12,7 +12,8 @@
             ],
             "bantime": "1",
             "dyn_bantime": true,
-            "ban_local_network" : false
+            "ban_local_network": false,
+            "enroll_instance": "cl7ze8xdn00030vl70tyutuxjj"
         }
     ],
     "type": "object",
@@ -21,7 +22,8 @@
         "receiver_emails",
         "bantime",
         "dyn_bantime",
-        "ban_local_network"
+        "ban_local_network",
+        "enroll_instance"
     ],
     "properties": {
         "helo_host": {
@@ -81,6 +83,11 @@
             "type": "boolean",
             "title": "ban_local_network",
             "description": "Allow to ban on the local network"
+        },
+        "enroll_instance": {
+            "type": "string",
+            "title": "enroll_instance",
+            "description": "Enroll a crowdsec instance to app.crowdsec.net"
         }
     }
 }
