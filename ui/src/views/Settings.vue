@@ -22,6 +22,20 @@
     <cv-row>
       <cv-column>
         <cv-tile light>
+          <div
+            class="page-toolbar"
+            v-if="!mail_configured && !loading.getConfiguration"
+          >
+            <NsButton
+              kind="tertiary"
+              size="field"
+              :icon="Email20"
+              @click="goToSmarthost()"
+              class="subpage-toolbar-item"
+              :disabled="loading.getConfiguration"
+              >{{ $t("settings.enable_smarthosts_for_notifications") }}
+            </NsButton>
+          </div>
           <cv-skeleton-text
             v-if="loading.getConfiguration || loading.getDefaults"
             heading
@@ -39,7 +53,11 @@
               class="maxwidth textarea"
               ref="receiver_emails"
               :placeholder="$t('settings.receiver_emails_list')"
-              :disabled="loading.getConfiguration || loading.configureModule"
+              :disabled="
+                loading.getConfiguration ||
+                loading.configureModule ||
+                !mail_configured
+              "
             >
             </cv-text-area>
             <cv-text-area
@@ -185,7 +203,9 @@
                     class="mg-bottom mg-left"
                     :invalid-message="error.helo_host"
                     :disabled="
-                      loading.getConfiguration || loading.configureModule
+                      loading.getConfiguration ||
+                      loading.configureModule ||
+                      !mail_configured
                     "
                     ref="helo_host"
                     tooltipAlignment="center"
@@ -256,6 +276,7 @@ export default {
       },
       urlCheckInterval: null,
       enroll_instance: "",
+      mail_configured: false,
       ban_local_network: false,
       helo_host: "",
       receiver_emails: [],
@@ -298,8 +319,17 @@ export default {
     this.getConfiguration();
   },
   methods: {
-    goToAppCrowdsec() {
+    goToSmarthost() {
+      window.open(
+        "https://" +
+          window.location.hostname +
+          "/cluster-admin/#/settings/smarthost",
+        "_blank"
+      );
+    },
+    goToAppCrowdsec(e) {
       window.open("https://app.crowdsec.net/", "_blank");
+      e.preventDefault();
     },
     async getConfiguration() {
       this.loading.getConfiguration = true;
@@ -355,6 +385,7 @@ export default {
       this.focusElement("receiver_emails");
       this.ban_local_network = config.ban_local_network;
       this.enroll_instance = config.enroll_instance;
+      this.mail_configured = config.mail_configured;
     },
     validateConfigureModule() {
       this.clearErrors(this);
@@ -513,5 +544,15 @@ export default {
 }
 .mg-bottom {
   margin-bottom: $spacing-06;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-05;
+}
+
+.page-toolbar {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

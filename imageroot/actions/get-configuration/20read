@@ -8,8 +8,12 @@
 import json
 import sys
 import os
+import agent
 
 config = {}
+
+# we look if smarthost settings are configured
+smtp = agent.get_smarthost_settings(agent.redis_connect())
 
 # Read current configuration from the environment file
 config["helo_host"] = os.getenv("HELO_HOST","")
@@ -20,4 +24,6 @@ config["whitelists"] = os.getenv("WHITELISTS","").split(",")
 config["disable_online_api"] = os.getenv("DISABLE_ONLINE_API",'True') == "True"
 config["ban_local_network"] = os.getenv("BAN_LOCAL_NETWORK", "False") == "True"
 config["enroll_instance"] = os.getenv("ENROLL_INSTANCE", "")
+config["mail_configured"] = True if smtp["host"] else False
+
 json.dump(config, fp=sys.stdout)
