@@ -16,6 +16,10 @@ token = os.getenv("ENROLL_INSTANCE", "")
 if new_token == token:
     # we have no need to register again
     sys.exit(0)
+
+# we save enroll_instance
+agent.set_env("ENROLL_INSTANCE",new_token)
+
 online_api = os.getenv("DISABLE_ONLINE_API", "True") == "True"
-if token and not online_api:
-    agent.run_helper("cscli", "console", "enroll", "--overwrite", token).check_returncode()
+if new_token and not online_api:
+    agent.run_helper("cscli", "console", "enroll", "--overwrite", new_token).check_returncode()
