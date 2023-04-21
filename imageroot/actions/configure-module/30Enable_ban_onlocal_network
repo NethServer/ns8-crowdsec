@@ -8,5 +8,5 @@
 import agent
 import os
 
-action = "install" if os.getenv("BAN_LOCAL_NETWORK", "True") == "True" else "remove"
+action = "remove" if os.getenv("BAN_LOCAL_NETWORK", "True") == "True" else "install"
 agent.run_helper("cscli", "parsers", action, "crowdsecurity/whitelists").check_returncode()
