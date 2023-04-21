@@ -52,7 +52,7 @@
               :value="receiver_emails"
               class="maxwidth textarea"
               ref="receiver_emails"
-              :placeholder="$t('settings.receiver_emails_list')"
+              :placeholder="$t('settings.receiver_emails_placeholder')"
               :disabled="
                 loading.getConfiguration ||
                 loading.configureModule ||
@@ -68,7 +68,7 @@
               :value="whitelists"
               class="maxwidth textarea"
               ref="receiver_emails"
-              :placeholder="$t('settings.whitelistst')"
+              :placeholder="$t('settings.whitelist_placeholder')"
               :disabled="loading.getConfiguration || loading.configureModule"
             >
             </cv-text-area>
