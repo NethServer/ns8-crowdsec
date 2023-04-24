@@ -64,7 +64,7 @@
               :label="$t('settings.whitelists')"
               v-model.trim="whitelists"
               :invalid-message="error.whitelists"
-              :helper-text="$t('settings.whitelists')"
+              :helper-text="$t('settings.whitelists_tips')"
               :value="whitelists"
               class="maxwidth textarea"
               ref="receiver_emails"
