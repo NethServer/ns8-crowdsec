@@ -49,7 +49,9 @@
     "helo_host_placeholder": "sub.domain.com",
     "enable_smarthosts_for_notifications": "Smarthost settings",
     "bad_email_address": "Bad email address",
-    "bad_IP_or_hostname": "Bad CIDR, IP or FQDN"
+    "bad_IP_or_hostname": "Bad CIDR, IP or FQDN",
+    "processing": "Processing...",
+    "required": "Required"
   },
   "about": {
     "title": "About"
