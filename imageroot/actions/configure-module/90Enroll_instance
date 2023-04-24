@@ -24,4 +24,8 @@ agent.set_env("ENROLL_INSTANCE",new_token)
 
 online_api = os.getenv("DISABLE_ONLINE_API", "True") == "True"
 if new_token and not online_api:
-    agent.run_helper("cscli", "console", "--name", hostname, "enroll", "--overwrite", new_token).check_returncode()
+    agent.set_weight(os.path.basename(__file__), 0) # Validation step, no task progress at all
+    test = agent.run_helper("cscli", "console", "--name", hostname, "enroll", "--overwrite", new_token)
+    if test.returncode !=0 :
+        agent.set_status('validation-failed')
+        json.dump([{'field':'enroll_instance','parameter':'enroll_instance','value':new_token,'error':'token_not_valid'}],fp=sys.stdout)
