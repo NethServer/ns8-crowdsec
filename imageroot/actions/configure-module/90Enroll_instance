@@ -9,7 +9,9 @@ import agent
 import os
 import json
 import sys
+import socket
 
+hostname = socket.gethostname()
 data = json.load(sys.stdin)
 new_token = data.get("enroll_instance", "")
 token = os.getenv("ENROLL_INSTANCE", "")
@@ -22,4 +24,4 @@ agent.set_env("ENROLL_INSTANCE",new_token)
 
 online_api = os.getenv("DISABLE_ONLINE_API", "True") == "True"
 if new_token and not online_api:
-    agent.run_helper("cscli", "console", "enroll", "--overwrite", new_token).check_returncode()
+    agent.run_helper("cscli", "console", "--name", hostname, "enroll", "--overwrite", new_token).check_returncode()
