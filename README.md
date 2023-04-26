@@ -66,7 +66,7 @@ You can also modify settings with the configure-module action
 
 Display the configuration
 
-    api-cli run get-configuration --agent module/crowdsec1 --data null | jq
+    api-cli run get-configuration --agent module/crowdsec1 | jq
 
 ## Disable whitelist
 
