@@ -56,7 +56,7 @@
                     "type": "array",
                     "title": "receiver_emails",
                     "minItems": 1,
-                    "description": "List of administrator to send crowdsec alerts",
+                    "description": "List of administrators to send crowdsec alerts",
                     "items": {
                         "type": "string",
                         "maxLength": 0
@@ -66,7 +66,7 @@
                     "type": "array",
                     "title": "receiver_emails",
                     "minItems": 1,
-                    "description": "List of administrator to send crowdsec alerts",
+                    "description": "List of administrators to send crowdsec alerts",
                     "items": {
                         "type": "string",
                         "format": "idn-email"

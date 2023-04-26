@@ -52,7 +52,6 @@
               :value="receiver_emails"
               class="maxwidth textarea"
               ref="receiver_emails"
-              :placeholder="$t('settings.receiver_emails_placeholder')"
               :disabled="
                 loading.getConfiguration ||
                 loading.configureModule ||
