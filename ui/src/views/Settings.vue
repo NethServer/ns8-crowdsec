@@ -141,15 +141,15 @@
                     />
                   </template>
                   <NsToggle
-                    :label="$t('settings.disable_online_api')"
+                    :label="$t('settings.enable_online_api')"
                     class="mg-left"
-                    value="disable_online_api"
+                    value="enable_online_api"
                     :form-item="true"
-                    v-model="disable_online_api"
+                    v-model="enable_online_api"
                     :disabled="
                       loading.getConfiguration || loading.configureModule
                     "
-                    ref="disable_online_api"
+                    ref="enable_online_api"
                   >
                     <template slot="tooltip">
                       <span
@@ -163,7 +163,7 @@
                       $t("settings.enabled")
                     }}</template>
                   </NsToggle>
-                  <template v-if="!disable_online_api">
+                  <template v-if="enable_online_api">
                     <NsButton
                       kind="ghost"
                       class="mg-left"
@@ -282,7 +282,7 @@ export default {
       bantime: "1m",
       dyn_bantime: true,
       whitelists: [],
-      disable_online_api: false,
+      enable_online_api: true,
       loading: {
         getConfiguration: false,
         configureModule: false,
@@ -297,7 +297,7 @@ export default {
         bantime: "",
         dyn_bantime: "",
         whitelists: "",
-        disable_online_api: "",
+        enable_online_api: "",
       },
     };
   },
@@ -379,7 +379,7 @@ export default {
       this.bantime = String(config.bantime);
       this.dyn_bantime = config.dyn_bantime;
       this.whitelists = config.whitelists.join("\n");
-      this.disable_online_api = config.disable_online_api;
+      this.enable_online_api = config.enable_online_api;
       this.loading.getConfiguration = false;
       this.focusElement("receiver_emails");
       this.ban_local_network = config.ban_local_network;
@@ -499,7 +499,7 @@ export default {
             bantime: String(this.bantime),
             dyn_bantime: this.dyn_bantime,
             whitelists: this.whitelists.toLowerCase().split("\n"),
-            disable_online_api: this.disable_online_api,
+            enable_online_api: this.enable_online_api,
             ban_local_network: this.ban_local_network,
             enroll_instance: this.enroll_instance,
           },

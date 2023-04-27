@@ -21,7 +21,8 @@ receiver_emails = data.get("receiver_emails", [])
 whitelists = data.get("whitelists", [])
 bantime =data.get("bantime", "1")
 dyn_bantime = data.get("dyn_bantime", True)
-disable_online_api = data.get("disable_online_api", True)
+# crowdsec looks for Env DISABLE_ONLINE_API we need to inverse the value
+disable_online_api = False if data.get("enable_online_api", True) else True
 ban_local_network = data.get("ban_local_network", False)
 
 # Setup default values

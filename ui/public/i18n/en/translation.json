@@ -37,7 +37,7 @@
     "dyn_bantime_tips": "Ban time is calculated by ((number of attempts + 1) * 4) minutes",
     "bantime": "Bantime",
     "minutes": "Minutes",
-    "disable_online_api": "Disable central API",
+    "enable_online_api": "Enable the central API",
     "disable_online_api_tips": "The central API is used to retrieve blacklists and to have a glance on metrics at app.crowdsec.net",
     "open_app_crowdsec": "Go to CrowdSec website",
     "enroll_instance": "Enroll this CrowdSec instance",

@@ -22,8 +22,8 @@ if new_token == token:
 # we save enroll_instance
 agent.set_env("ENROLL_INSTANCE",new_token)
 
-online_api = os.getenv("DISABLE_ONLINE_API", "True") == "True"
-if new_token and not online_api:
+online_api = True if os.getenv("DISABLE_ONLINE_API","False") == "False" else False
+if new_token and online_api:
     agent.set_weight(os.path.basename(__file__), 0) # Validation step, no task progress at all
     test = agent.run_helper("cscli", "console", "--name", hostname, "enroll", "--overwrite", new_token)
     if test.returncode !=0 :

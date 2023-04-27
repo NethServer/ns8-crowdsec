@@ -13,7 +13,8 @@
             "bantime": "1",
             "dyn_bantime": true,
             "ban_local_network": false,
-            "enroll_instance": "cl7ze8xdn00030vl70tyutuxjj"
+            "enroll_instance": "cl7ze8xdn00030vl70tyutuxjj",
+            "enable_online_api": true
         }
     ],
     "type": "object",
@@ -23,7 +24,8 @@
         "bantime",
         "dyn_bantime",
         "ban_local_network",
-        "enroll_instance"
+        "enroll_instance",
+        "enable_online_api"
     ],
     "properties": {
         "helo_host": {
@@ -88,6 +90,11 @@
             "type": "string",
             "title": "enroll_instance",
             "description": "Enroll a crowdsec instance to app.crowdsec.net"
+        },
+        "enable_online_api": {
+            "type": "boolean",
+            "title": "enable_online_api",
+            "description": "Enable the central API"
         }
     }
 }
