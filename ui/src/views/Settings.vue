@@ -22,20 +22,6 @@
     <cv-row>
       <cv-column>
         <cv-tile light>
-          <div
-            class="page-toolbar"
-            v-if="!mail_configured && !loading.getConfiguration"
-          >
-            <NsButton
-              kind="tertiary"
-              size="field"
-              :icon="Email20"
-              @click="goToSmarthost()"
-              class="subpage-toolbar-item"
-              :disabled="loading.getConfiguration"
-              >{{ $t("settings.enable_smarthosts_for_notifications") }}
-            </NsButton>
-          </div>
           <cv-skeleton-text
             v-if="loading.getConfiguration || loading.getDefaults"
             heading
@@ -44,6 +30,20 @@
             width="80%"
           ></cv-skeleton-text>
           <cv-form v-else @submit.prevent="configureModule">
+            <template v-if="!mail_configured">
+              <NsInlineNotification
+                kind="info"
+                :title="$t('settings.smarthost_is_disabled')"
+                :description="
+                  $t('settings.smarthosts_is_needed_to_send_notifications')
+                "
+                :actionLabel="
+                  $t('settings.enable_smarthosts_for_notifications')
+                "
+                @action="goToSmarthost()"
+                :showCloseButton="false"
+              />
+            </template>
             <cv-text-area
               :label="$t('settings.receiver_emails')"
               v-model.trim="receiver_emails"
@@ -319,12 +319,7 @@ export default {
   },
   methods: {
     goToSmarthost() {
-      window.open(
-        "https://" +
-          window.location.hostname +
-          "/cluster-admin/#/settings/smarthost",
-        "_blank"
-      );
+      this.core.$router.push("/settings/smarthost");
     },
     goToAppCrowdsec(e) {
       window.open("https://app.crowdsec.net/", "_blank");

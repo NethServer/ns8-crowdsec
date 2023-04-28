@@ -44,7 +44,7 @@
     "enroll_instance_must_be_real_token": "The token must be retrieved on the website app.crowdsec.net",
     "enroll_instance_placeholder": "xxxxxxxxxxxxxxxxxxx",
     "helo_host": "Helo_host",
-    "helo_host_must_be_relevant_for_smtp": "You can set a specific Helo FQDN if your antispam adds score due to default localhost Helo name",
+    "helo_host_must_be_relevant_for_smtp": "This might be needed to properly receive email notifications. If your antispam system adds score due to default 'localhost' Helo name, you can set a specific Helo FQDN here",
     "helo_host_placeholder": "sub.domain.com",
     "enable_smarthosts_for_notifications": "Smarthost settings",
     "bad_email_address": "Bad email address",
@@ -52,7 +52,9 @@
     "processing": "Processing...",
     "required": "Required",
     "token_not_valid":"The token provided is not valid",
-    "whitelists_tips": "No ban will occur for members of this list"
+    "whitelists_tips": "No ban will occur for members of this list",
+    "smarthost_is_disabled": "Email notifications are disabled",
+    "smarthosts_is_needed_to_send_notifications": "Enable Smarthost to receive CrowdSec email notifications"
   },
   "about": {
     "title": "About"
