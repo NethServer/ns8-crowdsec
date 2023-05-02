@@ -9,7 +9,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    appName: "Crowdsec",
+    appName: "CrowdSec",
     instanceName: "",
     instanceLabel: "",
     core: null,
