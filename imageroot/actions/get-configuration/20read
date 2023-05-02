@@ -1,14 +1,29 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2022 Nethesis S.r.l.
+# Copyright (C) 2023 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
 import json
 import sys
+import os
 import agent
 
 config = {}
+
+# we look if smarthost settings are configured
+smtp = agent.get_smarthost_settings(agent.redis_connect())
+
+# Read current configuration from the environment file
+config["helo_host"] = os.getenv("HELO_HOST","")
+config["receiver_emails"] = os.getenv("RECEIVER_EMAILS","").split(",")
+config["bantime"] = os.getenv("BANTIME",'1')
+config["dyn_bantime"] = os.getenv("DYN_BANTIME",'True') == "True"
+config["whitelists"] = os.getenv("WHITELISTS","").split(",")
+config["enable_online_api"] = True if os.getenv("DISABLE_ONLINE_API","False") == "False" else False
+config["ban_local_network"] = os.getenv("BAN_LOCAL_NETWORK", "False") == "True"
+config["enroll_instance"] = os.getenv("ENROLL_INSTANCE", "")
+config["mail_configured"] = True if smtp["host"] else False
 
 json.dump(config, fp=sys.stdout)

@@ -20,8 +20,8 @@ Requisite=${MODULE_ID}.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/podman exec -ti crowdsec1 cscli hub update
-ExecStart=/usr/bin/podman exec -ti crowdsec1 cscli hub upgrade
+ExecStart=/usr/bin/podman exec -ti ${MODULE_ID} cscli hub update
+ExecStart=/usr/bin/podman exec -ti ${MODULE_ID} cscli hub upgrade
 SyslogIdentifier=%N
 EOF
 install -v -m 644 "${tmpfile}" /etc/systemd/system/${MODULE_ID}-upgrade-hub.service

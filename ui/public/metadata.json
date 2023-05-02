@@ -1,19 +1,19 @@
 {
-  "name": "crowdsec",
+  "name": "CrowdSec",
   "description": {
-    "en": "My crowdsec module"
+    "en": "The collaborative malicious activity detection and remediation ban tool."
   },
-  "categories": [],
+  "categories": ["security"],
   "authors": [
     {
-      "name": "Name Surname",
-      "email": "author@yourmail.org"
+      "name": "stephane de Labrusse",
+      "email": "stephdl@de-labrusse.fr"
     }
   ],
   "docs": {
-    "documentation_url": "https://docs.crowdsec.com/",
+    "documentation_url": "https://doc.crowdsec.net/docs/intro/",
     "bug_url": "https://github.com/NethServer/dev",
-    "code_url": "https://github.com/author/ns8-crowdsec"
+    "code_url": "https://github.com/NethServer/ns8-crowdsec"
   },
   "source": "ghcr.io/nethserver/crowdsec"
 }

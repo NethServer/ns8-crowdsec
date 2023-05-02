@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2023 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import agent
+import os
+import json
+import sys
+import socket
+
+hostname = socket.gethostname()
+data = json.load(sys.stdin)
+new_token = data.get("enroll_instance", "")
+token = os.getenv("ENROLL_INSTANCE", "")
+if new_token == token:
+    # we have no need to register again
+    sys.exit(0)
+
+# we save enroll_instance
+agent.set_env("ENROLL_INSTANCE",new_token)
+
+online_api = True if os.getenv("DISABLE_ONLINE_API","False") == "False" else False
+if new_token and online_api:
+    agent.set_weight(os.path.basename(__file__), 0) # Validation step, no task progress at all
+    test = agent.run_helper("cscli", "console", "--name", hostname, "enroll", "--overwrite", new_token)
+    if test.returncode !=0 :
+        agent.set_status('validation-failed')
+        json.dump([{'field':'enroll_instance','parameter':'enroll_instance','value':new_token,'error':'token_not_valid'}],fp=sys.stdout)

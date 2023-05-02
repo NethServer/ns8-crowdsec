@@ -28,7 +28,7 @@ db_config:
   flush:
     max_items: 5000
     max_age: 7d
-  use_wal: false
+  use_wal: true
 api:
   client:
     insecure_skip_verify: false
