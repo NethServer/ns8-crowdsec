@@ -1,12 +1,13 @@
 {
   "name": "CrowdSec",
   "description": {
-    "en": "The collaborative malicious activity detection and remediation ban tool."
+    "en": "The collaborative malicious activity detection and remediation ban tool.",
+    "it": "Strumento collaborativo per il rilevamento e il blocco di attività malevole"
   },
   "categories": ["security"],
   "authors": [
     {
-      "name": "stephane de Labrusse",
+      "name": "Stephane de Labrusse",
       "email": "stephdl@de-labrusse.fr"
     }
   ],
