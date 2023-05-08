@@ -26,4 +26,9 @@ install -v -m 644 "${tmpfile}" "/etc/systemd/system/crowdsec-firewall-bouncer.se
 
 # reload and start service
 systemctl daemon-reload
+# restart crowdsec so it listens on port 8085
+systemctl restart "${MODULE_ID}.service"
 systemctl enable --now crowdsec-firewall-bouncer.service
+# API server could be slow to start:
+# ignore  bouncer connect error if it fails to start on first run
+exit 0
