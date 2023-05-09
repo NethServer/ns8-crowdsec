@@ -35,7 +35,7 @@ api:
     credentials_path: /etc/crowdsec/local_api_credentials.yaml
   server:
     log_level: info
-    listen_uri: 0.0.0.0:8085
+    listen_uri: 127.0.0.1:{{api_port}}
     profiles_path: /etc/crowdsec/profiles.yaml
     trusted_ips: # IP ranges, or IPs which can have admin API access
       - 127.0.0.1
@@ -45,5 +45,5 @@ api:
 prometheus:
   enabled: true
   level: full
-  listen_addr: 0.0.0.0
-  listen_port: 6060
+  listen_addr: 127.0.0.1
+  listen_port: {{metrics_port}}
