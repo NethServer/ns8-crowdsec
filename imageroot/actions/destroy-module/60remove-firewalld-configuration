@@ -19,4 +19,7 @@ systemctl daemon-reload
 echo "Restart firewalld"
 systemctl restart firewalld
 
+# remove firewalld backup files
+rm -fv /etc/firewalld/ipsets/crowdsec*.xml.old
+
 exit 0
