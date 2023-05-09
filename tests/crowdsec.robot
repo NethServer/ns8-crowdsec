@@ -15,7 +15,7 @@ Check if crowdsec can be configured
     Should Be Equal As Integers    ${rc}  0
 
 Check if crowdsec works as expected
-    ${rc} =    Execute Command    exec 3<>/dev/tcp/127.0.0.1/8085
+    ${rc} =    Execute Command    exec 3<>/dev/tcp/127.0.0.1/${TCP_PORT}
     ...    return_rc=True  return_stdout=False
     Should Be Equal As Integers    ${rc}  0
 
