@@ -30,11 +30,15 @@ f = open(os.environ["AGENT_STATE_DIR"]+"/secrets/bouncer_keys_firewall.secret")
 secret = f.read()
 f.close()
 
+ports = os.environ["TCP_PORTS"].split(',')
 properties = {
-    "secret": secret
+    "secret": secret,
+    "api_port": ports[0],
+    "metrics_port": ports[1]
 }
 
 template = jenv.get_template('crowdsec-firewall-bouncer.yaml')
 output = template.render(properties)
+os.makedirs("/etc/crowdsec/bouncers", exist_ok = True) 
 with open("/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml","w") as f:
     f.write(output)

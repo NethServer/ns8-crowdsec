@@ -6,16 +6,20 @@
 #
 
 exec 1>&2 # Send any output to stderr, to not alter the action response protocol
-set -e
 
 echo "Remove ipset firewall rules"
 firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists
 firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
 
 # remove our systemd unit override fragment
-rm -vf "/etc/systemd/system/crowdsec-firewall-bouncer.service.d/${MODULE_ID}-override.conf"
+rm -rvf "/etc/systemd/system/crowdsec-firewall-bouncer.service.d"
 systemctl daemon-reload
 
 # after IPSET deletion, we need to restart firewalld
 echo "Restart firewalld"
 systemctl restart firewalld
+
+# remove firewalld backup files
+rm -fv /etc/firewalld/ipsets/crowdsec*.xml.old
+
+exit 0
