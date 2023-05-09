@@ -13,8 +13,10 @@ source /etc/os-release
 echo "Remove the bouncer:"
 if [[ "${PLATFORM_ID}" == "platform:el9" ]] ; then
     dnf remove -y crowdsec-firewall-bouncer-iptables
+    rm -fv /etc/yum.repos.d/crowdsec_crowdsec.repo
 elif [[ "${ID}" == "debian" ]]; then
     apt-get -y remove crowdsec-firewall-bouncer-iptables
+    rm -fv /etc/apt/sources.list.d/crowdsec_crowdsec.list
 else
     echo "The platform is not compatible, we exit"
     exit 0
