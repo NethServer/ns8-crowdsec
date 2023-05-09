@@ -12,7 +12,7 @@ firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists
 firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
 
 # remove our systemd unit override fragment
-rm -vf "/etc/systemd/system/crowdsec-firewall-bouncer.service.d/${MODULE_ID}-override.conf"
+rm -rvf "/etc/systemd/system/crowdsec-firewall-bouncer.service.d"
 systemctl daemon-reload
 
 # after IPSET deletion, we need to restart firewalld
