@@ -6,7 +6,6 @@
 #
 
 exec 1>&2 # Send any output to stderr, to not alter the action response protocol
-set -e
 
 echo "Remove ipset firewall rules"
 firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists
@@ -19,3 +18,5 @@ systemctl daemon-reload
 # after IPSET deletion, we need to restart firewalld
 echo "Restart firewalld"
 systemctl restart firewalld
+
+exit 0
