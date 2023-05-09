@@ -30,7 +30,7 @@ f = open(os.environ["AGENT_STATE_DIR"]+"/secrets/bouncer_keys_firewall.secret")
 secret = f.read()
 f.close()
 
-ports = os.environ.get("TCP_PORTS", "").split(',')
+ports = os.environ["TCP_PORTS"].split(',')
 properties = {
     "secret": secret,
     "api_port": ports[0],

@@ -29,4 +29,4 @@ systemctl daemon-reload
 
 # API server could be slow to start:
 # ignore  bouncer connect error if it fails to start on first run
-systemctl enable --now crowdsec-firewall-bouncer.service || exit 0
+systemctl enable --now crowdsec-firewall-bouncer.service || :
