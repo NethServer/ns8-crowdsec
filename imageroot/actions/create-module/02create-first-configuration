@@ -10,4 +10,4 @@ set -e
 # build folder to store configuration
 mkdir -vp crowdsec_config
 # first build of the configuration
-expand-configuration
+exec expand-configuration
