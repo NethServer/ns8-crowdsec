@@ -1,0 +1,8 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "delete-ban input",
+    "$id": "http://schema.nethserver.org/crowdsec/delete-ban-input.json",
+    "description": "delete crowdsec ban",
+    "examples": [],
+    "type": "object"
+}
