@@ -7,10 +7,10 @@
 
 action=$1
 if [[ $action == 'create-ipset' ]]; then
-    if [[ ! -f /etc/firewalld/ipsets/crowdsec-blacklists.xml ]]; then
+    if ! ipset list crowdsec-blacklists > /dev/null; then
         firewall-cmd --permanent --new-ipset=crowdsec-blacklists --type=hash:ip --option="timeout=0" --option="maxelem=150000"
     fi
-    if [[ ! -f  /etc/firewalld/ipsets/crowdsec6-blacklists.xml ]]; then
+    if ! ipset list crowdsec6-blacklists > /dev/null; then
         firewall-cmd --permanent --new-ipset=crowdsec6-blacklists --option=family=inet6 --type=hash:ip --option="timeout=0" --option="maxelem=150000"
     fi
     firewall-cmd --reload
