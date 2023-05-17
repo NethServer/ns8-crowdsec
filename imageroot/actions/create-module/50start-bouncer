@@ -18,7 +18,7 @@ After=${MODULE_ID}.service
 [Service]
 Restart=always
 ExecStartPre=runagent -m ${MODULE_ID} firewall-rules create-ipset
-ExecStartPost=runagent -m ${MODULE_ID} firewall-rules add-rule
+ExecStartPre=runagent -m ${MODULE_ID} firewall-rules add-rule
 ExecStopPost=runagent -m ${MODULE_ID} firewall-rules remove-rule
 EOF
 mkdir -vp /etc/systemd/system/crowdsec-firewall-bouncer.service.d/
