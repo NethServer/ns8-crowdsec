@@ -5,7 +5,7 @@
 #
 # list the current banned IP
 
-list=$(cscli decisions list --output json)
+list=$(podman exec $MODULE_ID cscli decisions list --output json)
 
 if [[ $list == 'null' ]];then
     echo '[]'

@@ -338,7 +338,7 @@ export default {
     },
     async listDeferredQueue() {
       this.queue = [];
-      const taskAction = "report-queue-status"; 
+      const taskAction = "list-banned-ip"; 
       const eventId = this.getUuid();
       this.loading.listDeferredQueue = true;
 
@@ -380,9 +380,7 @@ export default {
     },
     listDeferredQueueCompleted(taskContext, taskResult) {
       // We want only deferred status in queue
-      this.queue = taskResult.output.queue_status.filter(function (u) {
-        return u.queue_name == "deferred";
-      });
+      this.queue = taskResult.output
       this.check_queue = this.queue.length ? true : false;
       this.loading.listDeferredQueue = false;
     },
