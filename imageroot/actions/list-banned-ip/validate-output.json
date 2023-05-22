@@ -4,5 +4,5 @@
     "$id": "http://schema.nethserver.org/crowdsec/list-banned-ip-output.json",
     "description": "list-banned-ip",
     "examples": [],
-    "type": "object"
+    "type": "array"
 }
