@@ -8,7 +8,7 @@
       <cv-row>
         <cv-column class="page-title">
           <h2>
-            {{ $t("queue.title") }}
+            {{ $t("unban.title") }}
             <cv-interactive-tooltip
               alignment="start"
               direction="right"
@@ -16,7 +16,7 @@
             >
               <template slot="trigger"></template>
               <template slot="content">
-                <div v-html="$t('queue.queue_tooltip')"></div>
+                <div v-html="$t('unban.unban_tooltip')"></div>
               </template>
             </cv-interactive-tooltip>
           </h2>
