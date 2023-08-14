@@ -70,7 +70,26 @@ if os.path.isfile("crowdsec_config/config.yaml.local"):
     output = template.render(properties)
     with open("crowdsec_config/config.yaml.local","w") as f:
         f.write(output)
+## template of local_api_credentials.yaml.local
+if os.path.isfile("crowdsec_config/config.yaml.local"):
+    files =["crowdsec_config/local_api_credentials.yaml.local"]
+    for f in files:
+        try:
+            os.remove(f)
+        except FileNotFoundError:
+            pass
 
+    jenv = Environment(
+        loader=FileSystemLoader(os.getenv("AGENT_INSTALL_DIR")+"/templates"),
+        autoescape=select_autoescape(),
+        keep_trailing_newline=True,
+    )
+    ports = os.environ["TCP_PORTS"].split(',')
+    template = jenv.get_template('local_api_credentials.yaml.local')
+    properties = {"api_port": ports[0]}
+    output = template.render(properties)
+    with open("crowdsec_config/local_api_credentials.yaml.local","w") as f:
+        f.write(output)
 
 # expand profiles.yaml.local
 smtp = agent.get_smarthost_settings(agent.redis_connect())
