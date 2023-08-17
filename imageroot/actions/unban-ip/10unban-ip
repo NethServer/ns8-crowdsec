@@ -14,7 +14,7 @@ import os
 request = json.load(sys.stdin)
 ip = request['ip']
 action = request['action']
-module_id =  os.get["MODULE_ID"]
+module_id =  os.environ["MODULE_ID"]
 
 if action == 'unban':
     agent.run_helper("podman", "exec", module_id, "cscli", "decision", "delete", "-i", ip).check_returncode()
