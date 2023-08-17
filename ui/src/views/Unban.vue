@@ -38,27 +38,19 @@
             <NsButton
               kind="secondary"
               :icon="Restart20"
-              @click="listDeferredQueue"
-              :disabled="loading.listDeferredQueue || loading.setDeleteQueue"
-              >{{ $t("queue.reload_queue") }}
+              @click="listBans"
+              :disabled="loading.listBans || loading.setDeleteBan"
+              >{{ $t("unban.reload_bans") }}
             </NsButton>
           </template>
-          <template v-if="queue.length">
-            <NsButton
-              kind="secondary"
-              :icon="Email20"
-              class="mg-left"
-              @click="setResendQueueAll"
-              :disabled="loading.listDeferredQueue || loading.setDeleteQueue"
-              >{{ $t("queue.resend_all") }}
-            </NsButton>
+          <template v-if="bans.length">
             <NsButton
               kind="danger"
               class="mg-left"
               :icon="TrashCan20"
-              @click="toggleDeleteQueueAll"
-              :disabled="loading.listDeferredQueue || loading.setDeleteQueue"
-              >{{ $t("queue.delete_all") }}
+              @click="toggleUnbanAll"
+              :disabled="loading.listBans || loading.setDeleteBan"
+              >{{ $t("unban.delete_all") }}
             </NsButton>
           </template>
         </cv-column>
@@ -67,24 +59,24 @@
         <cv-column>
           <cv-tile light>
             <NsDataTable
-              :allRows="queue"
+              :allRows="bans"
               :columns="i18nTableColumns"
               :rawColumns="tableColumns"
               :sortable="true"
               :pageSizes="[10, 25, 50, 100]"
               :overflow-menu="true"
-              :isSearchable="check_queue"
-              :searchPlaceholder="$t('queue.search_queue')"
+              :isSearchable="check_bans"
+              :searchPlaceholder="$t('unban.search_bans')"
               :searchClearLabel="core.$t('common.clear_search')"
               :noSearchResultsLabel="core.$t('common.no_search_results')"
               :noSearchResultsDescription="
                 core.$t('common.no_search_results_description')
               "
-              :isLoading="loading.listDeferredQueue || loading.setDeleteQueue"
+              :isLoading="loading.listBans || loading.setDeleteBan"
               :skeletonRows="5"
-              :isErrorShown="!!error.listDeferredQueue"
-              :errorTitle="$t('action.report-queue-status')"
-              :errorDescription="error.listDeferredQueue"
+              :isErrorShown="!!error.listBans"
+              :errorTitle="$t('action.unban_ip_status')"
+              :errorDescription="error.listBans"
               :itemsPerPageLabel="core.$t('pagination.items_per_page')"
               :rangeOfTotalItemsLabel="
                 core.$t('pagination.range_of_total_items')
@@ -96,7 +88,7 @@
               @updatePage="tablePage = $event"
             >
               <template slot="empty-state">
-                <NsEmptyState :title="$t('queue.no_queue')">
+                <NsEmptyState :title="$t('unban.no_bans')">
                   <template #pictogram>
                     <FaceSatisfiedPictogram />
                   </template>
@@ -104,72 +96,48 @@
               </template>
               <template slot="data">
                 <cv-data-table-row
-                  v-for="(row, rowIndex) in queue"
+                  v-for="(row, rowIndex) in bans"
                   :key="`${rowIndex}`"
                   :value="`${rowIndex}`"
                 >
-                  <cv-data-table-cell>
-                    {{ row.queue_id }}
-                  </cv-data-table-cell>
-                  <cv-data-table-row>
-                    <div class="mg-top mg-left gray">
-                      {{
-                        formatDate(
-                          new Date(row.arrival_time * 1000),
-                          "yyyy-MM-dd HH.mm"
-                        )
-                      }}
-                    </div>
-                  </cv-data-table-row>
-                  <cv-data-table-cell>
-                    {{ row.sender }}
-                  </cv-data-table-cell>
-                  <cv-data-table-cell>
-                    <template v-if="row.recipients.length == 1">
-                      {{ row.recipients[0].address }}
-                    </template>
-                    <template v-else>
-                      {{ row.recipients.length + " " + $t("queue.recipients") }}
-                    </template>
-                  </cv-data-table-cell>
-                  <cv-data-table-cell>
-                    {{ row.message_size | byteFormat }}
-                  </cv-data-table-cell>
-                  <cv-data-table-cell class="table-overflow-menu-cell">
-                    <cv-overflow-menu
-                      flip-menu
-                      class="table-overflow-menu"
-                      :data-test-id="row.queue_id + '-menu'"
-                    >
-                      <cv-overflow-menu-item
-                        @click="showQueueDetailModal(row)"
-                        :data-test-id="row.queue_id + '-details'"
+                  <template v-if="row.decisions.length">
+                    <cv-data-table-row>
+                      <div class="mg-top mg-left gray">
+                        {{
+                          formatDate(
+                            new Date(row.created_at),
+                            "yyyy-MM-dd HH.mm"
+                          )
+                        }}
+                      </div>
+                    </cv-data-table-row>
+                    <cv-data-table-cell>
+                      {{ row.decisions[0].value }}
+                    </cv-data-table-cell>
+                    <cv-data-table-cell>
+                      {{ row.decisions[0].duration }}
+                    </cv-data-table-cell>
+                    <cv-data-table-cell>
+                      {{ row.decisions[0].scenario }}
+                    </cv-data-table-cell>
+                    <cv-data-table-cell class="table-overflow-menu-cell">
+                      <cv-overflow-menu
+                        flip-menu
+                        class="table-overflow-menu"
+                        :data-test-id="row.decisions[0].id + '-menu'"
                       >
-                        <NsMenuItem
-                          :icon="Information20"
-                          :label="$t('queue.see_details')"
-                        />
-                      </cv-overflow-menu-item>
-                      <cv-overflow-menu-item
-                        @click="setResendQueue(row)"
-                        :data-test-id="row.queue_id + '-resend-queue'"
-                      >
-                        <NsMenuItem
-                          :icon="Email20"
-                          :label="$t('queue.resend')"
-                        />
-                      </cv-overflow-menu-item>
-                      <cv-overflow-menu-item
-                        @click="toggleDeleteQueue(row)"
-                        :data-test-id="row.queue_id + '-delete-queue'"
-                      >
-                        <NsMenuItem
-                          :icon="TrashCan20"
-                          :label="$t('queue.delete')"
-                        />
-                      </cv-overflow-menu-item>
-                    </cv-overflow-menu>
-                  </cv-data-table-cell>
+                        <cv-overflow-menu-item
+                          @click="toggleUnban(row.decisions[0])"
+                          :data-test-id="row.decisions[0].value + '-delete-ban'"
+                        >
+                          <NsMenuItem
+                            :icon="TrashCan20"
+                            :label="$t('unban.delete')"
+                          />
+                        </cv-overflow-menu-item>
+                      </cv-overflow-menu>
+                    </cv-data-table-cell>
+                  </template>
                 </cv-data-table-row>
               </template>
             </NsDataTable>
@@ -177,37 +145,29 @@
         </cv-column>
       </cv-row>
     </cv-grid>
-    <ShowQueueDetailModal
-      :isShown="isShownQueueDetailModal"
-      :queue="currentMessage"
-      @hide="hideQueueDetailModal"
-    />
     <NsDangerDeleteModal
-      :isShown="isShownConfirmDeleteQueue"
-      :name="currentMessage ? currentMessage.queue_id : ''"
-      :title="$t('queue.delete_email')"
+      :isShown="isShownConfirmUnbanIp"
+      :name="currentBan ? currentBan.value : ''"
+      :title="$t('unban.unban_ip')"
       :warning="core.$t('common.please_read_carefully')"
       :description="
-        $t('queue.delete_email_confirm', {
-          name: currentMessage ? currentMessage.queue_id : '',
+        $t('unban.unban_ip_confirm', {
+          name: currentBan ? currentBan.value : '',
         })
       "
       :typeToConfirm="
         core.$t('common.type_to_confirm', {
-          name: currentMessage ? currentMessage.queue_id : '',
+          name: currentBan ? currentBan.value : '',
         })
       "
-      :isErrorShown="!!error.setDeleteQueue"
-      :errorTitle="$t('action.flush-postfix-queue')"
-      :errorDescription="error.setDeleteQueue"
-      @hide="hideConfirmDeleteQueue"
-      @confirmDelete="setDeleteQueue(false)"
+      :isErrorShown="!!error.setDeleteBan"
+      :errorTitle="$t('action.unban-ip')"
+      :errorDescription="error.setDeleteBan"
+      @hide="hideConfirmUnbanIP"
+      @confirmDelete="setDeleteBan(false)"
     >
       <template slot="explanation">
-        <p
-          class="mg-top-sm"
-          v-html="$t('queue.confirm_delete_queued_message')"
-        ></p>
+        <p class="mg-top-sm" v-html="$t('unban.confirm_unban_ip_message')"></p>
         <p
           class="mg-top-sm"
           v-html="core.$t('common.this_action_is_not_reversible')"
@@ -215,17 +175,17 @@
       </template>
     </NsDangerDeleteModal>
     <NsDangerDeleteModal
-      :isShown="isShownConfirmDeleteQueueAll"
+      :isShown="isShownConfirmUnbanIPAll"
       :name="delete_all"
-      :title="$t('queue.delete_queue')"
+      :title="$t('unban.delete_bans')"
       :warning="core.$t('common.please_read_carefully')"
-      :description="$t('queue.confirm_delete_all_queued_message')"
+      :description="$t('unban.confirm_delete_all_bans_message')"
       :typeToConfirm="core.$t('common.type_to_confirm', { name: delete_all })"
-      :isErrorShown="!!error.setDeleteQueueAll"
-      :errorTitle="$t('action.flush-postfix-queue')"
-      :errorDescription="error.setDeleteQueueAll"
-      @hide="hideConfirmDeleteQueueAll"
-      @confirmDelete="setDeleteQueueAll(false)"
+      :isErrorShown="!!error.setUnbanAll"
+      :errorTitle="$t('action.unban-ip')"
+      :errorDescription="error.setUnbanAll"
+      @hide="hideConfirmUnbanIPAll"
+      @confirmDelete="setUnbanAll(false)"
     >
       <template slot="explanation">
         <p
@@ -247,12 +207,9 @@ import {
   DateTimeService,
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
-import ShowQueueDetailModal from "@/components/ShowQueueDetailModal";
 export default {
-  name: "DeferredQueue",
-  components: {
-    ShowQueueDetailModal,
-  },
+  name: "UnbanIP",
+  components: {},
   mixins: [
     QueryParamService,
     UtilService,
@@ -261,49 +218,37 @@ export default {
     DateTimeService,
   ],
   pageTitle() {
-    return this.$t("queue.title") + " - " + this.appName;
+    return this.$t("unban.title") + " - " + this.appName;
   },
   data() {
     return {
       q: {
-        page: "deferredQueue",
+        page: "unBan",
       },
       urlCheckInterval: null,
       tablePage: [],
-      tableColumns: [
-        "queue_id",
-        "arrival_time",
-        "sender",
-        "recipients",
-        "message_size",
-      ],
-      queue: [],
-      check_queue: false,
-      isShownConfirmDeleteQueue: false,
-      isShownConfirmDeleteQueueAll: false,
-      isShownQueueDetailModal: false,
-      currentMessage: {
-        queue_id: "",
-        arrival_time: 0,
-        message_size: 0,
-        sender: "",
-        recipients: [],
+      tableColumns: ["created_at", "value", "duration", "scenario"],
+      bans: [],
+      splitDuration: "",
+      check_bans: false,
+      isShownConfirmUnbanIp: false,
+      isShownConfirmUnbanIPAll: false,
+      currentBan: {
+        created_at: "",
+        value: "",
+        duration: "",
+        scenario: "",
       },
       delete_all: "delete",
-      isShowQueueDetailModal: false,
       loading: {
-        listDeferredQueue: false,
-        setDeleteQueue: false,
-        setResendQueue: false,
-        setResendQueueAll: false,
-        setDeleteQueueAll: false,
+        listBans: false,
+        setDeleteBan: false,
+        setUnbanAll: false,
       },
       error: {
-        listDeferredQueue: "",
-        setDeleteQueue: "",
-        setResendQueue: "",
-        setResendQueueAll: "",
-        setDeleteQueueAll: "",
+        listBans: "",
+        setDeleteBan: "",
+        setUnbanAll: "",
       },
     };
   },
@@ -311,7 +256,7 @@ export default {
     ...mapState(["instanceName", "core", "appName"]),
     i18nTableColumns() {
       return this.tableColumns.map((column) => {
-        return this.$t("queue.col_" + column);
+        return this.$t("unban.col_" + column);
       });
     },
   },
@@ -326,34 +271,23 @@ export default {
     next();
   },
   created() {
-    this.listDeferredQueue();
+    this.listBans();
   },
   methods: {
-    showQueueDetailModal(queue) {
-      this.currentMessage = queue;
-      this.isShownQueueDetailModal = true;
-    },
-    hideQueueDetailModal() {
-      this.isShownQueueDetailModal = false;
-    },
-    async listDeferredQueue() {
-      this.queue = [];
-      const taskAction = "list-banned-ip"; 
+    async listBans() {
+      this.bans = [];
+      const taskAction = "list-banned-ip";
       const eventId = this.getUuid();
-      this.loading.listDeferredQueue = true;
-
+      this.loading.listBans = true;
       // register to task events
-
       this.core.$root.$once(
         `${taskAction}-aborted-${eventId}`,
-        this.listDeferredQueueAborted
+        this.listBansAborted
       );
-
       this.core.$root.$once(
         `${taskAction}-completed-${eventId}`,
-        this.listDeferredQueueCompleted
+        this.listBansCompleted
       );
-
       const res = await to(
         this.createModuleTaskForApp(this.instanceName, {
           action: taskAction,
@@ -369,64 +303,69 @@ export default {
       if (err) {
         console.error(`error creating task ${taskAction}`, err);
         const errMessage = this.getErrorMessage(err);
-        this.error.listDeferredQueue = errMessage;
-        this.loading.listDeferredQueue = false;
+        this.error.listBans = errMessage;
+        this.loading.listBans = false;
       }
     },
-    listDeferredQueueAborted(taskResult, taskContext) {
+    listBansAborted(taskResult, taskContext) {
       console.error(`${taskContext.action} aborted`, taskResult);
-      this.error.listDeferredQueue = this.$t("error.generic_error");
-      this.loading.listDeferredQueue = false;
+      this.error.listBans = this.$t("error.generic_error");
+      this.loading.listBans = false;
     },
-    listDeferredQueueCompleted(taskContext, taskResult) {
-      // We want only deferred status in queue
-      this.queue = taskResult.output
-      this.check_queue = this.queue.length ? true : false;
-      this.loading.listDeferredQueue = false;
+    listBansCompleted(taskContext, taskResult) {
+      let listBans = taskResult.output;
+      //we want to split digit after the point of seconds to display time in human format : 3h29m45s
+      listBans.forEach((ban) => {
+        if (ban.decisions[0]) {
+          //we protect against manual ban twice, decisions is an empty array
+          const splitSecond = ban.decisions[0].duration.split(".");
+          ban.decisions[0].duration = splitSecond[0] + "s";
+          this.bans.push(ban);
+        }
+      });
+      this.check_bans = this.bans.length ? true : false;
+      this.loading.listBans = false;
     },
-    toggleDeleteQueueAll() {
-      this.showConfirmDeleteQueueAll();
+    toggleUnbanAll() {
+      this.showConfirmUnbanAll();
     },
-    showConfirmDeleteQueueAll() {
-      this.isShownConfirmDeleteQueueAll = true;
+    showConfirmUnbanAll() {
+      this.isShownConfirmUnbanIPAll = true;
     },
-    hideConfirmDeleteQueueAll() {
-      this.isShownConfirmDeleteQueueAll = false;
+    hideConfirmUnbanIPAll() {
+      this.isShownConfirmUnbanIPAll = false;
     },
-    toggleDeleteQueue(queue) {
-      this.currentMessage = queue;
-      this.showConfirmDeleteQueue();
+    toggleUnban(ban) {
+      this.currentBan = ban;
+      this.showConfirmUnbanIP();
     },
-    showConfirmDeleteQueue() {
-      this.isShownConfirmDeleteQueue = true;
+    showConfirmUnbanIP() {
+      this.isShownConfirmUnbanIp = true;
     },
-    hideConfirmDeleteQueue() {
-      this.isShownConfirmDeleteQueue = false;
+    hideConfirmUnbanIP() {
+      this.isShownConfirmUnbanIp = false;
     },
-    async setDeleteQueue() {
-      this.loading.setDeleteQueue = true;
-      this.error.setDeleteQueue = "";
-      const taskAction = "flush-postfix-queue";
+    async setDeleteBan() {
+      this.loading.setDeleteBan = true;
+      this.error.setDeleteBan = "";
+      const taskAction = "unban-ip";
       const eventId = this.getUuid();
-
       // register to task error
       this.core.$root.$once(
         `${taskAction}-aborted-${eventId}`,
-        this.setDeleteQueueAborted
+        this.setUnbanIpAborted
       );
-
       // register to task completion
       this.core.$root.$once(
         `${taskAction}-completed-${eventId}`,
-        this.setDeleteQueueCompleted
+        this.setUnbanIpCompleted
       );
-
       const res = await to(
         this.createModuleTaskForApp(this.instanceName, {
           action: taskAction,
           data: {
-            queue: this.currentMessage.queue_id,
-            action: "delete",
+            ip: this.currentBan.value,
+            action: "unban",
           },
           extra: {
             title: this.$t("action." + taskAction),
@@ -439,45 +378,42 @@ export default {
 
       if (err) {
         console.error(`error creating task ${taskAction}`, err);
-        this.error.setDeleteQueue = this.getErrorMessage(err);
-        this.loading.setDeleteQueue = false;
+        this.error.setDeleteBan = this.getErrorMessage(err);
+        this.loading.setDeleteBan = false;
         return;
       }
-      this.hideConfirmDeleteQueue();
+      this.hideConfirmUnbanIP();
     },
-    setDeleteQueueAborted(taskResult, taskContext) {
+    setUnbanIpAborted(taskResult, taskContext) {
       console.error(`${taskContext.action} aborted`, taskResult);
-      this.error.setDeleteQueue = this.$t("error.generic_error");
-      this.loading.setDeleteQueue = false;
+      this.error.setDeleteBan = this.$t("error.generic_error");
+      this.loading.setDeleteBan = false;
     },
-    setDeleteQueueCompleted() {
-      this.loading.setDeleteQueue = false;
-      this.listDeferredQueue();
+    setUnbanIpCompleted() {
+      this.loading.setDeleteBan = false;
+      this.listBans();
     },
-    async setResendQueue(row) {
-      this.loading.setResendQueue = true;
-      this.error.setResendQueue = "";
-      const taskAction = "flush-postfix-queue";
+    async setUnbanAll() {
+      this.loading.setUnbanAll = true;
+      this.error.setUnbanAll = "";
+      const taskAction = "unban-ip";
       const eventId = this.getUuid();
-
       // register to task error
       this.core.$root.$once(
         `${taskAction}-aborted-${eventId}`,
-        this.setResendQueueAborted
+        this.setUnbanIpAllAborted
       );
-
       // register to task completion
       this.core.$root.$once(
         `${taskAction}-completed-${eventId}`,
-        this.setResendQueueCompleted
+        this.setUnbanIpAllCompleted
       );
-
       const res = await to(
         this.createModuleTaskForApp(this.instanceName, {
           action: taskAction,
           data: {
-            queue: row.queue_id,
-            action: "resend",
+            ip: "0.0.0.0",
+            action: "unban_all",
           },
           extra: {
             title: this.$t("action." + taskAction),
@@ -490,120 +426,20 @@ export default {
 
       if (err) {
         console.error(`error creating task ${taskAction}`, err);
-        this.error.setResendQueue = this.getErrorMessage(err);
-        this.loading.setResendQueue = false;
+        this.error.setUnbanAll = this.getErrorMessage(err);
+        this.loading.setUnbanAll = false;
         return;
       }
     },
-    setResendQueueAborted(taskResult, taskContext) {
+    setUnbanIpAllAborted(taskResult, taskContext) {
       console.error(`${taskContext.action} aborted`, taskResult);
-      this.error.setResendQueue = this.$t("error.generic_error");
-      this.loading.setResendQueue = false;
+      this.error.setUnbanAll = this.$t("error.generic_error");
+      this.loading.setUnbanAll = false;
     },
-    setResendQueueCompleted() {
-      this.loading.setResendQueue = false;
-      this.listDeferredQueue();
-    },
-    async setResendQueueAll() {
-      this.loading.setResendQueue = true;
-      this.error.setResendQueue = "";
-      const taskAction = "flush-postfix-queue";
-      const eventId = this.getUuid();
-
-      // register to task error
-      this.core.$root.$once(
-        `${taskAction}-aborted-${eventId}`,
-        this.setResendQueueAllAborted
-      );
-
-      // register to task completion
-      this.core.$root.$once(
-        `${taskAction}-completed-${eventId}`,
-        this.setResendQueueAllCompleted
-      );
-
-      const res = await to(
-        this.createModuleTaskForApp(this.instanceName, {
-          action: taskAction,
-          data: {
-            queue: "resend_all",
-            action: "resend_all",
-          },
-          extra: {
-            title: this.$t("action." + taskAction),
-            isNotificationHidden: true,
-            eventId,
-          },
-        })
-      );
-      const err = res[0];
-
-      if (err) {
-        console.error(`error creating task ${taskAction}`, err);
-        this.error.setResendQueueAll = this.getErrorMessage(err);
-        this.loading.setResendQueueAll = false;
-        return;
-      }
-    },
-    setResendQueueAllAborted(taskResult, taskContext) {
-      console.error(`${taskContext.action} aborted`, taskResult);
-      this.error.setResendQueueAll = this.$t("error.generic_error");
-      this.loading.setResendQueueAll = false;
-    },
-    setResendQueueAllCompleted() {
-      this.loading.setResendQueueAll = false;
-      this.listDeferredQueue();
-    },
-    async setDeleteQueueAll() {
-      this.loading.setDeleteQueueAll = true;
-      this.error.setDeleteQueueAll = "";
-      const taskAction = "flush-postfix-queue";
-      const eventId = this.getUuid();
-
-      // register to task error
-      this.core.$root.$once(
-        `${taskAction}-aborted-${eventId}`,
-        this.setDeleteQueueAllAborted
-      );
-
-      // register to task completion
-      this.core.$root.$once(
-        `${taskAction}-completed-${eventId}`,
-        this.setDeleteQueueAllCompleted
-      );
-
-      const res = await to(
-        this.createModuleTaskForApp(this.instanceName, {
-          action: taskAction,
-          data: {
-            queue: "delete_all",
-            action: "delete_all",
-          },
-          extra: {
-            title: this.$t("action." + taskAction),
-            isNotificationHidden: true,
-            eventId,
-          },
-        })
-      );
-      const err = res[0];
-
-      if (err) {
-        console.error(`error creating task ${taskAction}`, err);
-        this.error.setDeleteQueueAll = this.getErrorMessage(err);
-        this.loading.setDeleteQueueAll = false;
-        return;
-      }
-    },
-    setDeleteQueueAllAborted(taskResult, taskContext) {
-      console.error(`${taskContext.action} aborted`, taskResult);
-      this.error.setDeleteQueueAll = this.$t("error.generic_error");
-      this.loading.setDeleteQueueAll = false;
-    },
-    setDeleteQueueAllCompleted() {
-      this.loading.setDeleteQueueAll = false;
-      this.hideConfirmDeleteQueueAll();
-      this.listDeferredQueue();
+    setUnbanIpAllCompleted() {
+      this.loading.setUnbanAll = false;
+      this.hideConfirmUnbanIPAll();
+      this.listBans();
     },
   },
 };
