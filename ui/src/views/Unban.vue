@@ -100,44 +100,39 @@
                   :key="`${rowIndex}`"
                   :value="`${rowIndex}`"
                 >
-                  <template v-if="row.decisions.length">
-                    <cv-data-table-row>
-                      <div class="mg-top mg-left gray">
-                        {{
-                          formatDate(
-                            new Date(row.created_at),
-                            "yyyy-MM-dd HH.mm"
-                          )
-                        }}
-                      </div>
-                    </cv-data-table-row>
-                    <cv-data-table-cell>
-                      {{ row.decisions[0].value }}
-                    </cv-data-table-cell>
-                    <cv-data-table-cell>
-                      {{ row.decisions[0].duration }}
-                    </cv-data-table-cell>
-                    <cv-data-table-cell>
-                      {{ row.decisions[0].scenario }}
-                    </cv-data-table-cell>
-                    <cv-data-table-cell class="table-overflow-menu-cell">
-                      <cv-overflow-menu
-                        flip-menu
-                        class="table-overflow-menu"
-                        :data-test-id="row.decisions[0].id + '-menu'"
+                  <cv-data-table-row>
+                    <div class="mg-top mg-left gray">
+                      {{
+                        formatDate(new Date(row.created_at), "yyyy-MM-dd HH.mm")
+                      }}
+                    </div>
+                  </cv-data-table-row>
+                  <cv-data-table-cell>
+                    {{ row.value }}
+                  </cv-data-table-cell>
+                  <cv-data-table-cell>
+                    {{ row.duration }}
+                  </cv-data-table-cell>
+                  <cv-data-table-cell>
+                    {{ row.scenario }}
+                  </cv-data-table-cell>
+                  <cv-data-table-cell class="table-overflow-menu-cell">
+                    <cv-overflow-menu
+                      flip-menu
+                      class="table-overflow-menu"
+                      :data-test-id="row.value + '-menu'"
+                    >
+                      <cv-overflow-menu-item
+                        @click="toggleUnban(row)"
+                        :data-test-id="row.value + '-delete-ban'"
                       >
-                        <cv-overflow-menu-item
-                          @click="toggleUnban(row.decisions[0])"
-                          :data-test-id="row.decisions[0].value + '-delete-ban'"
-                        >
-                          <NsMenuItem
-                            :icon="TrashCan20"
-                            :label="$t('unban.delete')"
-                          />
-                        </cv-overflow-menu-item>
-                      </cv-overflow-menu>
-                    </cv-data-table-cell>
-                  </template>
+                        <NsMenuItem
+                          :icon="TrashCan20"
+                          :label="$t('unban.delete')"
+                        />
+                      </cv-overflow-menu-item>
+                    </cv-overflow-menu>
+                  </cv-data-table-cell>
                 </cv-data-table-row>
               </template>
             </NsDataTable>
@@ -314,13 +309,20 @@ export default {
     },
     listBansCompleted(taskContext, taskResult) {
       let listBans = taskResult.output;
-      //we want to split digit after the point of seconds to display time in human format : 3h29m45s
+        // we protect against manual ban twice, decisions is an empty array
+        // we select informations we want to push
       listBans.forEach((ban) => {
+        // we want to split digit after the point of seconds to display time in human format : 
+        // 3h29m45s instead of 3h54m42.494246619s
         if (ban.decisions[0]) {
-          //we protect against manual ban twice, decisions is an empty array
           const splitSecond = ban.decisions[0].duration.split(".");
           ban.decisions[0].duration = splitSecond[0] + "s";
-          this.bans.push(ban);
+          this.bans.push({
+            duration: ban.decisions[0].duration,
+            value: ban.decisions[0].value,
+            scenario: ban.decisions[0].scenario,
+            created_at: ban.created_at,
+          });
         }
       });
       this.check_bans = this.bans.length ? true : false;
