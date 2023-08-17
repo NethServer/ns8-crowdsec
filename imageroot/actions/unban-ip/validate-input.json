@@ -16,7 +16,7 @@
     ],
     "additionalProperties": false,
     "properties": {
-        "queue": {
+        "ip": {
             "type": "string",
             "title": "IP",
             "description": "IP to unban",
