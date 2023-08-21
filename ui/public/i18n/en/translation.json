@@ -57,22 +57,22 @@
     "smarthosts_is_needed_to_send_notifications": "Enable Smarthost to receive CrowdSec email notifications"
   },
   "unban":{
-    "title": "Unban IP",
-    "unban_tooltip": "Crowdsec bans IP that have made some bad login attempts to your server, you can release them here",
-    "no_bans": "You have no bans, this is a normal behavior",
-    "reload_bans": "Reload the list",
-    "delete_all": "Release all IP",
-    "delete": "Release",
+    "title": "Banned IP addresses",
+    "unban_tooltip": "IP addresses that failed multiple login attempts are listed here. You can unban them if needed",
+    "no_bans": "No active bans",
+    "reload_bans": "Refresh",
+    "delete_all": "Unban all",
+    "delete": "Unban",
     "search_bans": "Search",
-    "col_created_at": "Created",
-    "col_value": "IP",
+    "col_created_at": "Banned",
+    "col_value": "IP address",
     "col_duration": "Ban time",
     "col_scenario": "Reason",
     "unban_ip": "Unban IP",
-    "unban_ip_confirm": "Confirm the release of the banned IP: <strong>{name}</strong>?",
+    "unban_ip_confirm": "Unban IP address <strong>{name}</strong>?",
     "confirm_unban_ip_message": "The IP will be released are you sure ?",
-    "confirm_delete_all_bans_message": "Confirm the release of the all banned IP",
-    "delete_bans": "Release all banned IP"
+    "confirm_delete_all_bans_message": "Unban all IP addresses?",
+    "delete_bans": "Unban all"
   },
   "about": {
     "title": "About"
@@ -89,8 +89,8 @@
     "list-backup-repositories": "List backup repositories",
     "list-backups": "List backups",
     "list-installed-modules": "List installed modules",
-    "unban_ip_status": "List the banned IP",
-    "unban-ip": "Release one banned IP"
+    "unban_ip_status": "List banned IP addresses",
+    "unban-ip": "Unban IP address"
   },
   "error": {
     "error": "Error",
