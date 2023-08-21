@@ -140,55 +140,19 @@
         </cv-column>
       </cv-row>
     </cv-grid>
-    <NsDangerDeleteModal
+    <ConfirmReleaseIP
       :isShown="isShownConfirmUnbanIp"
-      :name="currentBan ? currentBan.value : ''"
-      :title="$t('unban.unban_ip')"
-      :warning="core.$t('common.please_read_carefully')"
-      :description="
-        $t('unban.unban_ip_confirm', {
-          name: currentBan ? currentBan.value : '',
-        })
-      "
-      :typeToConfirm="
-        core.$t('common.type_to_confirm', {
-          name: currentBan ? currentBan.value : '',
-        })
-      "
-      :isErrorShown="!!error.setDeleteBan"
-      :errorTitle="$t('action.unban-ip')"
-      :errorDescription="error.setDeleteBan"
+      :ban="currentBan"
+      :core="core"
       @hide="hideConfirmUnbanIP"
-      @confirmDelete="setDeleteBan(false)"
-    >
-      <template slot="explanation">
-        <p class="mg-top-sm" v-html="$t('unban.confirm_unban_ip_message')"></p>
-        <p
-          class="mg-top-sm"
-          v-html="core.$t('common.this_action_is_not_reversible')"
-        ></p>
-      </template>
-    </NsDangerDeleteModal>
-    <NsDangerDeleteModal
+      @confirm="setDeleteBan(false)"
+    />
+    <ConfirmReleaseIPAll
       :isShown="isShownConfirmUnbanIPAll"
-      :name="delete_all"
-      :title="$t('unban.delete_bans')"
-      :warning="core.$t('common.please_read_carefully')"
-      :description="$t('unban.confirm_delete_all_bans_message')"
-      :typeToConfirm="core.$t('common.type_to_confirm', { name: delete_all })"
-      :isErrorShown="!!error.setUnbanAll"
-      :errorTitle="$t('action.unban-ip')"
-      :errorDescription="error.setUnbanAll"
-      @hide="hideConfirmUnbanIPAll"
-      @confirmDelete="setUnbanAll(false)"
-    >
-      <template slot="explanation">
-        <p
-          class="mg-top-sm"
-          v-html="core.$t('common.this_action_is_not_reversible')"
-        ></p>
-      </template>
-    </NsDangerDeleteModal>
+      :core="core"
+      @hide="hideConfirmUnbanIP"
+      @confirm="setUnbanAll(false)"
+    />
   </div>
 </template>
 
@@ -202,9 +166,14 @@ import {
   DateTimeService,
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
+import ConfirmReleaseIP from "@/components/ConfirmReleaseIP";
+import ConfirmReleaseIPAll from "@/components/ConfirmReleaseIPAll";
 export default {
   name: "UnbanIP",
-  components: {},
+  components: {
+    ConfirmReleaseIP,
+    ConfirmReleaseIPAll,
+  },
   mixins: [
     QueryParamService,
     UtilService,
@@ -234,7 +203,6 @@ export default {
         duration: "",
         scenario: "",
       },
-      delete_all: "delete",
       loading: {
         listBans: false,
         setDeleteBan: false,
@@ -309,10 +277,10 @@ export default {
     },
     listBansCompleted(taskContext, taskResult) {
       let listBans = taskResult.output;
-        // we protect against manual ban twice, decisions is an empty array
-        // we select informations we want to push
+      // we protect against manual ban twice, decisions is an empty array
+      // we select informations we want to push
       listBans.forEach((ban) => {
-        // we want to split digit after the point of seconds to display time in human format : 
+        // we want to split digit after the point of seconds to display time in human format :
         // 3h29m45s instead of 3h54m42.494246619s
         if (ban.decisions[0]) {
           const splitSecond = ban.decisions[0].duration.split(".");
