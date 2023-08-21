@@ -69,9 +69,9 @@
     "col_duration": "Ban time",
     "col_scenario": "Reason",
     "unban_ip": "Unban IP",
-    "unban_ip_confirm": "Unban IP address <strong>{name}</strong>?",
     "confirm_unban_ip_message": "The IP will be released are you sure ?",
     "confirm_delete_all_bans_message": "Unban all IP addresses?",
+    "release_all_ip": "Release all banned IP",
     "delete_bans": "Unban all"
   },
   "about": {
@@ -90,7 +90,8 @@
     "list-backups": "List backups",
     "list-installed-modules": "List installed modules",
     "unban_ip_status": "List banned IP addresses",
-    "unban-ip": "Unban IP address"
+    "unban-ip": "Unban IP address",
+    "list-banned-ip": "List banned IP"
   },
   "error": {
     "error": "Error",
