@@ -16,7 +16,7 @@
       <div>{{ $t("unban.confirm_unban_ip_message") }}</div>
     </template>
     <template slot="secondary-button">{{ core.$t("common.cancel") }}</template>
-    <template slot="primary-button">{{ core.$t("common.delete") }}</template>
+    <template slot="primary-button">{{ $t('unban.delete') }}</template>
   </NsModal>
 </template>
 
