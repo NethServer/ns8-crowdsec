@@ -32,7 +32,7 @@
         @click="goToAppPage(instanceName, 'unban')"
         :class="{ 'current-page': isLinkActive('unban') }"
       >
-        <template v-slot:nav-icon><Locked20 /></template>
+        <template v-slot:nav-icon><Error20 /></template>
         <span>{{ $t("unban.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
@@ -50,7 +50,7 @@
 import Settings20 from "@carbon/icons-vue/es/settings/20";
 import Information20 from "@carbon/icons-vue/es/information/20";
 import Activity20 from "@carbon/icons-vue/es/activity/20";
-import Locked20 from "@carbon/icons-vue/es/locked/20";
+import Error20 from "@carbon/icons-vue/es/error/20";
 import { mapState } from "vuex";
 import { QueryParamService, UtilService } from "@nethserver/ns8-ui-lib";
 
@@ -60,7 +60,7 @@ export default {
     Settings20,
     Information20,
     Activity20,
-    Locked20,
+    Error20,
   },
   mixins: [QueryParamService, UtilService],
   data() {
