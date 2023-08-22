@@ -45,9 +45,9 @@
           </template>
           <template v-if="bans.length">
             <NsButton
-              kind="danger"
+              kind="secondary"
               class="mg-left"
-              :icon="TrashCan20"
+              :icon="Unlocked20"
               @click="toggleUnbanAll"
               :disabled="loading.listBans || loading.setDeleteBan"
               >{{ $t("unban.delete_all") }}
@@ -127,7 +127,7 @@
                         :data-test-id="row.value + '-delete-ban'"
                       >
                         <NsMenuItem
-                          :icon="TrashCan20"
+                          :icon="Unlocked20"
                           :label="$t('unban.delete')"
                         />
                       </cv-overflow-menu-item>
@@ -168,6 +168,7 @@ import {
 import to from "await-to-js";
 import ConfirmReleaseIP from "@/components/ConfirmReleaseIP";
 import ConfirmReleaseIPAll from "@/components/ConfirmReleaseIPAll";
+import Unlocked20 from "@carbon/icons-vue/es/unlocked/20";
 export default {
   name: "UnbanIP",
   components: {
@@ -189,6 +190,7 @@ export default {
       q: {
         page: "unBan",
       },
+      Unlocked20,
       urlCheckInterval: null,
       tablePage: [],
       tableColumns: ["created_at", "value", "duration", "scenario"],
