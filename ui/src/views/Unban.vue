@@ -240,6 +240,8 @@ export default {
   },
   methods: {
     async listBans() {
+      // we push after object to bans
+      // we have to set to zero at first
       this.bans = [];
       const taskAction = "list-banned-ip";
       const eventId = this.getUuid();
@@ -363,6 +365,7 @@ export default {
     },
     setUnbanIpCompleted() {
       this.loading.setDeleteBan = false;
+      this.hideConfirmUnbanIP();
       this.listBans();
     },
     async setUnbanAll() {
