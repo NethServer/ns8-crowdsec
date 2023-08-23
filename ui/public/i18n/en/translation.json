@@ -57,7 +57,7 @@
     "smarthosts_is_needed_to_send_notifications": "Enable Smarthost to receive CrowdSec email notifications"
   },
   "unban":{
-    "title": "Banned IP addresses",
+    "title": "Banned IP",
     "unban_tooltip": "IP addresses that failed multiple login attempts are listed here. You can unban them if needed",
     "no_bans": "No active bans",
     "reload_bans": "Refresh",
