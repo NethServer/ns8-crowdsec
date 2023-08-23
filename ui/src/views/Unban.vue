@@ -170,7 +170,7 @@ import ConfirmReleaseIP from "@/components/ConfirmReleaseIP";
 import ConfirmReleaseIPAll from "@/components/ConfirmReleaseIPAll";
 import Unlocked20 from "@carbon/icons-vue/es/unlocked/20";
 export default {
-  name: "UnbanIP",
+  name: "Unban",
   components: {
     ConfirmReleaseIP,
     ConfirmReleaseIPAll,
@@ -188,7 +188,7 @@ export default {
   data() {
     return {
       q: {
-        page: "unBan",
+        page: "unban",
       },
       Unlocked20,
       urlCheckInterval: null,
