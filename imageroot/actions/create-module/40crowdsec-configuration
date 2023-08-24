@@ -12,7 +12,7 @@ import agent.tasks
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-files =["crowdsec_config/config.yaml"]
+files =["crowdsec_config/config.yaml.local"]
 for f in files:
     try:
         os.remove(f)
@@ -27,7 +27,7 @@ jenv = Environment(
 # placeholder for later
 properties = {}
 
-template = jenv.get_template('config.yaml')
+template = jenv.get_template('config.yaml.local')
 output = template.render(properties)
-with open("crowdsec_config/config.yaml","w") as f:
+with open("crowdsec_config/config.yaml.local","w") as f:
     f.write(output)
