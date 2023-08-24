@@ -56,6 +56,24 @@
     "smarthost_is_disabled": "Email notifications are disabled",
     "smarthosts_is_needed_to_send_notifications": "Enable Smarthost to receive CrowdSec email notifications"
   },
+  "unban":{
+    "title": "Banned IP",
+    "unban_tooltip": "IP addresses that failed multiple login attempts are listed here. You can unban them if needed",
+    "no_bans": "No active bans",
+    "reload_bans": "Refresh",
+    "delete_all": "Unban all",
+    "delete": "Unban",
+    "search_bans": "Search",
+    "col_created_at": "Banned",
+    "col_value": "IP address",
+    "col_duration": "Ban time",
+    "col_scenario": "Reason",
+    "unban_ip": "Unban IP",
+    "confirm_unban_ip_message": "Unban IP address?",
+    "confirm_delete_all_bans_message": "Unban all IP addresses?",
+    "release_all_ip": "Unban all IP addresses",
+    "delete_bans": "Unban all"
+  },
   "about": {
     "title": "About"
   },
@@ -70,7 +88,10 @@
     "get-name": "Get name",
     "list-backup-repositories": "List backup repositories",
     "list-backups": "List backups",
-    "list-installed-modules": "List installed modules"
+    "list-installed-modules": "List installed modules",
+    "unban_ip_status": "List banned IP addresses",
+    "unban-ip": "Unban IP address",
+    "list-banned-ip": "List banned IP"
   },
   "error": {
     "error": "Error",

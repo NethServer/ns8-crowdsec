@@ -22,6 +22,12 @@ const routes = [
     component: Settings,
   },
   {
+    path: "/unban",
+    name: "Unban",
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/Unban.vue"),
+  },
+  {
     path: "/about",
     name: "About",
     // route level code-splitting
