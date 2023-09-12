@@ -32,7 +32,7 @@ buildah add "${container}" imageroot /imageroot
 buildah add "${container}" ui/dist /ui
 # Setup the entrypoint, ask to reserve one TCP port with the label and set a rootless container
 buildah config --entrypoint=/ \
-    --label="org.nethserver.authorizations=" \
+    --label="org.nethserver.authorizations=node:fwadm" \
     --label="org.nethserver.rootfull=1" \
     --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.5.3-rc4-debian" \
     --label="org.nethserver.tcp-ports-demand=2" \
