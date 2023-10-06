@@ -17,6 +17,7 @@ After=${MODULE_ID}.service
 
 [Service]
 Restart=always
+ExecStartPre=
 ExecStartPre=runagent -m ${MODULE_ID} firewall-rules create-ipset
 ExecStartPre=runagent -m ${MODULE_ID} firewall-rules add-rule
 ExecStopPost=runagent -m ${MODULE_ID} firewall-rules remove-rule
