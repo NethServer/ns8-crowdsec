@@ -1,15 +1,19 @@
 ---
 source: journalctl
 journalctl_filter:
-  - "_SYSTEMD_UNIT=sshd.service"
+  - "_TRANSPORT=journal"
 labels:
   type: syslog
 ---
-{% for tag in modules %}
 source: journalctl
 journalctl_filter:
-  - "SYSLOG_IDENTIFIER={{tag}}"
+  - "_TRANSPORT=syslog"
 labels:
   type: syslog
 ---
-{% endfor %}
+source: journalctl
+journalctl_filter:
+  - "_TRANSPORT=stdout"
+labels:
+  type: syslog
+---
