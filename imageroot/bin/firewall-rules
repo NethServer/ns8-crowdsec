@@ -1,25 +1,28 @@
 #!/bin/bash
 #
-# Copyright (C) 2023 Nethesis S.r.l.
+# Copyright (C) 2024 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # following actions, create SET in ipset, add rules (ipv4 and ipv6) to firewall or remove them
 
 action=$1
 if [[ $action == 'create-ipset' ]]; then
-    if [[ ! -f /etc/firewalld/ipsets/crowdsec-blacklists.xml ]]; then
-        firewall-cmd --permanent --new-ipset=crowdsec-blacklists --type=hash:ip --option="timeout=0" --option="maxelem=150000"
+    # create ipset for crowdsec-blacklists and crowdsec6-blacklists directly from CLI
+    # we cannot use --permanent option here, because the set of ipset won't be seen by crowdsec-firewall-bouncer.service
+    if ! ipset -L  crowdsec-blacklists >/dev/null 2>&1; then
+        ipset create crowdsec-blacklists hash:ip timeout 0 maxelem 150000
     fi
-    if [[ ! -f  /etc/firewalld/ipsets/crowdsec6-blacklists.xml ]]; then
-        firewall-cmd --permanent --new-ipset=crowdsec6-blacklists --option=family=inet6 --type=hash:ip --option="timeout=0" --option="maxelem=150000"
+    if ! ipset -L  crowdsec6-blacklists >/dev/null 2>&1; then
+        ipset create crowdsec6-blacklists hash:ip family inet6 timeout 0 maxelem 150000
     fi
     firewall-cmd --reload
 elif [[ $action == 'add-rule' ]]; then
-    firewall-cmd --direct --add-rule ipv4 filter INPUT 0 -p all -m set --match-set crowdsec-blacklists src -j DROP
-    firewall-cmd --direct --add-rule ipv6 filter INPUT 0 -p all -m set --match-set crowdsec6-blacklists src -j DROP
+    # we cannot use --permanent option here, because the set of ipset won't be seen by crowdsec-firewall-bouncer.service
+    iptables -I INPUT 1 -m set --match-set crowdsec-blacklists src -j DROP
+    ip6tables -I INPUT 1 -m set --match-set  crowdsec6-blacklists src -j DROP
 elif [[ $action == 'remove-rule' ]]; then
-    firewall-cmd --direct --remove-rule ipv4 filter INPUT 0  -p all -m set --match-set crowdsec-blacklists src -j DROP
-    firewall-cmd --direct --remove-rule ipv6 filter INPUT 0  -p all -m set --match-set crowdsec6-blacklists src -j DROP
+    iptables -D INPUT -m set --match-set crowdsec-blacklists src -j DROP
+    ip6tables -D INPUT -m set --match-set crowdsec6-blacklists src -j DROP
 else
         echo 'No actions to do in firewall for crowdsec-firewall-bouncer.service'
 fi
