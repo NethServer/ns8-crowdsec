@@ -29,23 +29,11 @@ jenv = Environment(
     keep_trailing_newline=True,
 )
 
-rdb = agent.redis_connect()
-modules=[]
-
-# we list all modules, then we search in which node they run and 
-# we filter only relevant module on the node
-for kenv in rdb.scan_iter(match='module/*/environment'):
-    if rdb.hget(kenv, "NODE_ID") == node_id:
-        modules.append(kenv.removeprefix("module/").removesuffix("/environment"))
-
-properties = {
-    "modules" : modules
-}
+# acquis.yaml is a static file but the first start remove it
 
 template = jenv.get_template('acquis.yaml')
-output = template.render(properties)
 with open("crowdsec_config/acquis.yaml","w") as f:
-    f.write(output)
+    f.write(template.render())
 
 # The first start crowdsec expects other configuration files
 # if these files are not present then the service fails to start
