@@ -8,6 +8,23 @@
 set -e
 exec 1>&2 # Send any output to stderr, to not alter the action response protocol
 
+# create the override of crowdsec-firewall-bouncer
+tmpfile=$(mktemp)
+trap "rm -f \${tmpfile}" EXIT
+cat <<EOF >${tmpfile}
+[Unit]
+After=${MODULE_ID}.service
+[Service]
+Restart=always
+ExecStartPre=
+ExecStartPre=runagent -m ${MODULE_ID} expand-bouncer-configuration
+EOF
+mkdir -vp /etc/systemd/system/crowdsec-firewall-bouncer.service.d/
+install -v -m 644 "${tmpfile}" "/etc/systemd/system/crowdsec-firewall-bouncer.service.d/${MODULE_ID}-override.conf"
+
+# reload and start service
+systemctl daemon-reload
+
 # API server could be slow to start:
 # ignore  bouncer connect error if it fails to start on first run
 systemctl enable --now crowdsec-firewall-bouncer.service || :
