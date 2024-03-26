@@ -14,13 +14,10 @@ trap "rm -f \${tmpfile}" EXIT
 cat <<EOF >${tmpfile}
 [Unit]
 After=${MODULE_ID}.service
-
 [Service]
 Restart=always
 ExecStartPre=
-ExecStartPre=runagent -m ${MODULE_ID} firewall-rules create-ipset
-ExecStartPre=runagent -m ${MODULE_ID} firewall-rules add-rule
-ExecStopPost=runagent -m ${MODULE_ID} firewall-rules remove-rule
+ExecStartPre=runagent -m ${MODULE_ID} expand-bouncer-configuration
 EOF
 mkdir -vp /etc/systemd/system/crowdsec-firewall-bouncer.service.d/
 install -v -m 644 "${tmpfile}" "/etc/systemd/system/crowdsec-firewall-bouncer.service.d/${MODULE_ID}-override.conf"

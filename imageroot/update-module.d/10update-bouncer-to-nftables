@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+# Copyright (C) 2024 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Remove the permanent set created by firewalld, we use nftables now
+# Needed to upgrade from crowdsec:1.0.6
+
+source /etc/os-release
+
+find=0
+    if [[ -f /etc/firewalld/ipsets/crowdsec-blacklists.xml ]]; then
+        firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
+        find=1
+    fi
+    if [[ -f  /etc/firewalld/ipsets/crowdsec6-blacklists.xml ]]; then
+        firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists
+        find=2
+    fi
+    if [[ $find -ne 0 ]]; then
+        # remove firewalld backup files
+        rm -fv /etc/firewalld/ipsets/crowdsec*.xml.old
+        # we need the reload to remove the set from the runtime configuration
+        firewall-cmd --reload
+
+        echo "Install the nftables bouncer :"
+        if [[ "${PLATFORM_ID}" == "platform:el9" ]] ; then
+            dnf remove -y crowdsec-firewall-bouncer-iptables
+            dnf install -y crowdsec-firewall-bouncer-nftables
+        elif [[ "${ID}" == "debian" ]]; then
+            apt-get update
+            apt-get -y remove crowdsec-firewall-bouncer-iptables
+            apt-get -y install crowdsec-firewall-bouncer-nftables
+        fi
+        # create the override of crowdsec-firewall-bouncer
+        tmpfile=$(mktemp)
+        trap "rm -f \${tmpfile}" EXIT
+        cat <<EOF >${tmpfile}
+[Unit]
+After=${MODULE_ID}.service
+[Service]
+Restart=always
+ExecStartPre=
+ExecStartPre=runagent -m ${MODULE_ID} expand-bouncer-configuration
+EOF
+        mkdir -vp /etc/systemd/system/crowdsec-firewall-bouncer.service.d/
+        install -v -m 644 "${tmpfile}" "/etc/systemd/system/crowdsec-firewall-bouncer.service.d/${MODULE_ID}-override.conf"
+        # reload and start service
+        systemctl daemon-reload
+        systemctl enable crowdsec-firewall-bouncer.service
+        systemctl restart crowdsec-firewall-bouncer.service
+    fi
