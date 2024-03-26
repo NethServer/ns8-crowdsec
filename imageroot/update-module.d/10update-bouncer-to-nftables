@@ -3,7 +3,7 @@
 # Copyright (C) 2024 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Remove the permanent set created by firewalld, we use iptables/ip6tables directly
+# Remove the permanent set created by firewalld, we use nftables now
 # Needed to upgrade from crowdsec:1.0.6
 
 source /etc/os-release
@@ -47,5 +47,6 @@ EOF
         install -v -m 644 "${tmpfile}" "/etc/systemd/system/crowdsec-firewall-bouncer.service.d/${MODULE_ID}-override.conf"
         # reload and start service
         systemctl daemon-reload
-        systemctl enable --now crowdsec-firewall-bouncer.service
+        systemctl enable crowdsec-firewall-bouncer.service
+        systemctl restart crowdsec-firewall-bouncer.service
     fi
