@@ -5,6 +5,9 @@
 #
 # Remove the permanent set created by firewalld, we use iptables/ip6tables directly
 # Needed to upgrade from crowdsec:1.0.6
+
+source /etc/os-release
+
 find=0
     if [[ -f /etc/firewalld/ipsets/crowdsec-blacklists.xml ]]; then
         firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
