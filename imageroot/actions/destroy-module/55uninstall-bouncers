@@ -21,3 +21,5 @@ else
     echo "The platform is not compatible, we exit"
     exit 0
 fi
+# remove our systemd unit override fragment
+rm -rvf "/etc/systemd/system/crowdsec-firewall-bouncer.service.d"
