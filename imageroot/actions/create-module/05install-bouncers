@@ -15,11 +15,11 @@ fi
 echo "Install the bouncer:"
 if [[ "${PLATFORM_ID}" == "platform:el9" ]] ; then
     curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.rpm.sh | bash
-    dnf install -y crowdsec-firewall-bouncer-iptables
+    dnf install -y crowdsec-firewall-bouncer-nftables
 elif [[ "${ID}" == "debian" ]]; then
     curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.deb.sh | bash
     apt-get update
-    apt-get -y install crowdsec-firewall-bouncer-iptables
+    apt-get -y install crowdsec-firewall-bouncer-nftables
 else
     echo "The platform is not compatible, we exit"
     exit 0
