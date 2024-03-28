@@ -31,7 +31,6 @@ ExecStart=/usr/bin/podman run \
     --replace --name=%N \
     --uts=host \
     --network=host \
-    --privileged \
     --cap-add NET_ADMIN \
     --cap-add NET_RAW \
     --volume  ./crowdsec_config/crowdsec-firewall-bouncer.yaml.local:/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml.local:Z \
