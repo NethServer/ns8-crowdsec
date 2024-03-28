@@ -12,6 +12,43 @@ set -e
 images=()
 # The image will be pushed to GitHub container registry
 repobase="${REPOBASE:-ghcr.io/nethserver}"
+bouncer_version="0.0.28"
+crowdsec_version="v1.6.0-1-debian"
+
+# Create a new empty container image fro crowdsec-firewall-bouncer
+reponame="crowdsec-firewall-bouncer"
+container=$(buildah from docker.io/debian:bookworm-20240311)
+buildah config --env BOUNCER_VERSION=${bouncer_version} --env DEBIAN_FRONTEND=noninteractive --env TZ=UTC "${container}"
+buildah run "${container}" /bin/sh <<'EOF'
+apt update \
+    && apt upgrade -y \
+    && apt install curl -y \
+    && curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.deb.sh | bash \
+    && apt install crowdsec-firewall-bouncer-nftables=${BOUNCER_VERSION} -y \
+    && apt autoremove -y \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+EOF
+
+buildah config \
+    --workingdir="/" \
+    --cmd='["/usr/bin/crowdsec-firewall-bouncer", "-c", "/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml"]' \
+    --label="org.opencontainers.image.source=https://github.com/NethServer/ns8-crowdsec" \
+    --label="org.opencontainers.image.authors=Stephane de Labrusse <stephdl@de-labrusse.fr>" \
+    --label="org.opencontainers.image.title=Crowdsec-firewall-bouncer based on debian" \
+    --label="org.opencontainers.image.description=A Crowdsec-firewall-bouncer running in a debian container" \
+    --label="org.opencontainers.image.licenses=GPL-3.0-or-later" \
+    --label="org.opencontainers.image.url=https://github.com/NethServer/ns8-crowdsec" \
+    --label="org.opencontainers.image.documentation=https://github.com/NethServer/ns8-crowdsec/blob/main/README.md" \
+    --label="org.opencontainers.image.vendor=NethServer" \
+    "${container}"
+
+# Commit the image
+buildah commit "${container}" "${repobase}/${reponame}"
+
+# Append the image URL to the images array
+images+=("${repobase}/${reponame}")
+
 # Configure the image name
 reponame="crowdsec"
 
@@ -34,7 +71,7 @@ buildah add "${container}" ui/dist /ui
 buildah config --entrypoint=/ \
     --label="org.nethserver.authorizations=" \
     --label="org.nethserver.rootfull=1" \
-    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.6.0-1-debian" \
+    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:${crowdsec_version} ${repobase}/crowdsec-firewall-bouncer:${IMAGETAG:-latest}" \
     --label="org.nethserver.tcp-ports-demand=2" \
     "${container}"
 # Commit the image
