@@ -3,8 +3,11 @@
 # Copyright (C) 2024 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Remove the permanent set created by firewalld, we use iptables/ip6tables directly
+# Remove the permanent set created by firewalld, we use nftables now
 # Needed to upgrade from crowdsec:1.0.6
+
+source /etc/os-release
+
 find=0
     if [[ -f /etc/firewalld/ipsets/crowdsec-blacklists.xml ]]; then
         firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
@@ -15,8 +18,17 @@ find=0
         find=2
     fi
     if [[ $find -ne 0 ]]; then
+        # remove firewalld backup files
+        rm -fv /etc/firewalld/ipsets/crowdsec*.xml.old
         # we need the reload to remove the set from the runtime configuration
         firewall-cmd --reload
-        # we need to restart the service to apply the new configuration and create the set with iptables/ip6tables
-        systemctl restart crowdsec-firewall-bouncer.service
+
+        echo "Install the nftables bouncer :"
+        if [[ "${PLATFORM_ID}" == "platform:el9" ]] ; then
+            dnf remove -y crowdsec-firewall-bouncer-iptables
+        elif [[ "${ID}" == "debian" ]]; then
+            apt-get -y remove crowdsec-firewall-bouncer-iptables
+        fi
+        # start the bouncer
+        ../actions/create-module/50start-bouncer
     fi
