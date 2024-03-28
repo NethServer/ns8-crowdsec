@@ -17,4 +17,4 @@ systemctl daemon-reload
 
 # API server could be slow to start:
 # ignore  bouncer connect error if it fails to start on first run
-systemctl enable --now ${MODULE_ID}-firewall-bouncer.service || :
+systemctl enable --now ${MODULE_ID}-firewall-bouncer.service
