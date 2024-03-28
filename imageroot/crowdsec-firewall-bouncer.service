@@ -1,0 +1,47 @@
+#
+# Copyright (C) 2024 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+#
+# This systemd unit starts a crowdsec-firewall-bouncer instance using Podman.
+# Most parts of this file come from podman-generate-systemd.
+#
+
+[Unit]
+Description=crowdsec-firewall-bouncer server
+After=network.target ${MODULE_ID}.service
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=/var/lib/nethserver/${MODULE_ID}/state/environment
+WorkingDirectory=/var/lib/nethserver/${MODULE_ID}/state
+SyslogIdentifier=%N
+Restart=always
+RestartSec=10
+LimitNOFILE=65536
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
+ExecStartPre=runagent -m ${MODULE_ID} expand-bouncer-configuration
+ExecStart=/usr/bin/podman run \
+    --detach \
+    --conmon-pidfile %t/%N.pid \
+    --cidfile %t/%N.cid \
+    --cgroups=no-conmon \
+    --replace --name=%N \
+    --uts=host \
+    --network=host \
+    --privileged \
+    --cap-add NET_ADMIN \
+    --cap-add NET_RAW \
+    --volume  ./crowdsec_config/crowdsec-firewall-bouncer.yaml.local:/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml.local:Z \
+    ${CROWDSEC_FIREWALL_BOUNCER_IMAGE}
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
+ExecReload=runagent -m ${MODULE_ID} expand-bouncer-configuration
+ExecReload=/usr/bin/podman kill -s HUP %N
+PIDFile=%t/%N.pid
+Type=forking
+
+[Install]
+WantedBy=default.target
