@@ -75,6 +75,15 @@ By default whitelist is enabled to never ban IP on the local network, for test p
     cscli parsers remove  crowdsecurity/whitelists
     systemctl restart crowdsec1
 
+## List Banned IP in nftables sets
+
+Banned IP are contained inside nft sets that you can list by the command line below
+
+- ipv4
+`nft list set ip crowdsec crowdsec-blacklists`
+- ipv6
+`nft list set ip6 crowdsec6 crowdsec6-blacklists`
+
 ### cscli
 
 crowdsec come with a cli, do `cscli --help`, if you want to know on a specific command  `cscli <command> --help`
