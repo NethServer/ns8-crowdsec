@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# Copyright (C) 2024 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Stop the bouncer installed on the host and start the bouncer container
+# Needed to upgrade from crowdsec:1.0.6
+
+if systemctl is-active -q crowdsec-firewall-bouncer.service; then
+    # stop the bouncer
+    echo "Stop the crowdsec bouncer and disable it, removal of firewalld rules and bouncer binary can be done manually"
+    systemctl disable --now crowdsec-firewall-bouncer.service
+    # start the bouncer
+    echo "Enable and start the systemd service of the crowdsec bouncer container"
+    ../actions/create-module/50start-bouncer
+fi

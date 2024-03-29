@@ -18,4 +18,8 @@ systemctl disable --now "${MODULE_ID}-upgrade-hub.timer"
 rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.service
 rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.timer
 
+# remove the bouncer service
+systemctl disable --now "${MODULE_ID}-firewall-bouncer.service"
+rm -vf "/etc/systemd/system/${MODULE_ID}-firewall-bouncer.service"
+
 systemctl daemon-reload

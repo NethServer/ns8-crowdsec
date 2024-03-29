@@ -12,7 +12,7 @@ import agent.tasks
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-files =["/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml.local"]
+files =["crowdsec_config/crowdsec-firewall-bouncer.yaml.local"]
 for f in files:
     try:
         os.remove(f)
@@ -39,6 +39,6 @@ properties = {
 
 template = jenv.get_template('crowdsec-firewall-bouncer.yaml.local')
 output = template.render(properties)
-os.makedirs("/etc/crowdsec/bouncers", exist_ok = True) 
-with open("/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml.local","w") as f:
+os.makedirs("crowdsec_config", exist_ok = True) 
+with open("crowdsec_config/crowdsec-firewall-bouncer.yaml.local","w") as f:
     f.write(output)
