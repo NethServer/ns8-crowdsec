@@ -19,7 +19,8 @@ container=$(buildah from docker.io/debian:bookworm-20240311)
 # The crowdsec-firewall-bouncer versions can be found : https://github.com/crowdsecurity/cs-firewall-bouncer/releases
 # change the version in the apt below
 buildah run "${container}" /bin/sh <<'EOF'
-export DEBIAN_FRONTEND=noninteractive && apt update \
+export DEBIAN_FRONTEND=noninteractive
+apt update \
     && apt upgrade -y \
     && apt install curl -y \
     && curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.deb.sh | bash \
