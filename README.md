@@ -127,6 +127,24 @@ To uninstall the instance:
 
     remove-module --no-preserve crowdsec1
 
+## Uninstall the crowdsec binary bouncer
+
+Previous to the version 1.0.6 the bouncer was installed on the host following a repository method, after this version the bouncer is shipped in a full container.
+With the upgrade the service `crowdsec-firewall-bouncer` has been stopped but not removed from the host. For a full cleaning you can
+
+- remove firewalld permanent sets:
+        `firewall-cmd --permanent --delete-ipset=crowdsec-blacklists`
+        `firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists`
+
+- remove the bouncer on rocky linux
+        `dnf remove -y crowdsec-firewall-bouncer-iptables`
+        `rm /etc/yum.repos.d/crowdsec_crowdsec.repo`
+
+- remove the bouncer on debian
+        `apt-get -y remove crowdsec-firewall-bouncer-iptables`
+        `rm /etc/apt/sources.list.d/crowdsec_crowdsec.list`
+
+
 ## Testing
 
 Test the module using the `test-module.sh` script:
