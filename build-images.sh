@@ -12,6 +12,7 @@ set -e
 images=()
 # The image will be pushed to GitHub container registry
 repobase="${REPOBASE:-ghcr.io/nethserver}"
+# versions can be found : https://github.com/crowdsecurity/cs-firewall-bouncer/releases
 bouncer_version="0.0.28"
 
 # Create a new empty container image fro crowdsec-firewall-bouncer
