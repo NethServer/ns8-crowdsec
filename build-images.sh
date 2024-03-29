@@ -13,7 +13,6 @@ images=()
 # The image will be pushed to GitHub container registry
 repobase="${REPOBASE:-ghcr.io/nethserver}"
 bouncer_version="0.0.28"
-crowdsec_version="v1.6.0-1-debian"
 
 # Create a new empty container image fro crowdsec-firewall-bouncer
 reponame="crowdsec-firewall-bouncer"
