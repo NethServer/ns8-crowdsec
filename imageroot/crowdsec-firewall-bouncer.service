@@ -36,8 +36,6 @@ ExecStart=/usr/bin/podman run \
     ${CROWDSEC_FIREWALL_BOUNCER_IMAGE}
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
-ExecReload=runagent -m ${MODULE_ID} expand-bouncer-configuration
-ExecReload=/usr/bin/podman kill -s HUP %N
 PIDFile=%t/%N.pid
 Type=forking
 
