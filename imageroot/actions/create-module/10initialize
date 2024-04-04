@@ -8,41 +8,8 @@
 set -e
 exec 1>&2 # Send any output to stderr, to not alter the action response protocol
 
-install -m 644 "${AGENT_INSTALL_DIR}/crowdsec.service" "/etc/systemd/system/${MODULE_ID}.service"
+install-systemd-units
 
-# create the service to update the crowdsec hub for collections
-tmpfile=$(mktemp)
-trap "rm -f \${tmpfile}" EXIT
-cat <<EOF >${tmpfile}
-[Unit]
-Description=Update the crowdsec HUB
-Requisite=${MODULE_ID}.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/podman exec -i ${MODULE_ID} cscli hub update
-ExecStart=/usr/bin/podman exec -i ${MODULE_ID} cscli hub upgrade
-SyslogIdentifier=%N
-EOF
-install -v -m 644 "${tmpfile}" /etc/systemd/system/${MODULE_ID}-upgrade-hub.service
-
-# create the timer to update the crowdsec hub for collections
-tmpfile=$(mktemp)
-trap "rm -f \${tmpfile}" EXIT
-cat <<EOF >${tmpfile}
-[Unit]
-Description=Timer of crowdsec hub update
-
-[Timer]
-OnActiveSec=15 minutes
-OnUnitInactiveSec=15 days
-
-[Install]
-WantedBy=timers.target
-EOF
-install -v -m 644 "${tmpfile}" /etc/systemd/system/${MODULE_ID}-upgrade-hub.timer
-
-systemctl daemon-reload
 systemctl enable --now "${MODULE_ID}.service"
 systemctl enable --now "${MODULE_ID}-upgrade-hub.timer"
 
