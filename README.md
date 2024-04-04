@@ -75,15 +75,6 @@ By default whitelist is enabled to never ban IP on the local network, for test p
     runagent -m crowdsec1 cscli parsers remove crowdsecurity/whitelists
     systemctl restart crowdsec1
 
-## List Banned IP in nftables sets
-
-Banned IP are contained inside nft sets that you can list by the command line below
-
-- ipv4
-`nft list set ip crowdsec crowdsec-blacklists`
-- ipv6
-`nft list set ip6 crowdsec6 crowdsec6-blacklists`
-
 ### cscli
 
 Crowdsec come with a cli tool, available within the application environment. Get a shell with:
@@ -94,7 +85,7 @@ Then run the tool as
 
     cscli --help
 
-- if you want to know on a specific command  `cscli <command> --help`
+- help on a specific command:  `cscli <command> --help`
 - get a glance : `cscli metrics`
 - see the state of installed bouncers : `cscli bouncers list`
 - see the active decisions(ban): `cscli decisions list`
@@ -134,28 +125,30 @@ To uninstall the instance:
 
     remove-module --no-preserve crowdsec1
 
-## Uninstall the crowdsec binary bouncer
+## Uninstall the old crowdsec binary bouncer
 
 Previous to the version 1.0.6 the bouncer was installed on the host following a repository method, after this version the bouncer is shipped in a full container.
 With the upgrade the service `crowdsec-firewall-bouncer` has been stopped but not removed from the host. For a full cleaning you can
 
 - remove firewalld permanent sets:
-        `firewall-cmd --permanent --delete-ipset=crowdsec-blacklists`
-        `firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists`
+
+      firewall-cmd --permanent --delete-ipset=crowdsec-blacklists
+      firewall-cmd --permanent --delete-ipset=crowdsec6-blacklists
 
 - remove the bouncer on rocky linux
-        `dnf remove -y crowdsec-firewall-bouncer-iptables`
-        `rm /etc/yum.repos.d/crowdsec_crowdsec.repo`
+
+      dnf remove -y crowdsec-firewall-bouncer-iptables
+      rm -rvf /etc/yum.repos.d/crowdsec_crowdsec.repo /etc/crowdsec /usr/local/sbin/cscli
 
 - remove the bouncer on debian
-        `apt-get -y remove crowdsec-firewall-bouncer-iptables`
-        `rm /etc/apt/sources.list.d/crowdsec_crowdsec.list`
+
+      apt-get -y remove crowdsec-firewall-bouncer-iptables
+      rm -rvf /etc/apt/sources.list.d/crowdsec_crowdsec.list /etc/crowdsec /usr/local/sbin/cscli
 
 
 ## Testing
 
 Test the module using the `test-module.sh` script:
-
 
     ./test-module.sh <NODE_ADDR> ghcr.io/nethserver/crowdsec:latest
 
@@ -168,4 +161,4 @@ Translated with [Weblate](https://hosted.weblate.org/projects/ns8/).
 To setup the translation process:
 
 - add [GitHub Weblate app](https://docs.weblate.org/en/latest/admin/continuous.html#github-setup) to your repository
-- add your repository to [hosted.weblate.org]((https://hosted.weblate.org) or ask a NethServer developer to add it to ns8 Weblate project
+- add your repository to [hosted.weblate.org](https://hosted.weblate.org) or ask a NethServer developer to add it to ns8 Weblate project
