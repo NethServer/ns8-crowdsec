@@ -24,8 +24,10 @@ ExecStartPre=/bin/mkdir -vp crowdsec_config/postoverflows/s01-whitelist
 ExecStartPre=/bin/mkdir -vp crowdsec_config/parsers/s02-enrich
 ExecStartPre=/usr/local/bin/runagent -m %N expand-configuration
 ExecStartPre=/usr/local/bin/runagent -m %N expand-smarthost
+SuccessExitStatus=143
 ExecStart=/usr/bin/podman run \
     --detach \
+    --init \
     --privileged \
     --conmon-pidfile %t/%N.pid \
     --cidfile %t/%N.cid \
