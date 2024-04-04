@@ -72,7 +72,7 @@ Display the configuration
 
 By default whitelist is enabled to never ban IP on the local network, for test purpose you could disable it
 
-    cscli parsers remove  crowdsecurity/whitelists
+    runagent -m crowdsec1 cscli parsers remove crowdsecurity/whitelists
     systemctl restart crowdsec1
 
 ## List Banned IP in nftables sets
@@ -86,8 +86,15 @@ Banned IP are contained inside nft sets that you can list by the command line be
 
 ### cscli
 
-crowdsec come with a cli, do `cscli --help`, if you want to know on a specific command  `cscli <command> --help`
+Crowdsec come with a cli tool, available within the application environment. Get a shell with:
 
+    runagent -m crowdsec1 bash -l
+
+Then run the tool as
+
+    cscli --help
+
+- if you want to know on a specific command  `cscli <command> --help`
 - get a glance : `cscli metrics`
 - see the state of installed bouncers : `cscli bouncers list`
 - see the active decisions(ban): `cscli decisions list`
@@ -111,12 +118,12 @@ crowdsec come with a cli, do `cscli --help`, if you want to know on a specific c
 
 You can see the metrics of crowdsec at https://app.crowdsec.net/, for this purpose you need to create a login for a single user or an organization in the website, then in the top right menu click in `enroll an instance` and retrieve the keys, then enroll your container and restart it.
 
-    cscli console enroll <key>
+    runagent -m crowdsec1 cscli console enroll <key>
     systemctl restart crowdsec1
 
 you can force the enrollment with another key
 
-    cscli console enroll --overwrite <key>
+    runagent -m crowdsec1 cscli console enroll --overwrite <key>
     systemctl restart crowdsec1
 
 Once done you need to accept inside the website the `Instance enroll request`
