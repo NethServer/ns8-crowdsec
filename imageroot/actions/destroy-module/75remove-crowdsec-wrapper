@@ -10,5 +10,3 @@ set -e
 
 # remove the wrapper to use the container
 rm -vf /usr/local/sbin/cscli
-# remove residual config
-rm -rvf /etc/crowdsec
