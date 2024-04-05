@@ -7,7 +7,7 @@
 # Stop the bouncer installed on the host and start the bouncer container
 # Needed to upgrade from crowdsec:1.0.6
 
-if systemctl is-active -q crowdsec-firewall-bouncer.service; then
+if systemctl is-active -q crowdsec-firewall-bouncer.service || systemctl is-enabled crowdsec-firewall-bouncer.service &>/dev/null ; then
     echo "Uninstall the old crowdsec binary bouncer"
     echo "Check the app README for manual clean up instructions"
     systemctl disable --now crowdsec-firewall-bouncer.service
