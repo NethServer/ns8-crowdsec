@@ -8,6 +8,18 @@
 set -e
 exec 1>&2 # Send any output to stderr, to not alter the action response protocol
 
+# Run with TEST_MODE=true to generate the initial configuration
+mkdir -vp crowdsec_config
+podman run -i --rm --replace --name "${MODULE_ID}-init" \
+    --log-driver=none \
+    --privileged \
+    --network=host \
+    --env=TEST_MODE=true \
+    --volume  ./crowdsec_config:/etc/crowdsec:Z \
+    --volume "${MODULE_ID}-data":/var/lib/crowdsec/data:Z \
+    --volume "${CROWDSEC_JOURNAL}":/run/log/journal \
+    ${CROWDSEC_IMAGE}
+
 install-systemd-units
 
 systemctl enable --now "${MODULE_ID}.service"
