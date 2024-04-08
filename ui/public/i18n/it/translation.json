@@ -1,50 +1,108 @@
 {
-  "error": {
-      "validation_error": "Errore di validazione",
-      "network_error": "Errore di rete",
-      "error": "Errore",
-      "404": "Risorsa non trovata",
-      "cannot_retrieve_installed_modules": "Impossibile elencare moduli installati",
-      "cannot_retrieve_module_info": "Impossibile recuperare info modulo",
-      "network_timeout": "Timeout di rete",
-      "generic_error": "Qualcosa è andato storto",
-      "401": "Autenticazione non valida",
-      "403": "Operazione non autorizzata"
-  },
-  "common": {
-      "required": "Obbligatorio",
-      "work_in_progress": "In lavorazione"
-  },
-  "status": {
-      "title": "Stato",
-      "services": "Servizio | Servizi",
-      "node": "Nodo",
-      "name": "Nome",
-      "size": "Dimensione",
-      "created": "Creato",
-      "no_services": "Nessun servizio",
-      "no_images": "Nessuna immagine",
-      "no_volumes": "Nessun volume",
-      "app_instance": "Istanza app",
-      "app_images": "Immagine app|Immagini app",
-      "app_volumes": "Volume app|Volumi app",
-      "installation_node": "Nodo",
-      "mount": "Percorso di mount"
-  },
-  "settings": {
-      "save": "Salva",
-      "title": "Impostazioni"
-  },
-  "action": {
-      "configure-module": "Configura modulo",
-      "get-configuration": "Visualizza configurazione",
-      "get-module-info": "Visualizza info modulo",
-      "get-status": "Visualizza stato"
-  },
-  "about": {
-      "title": "Informazioni"
-  },
-  "task": {
-      "cannot_create_task": "Impossibile eseguire task {action}"
-  }
+    "error": {
+        "validation_error": "Errore di validazione",
+        "network_error": "Errore di rete",
+        "error": "Errore",
+        "404": "Risorsa non trovata",
+        "cannot_retrieve_installed_modules": "Impossibile elencare moduli installati",
+        "cannot_retrieve_module_info": "Impossibile recuperare info modulo",
+        "network_timeout": "Timeout di rete",
+        "generic_error": "Qualcosa è andato storto",
+        "401": "Autenticazione non valida",
+        "403": "Operazione non autorizzata"
+    },
+    "common": {
+        "required": "Obbligatorio",
+        "work_in_progress": "In lavorazione",
+        "processing": "Processing..."
+    },
+    "status": {
+        "title": "Stato",
+        "services": "Servizio | Servizi",
+        "node": "Nodo",
+        "name": "Nome",
+        "size": "Dimensione",
+        "created": "Creato",
+        "no_services": "Nessun servizio",
+        "no_images": "Nessuna immagine",
+        "no_volumes": "Nessun volume",
+        "app_instance": "Istanza app",
+        "app_images": "Immagine app|Immagini app",
+        "app_volumes": "Volume app|Volumi app",
+        "installation_node": "Nodo",
+        "mount": "Percorso di mount"
+    },
+    "settings": {
+        "save": "Salva",
+        "title": "Impostazioni",
+        "whitelist_placeholder": "One entry per line",
+        "enabled": "Enabled",
+        "disable_online_api_tips": "The central API is used to retrieve blacklists and to have a glance on metrics at app.crowdsec.net",
+        "enable_online_api": "Enable the central API",
+        "dyn_bantime_tips": "Ban time is calculated by ((number of attempts + 1) * 4) minutes",
+        "advanced": "Advanced",
+        "helo_host": "Helo_host",
+        "bad_email_address": "Bad email address",
+        "dyn_bantime": "Dynamic ban time",
+        "configure_instance": "Configure {instance}",
+        "disabled": "Disabled",
+        "whitelists_tips": "No ban will occur for members of this list",
+        "enroll_instance": "Enroll this CrowdSec instance",
+        "enroll_instance_placeholder": "xxxxxxxxxxxxxxxxxxx",
+        "receiver_emails": "Email recipients for notifications",
+        "minutes": "Minutes",
+        "bantime": "Bantime",
+        "smarthost_is_disabled": "Email notifications are disabled",
+        "bad_IP_or_hostname": "Bad CIDR, IP or FQDN",
+        "helo_host_placeholder": "sub.domain.com",
+        "smarthosts_is_needed_to_send_notifications": "To receive mail notifications from Crowdsec, change the cluster's email settings",
+        "open_app_crowdsec": "Go to CrowdSec website",
+        "ban_local_network": "Allow bans on the local network",
+        "enroll_instance_must_be_real_token": "The token must be retrieved on the website app.crowdsec.net",
+        "whitelists": "Allow list of CIDR, IP and fully qualified domain name",
+        "helo_host_must_be_relevant_for_smtp": "This might be needed to properly receive email notifications. If your antispam system adds score due to default 'localhost' Helo name, you can set a specific Helo FQDN here",
+        "required": "Required",
+        "ban_local_network_tips": "By default no ban occurs on private IP class",
+        "token_not_valid": "The token provided is not valid",
+        "enable_smarthosts_for_notifications": "Go to cluster Settings",
+        "receiver_emails_list": "Enter an email address per line",
+        "processing": "Processing..."
+    },
+    "action": {
+        "configure-module": "Configura modulo",
+        "get-configuration": "Visualizza configurazione",
+        "get-module-info": "Visualizza info modulo",
+        "get-status": "Visualizza stato",
+        "get-name": "Get name",
+        "list-banned-ip": "List banned IP",
+        "unban-ip": "Unban IP address",
+        "unban_ip_status": "List banned IP addresses",
+        "list-backup-repositories": "List backup repositories",
+        "list-installed-modules": "List installed modules",
+        "list-backups": "List backups"
+    },
+    "about": {
+        "title": "Informazioni"
+    },
+    "task": {
+        "cannot_create_task": "Impossibile eseguire task {action}"
+    },
+    "unban": {
+        "no_bans": "No active bans",
+        "delete_all": "Unban all",
+        "title": "Banned IP",
+        "col_value": "IP address",
+        "col_scenario": "Reason",
+        "unban_tooltip": "IP addresses that failed multiple login attempts are listed here. You can unban them if needed",
+        "confirm_unban_ip_message": "Unban IP address?",
+        "unban_ip": "Unban IP",
+        "delete_bans": "Unban all",
+        "col_duration": "Ban time",
+        "release_all_ip": "Unban all IP addresses",
+        "delete": "Unban",
+        "col_created_at": "Banned",
+        "reload_bans": "Refresh",
+        "search_bans": "Search",
+        "confirm_delete_all_bans_message": "Unban all IP addresses?"
+    }
 }
