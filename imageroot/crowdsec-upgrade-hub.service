@@ -1,0 +1,9 @@
+[Unit]
+Description=Update the crowdsec HUB
+Requisite=${MODULE_ID}.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman exec -i ${MODULE_ID} cscli hub update
+ExecStart=/usr/bin/podman exec -i ${MODULE_ID} cscli hub upgrade
+SyslogIdentifier=%N

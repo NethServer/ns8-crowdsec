@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+if [[ -t 1 ]]; then
+    with_tty=1
+fi
+
+exec podman exec -${with_tty:+t}i "${MODULE_ID}" cscli "${@}"

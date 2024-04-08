@@ -8,13 +8,6 @@
 set -e
 exec 1>&2 # Send any output to stderr, to not alter the action response protocol
 
-tmpfile=$(mktemp)
-trap "rm -f \${tmpfile}" EXIT
-envsubst >${tmpfile} <"${AGENT_INSTALL_DIR}/crowdsec-firewall-bouncer.service"
-install -m 644 "${tmpfile}" "/etc/systemd/system/${MODULE_ID}-firewall-bouncer.service"
-# reload and start service
-systemctl daemon-reload
-
 # API server could be slow to start:
 # ignore  bouncer connect error if it fails to start on first run
 systemctl enable --now ${MODULE_ID}-firewall-bouncer.service

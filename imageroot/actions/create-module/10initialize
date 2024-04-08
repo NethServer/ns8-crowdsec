@@ -8,49 +8,28 @@
 set -e
 exec 1>&2 # Send any output to stderr, to not alter the action response protocol
 
-install -m 644 "${AGENT_INSTALL_DIR}/crowdsec.service" "/etc/systemd/system/${MODULE_ID}.service"
+# Run with TEST_MODE=true to generate the initial configuration
+mkdir -vp crowdsec_config
+podman run -i --rm --replace --name "${MODULE_ID}-init" \
+    --log-driver=none \
+    --privileged \
+    --network=host \
+    --env=TEST_MODE=true \
+    --volume  ./crowdsec_config:/etc/crowdsec:Z \
+    --volume "${MODULE_ID}-data":/var/lib/crowdsec/data:Z \
+    --volume "${CROWDSEC_JOURNAL}":/run/log/journal \
+    ${CROWDSEC_IMAGE}
 
-# create the service to update the crowdsec hub for collections
-tmpfile=$(mktemp)
-trap "rm -f \${tmpfile}" EXIT
-cat <<EOF >${tmpfile}
-[Unit]
-Description=Update the crowdsec HUB
-Requisite=${MODULE_ID}.service
+install-systemd-units
 
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/podman exec -ti ${MODULE_ID} cscli hub update
-ExecStart=/usr/bin/podman exec -ti ${MODULE_ID} cscli hub upgrade
-SyslogIdentifier=%N
-EOF
-install -v -m 644 "${tmpfile}" /etc/systemd/system/${MODULE_ID}-upgrade-hub.service
-
-# create the timer to update the crowdsec hub for collections
-tmpfile=$(mktemp)
-trap "rm -f \${tmpfile}" EXIT
-cat <<EOF >${tmpfile}
-[Unit]
-Description=Timer of crowdsec hub update
-
-[Timer]
-OnActiveSec=15 minutes
-OnUnitInactiveSec=15 days
-
-[Install]
-WantedBy=timers.target
-EOF
-install -v -m 644 "${tmpfile}" /etc/systemd/system/${MODULE_ID}-upgrade-hub.timer
-
-systemctl daemon-reload
 systemctl enable --now "${MODULE_ID}.service"
 systemctl enable --now "${MODULE_ID}-upgrade-hub.timer"
 
 # Install default collections
-podman exec -ti ${MODULE_ID} cscli hub update
-podman exec -ti ${MODULE_ID} cscli hub upgrade
+podman exec -i ${MODULE_ID} cscli hub update
+podman exec -i ${MODULE_ID} cscli hub upgrade
 
-podman exec -ti ${MODULE_ID} cscli collections install \
+podman exec -i ${MODULE_ID} cscli collections install \
     crowdsecurity/apache2 \
     crowdsecurity/base-http-scenarios \
     crowdsecurity/dovecot \
@@ -70,4 +49,4 @@ podman exec -ti ${MODULE_ID} cscli collections install \
     crowdsecurity/whitelist-good-actors
 
 # we need it if we want to ban with IP from country
-podman exec -ti ${MODULE_ID} cscli parsers install crowdsecurity/geoip-enrich
+podman exec -i ${MODULE_ID} cscli parsers install crowdsecurity/geoip-enrich

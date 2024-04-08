@@ -23,8 +23,10 @@ LimitNOFILE=65536
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
 ExecStartPre=runagent -m ${MODULE_ID} expand-bouncer-configuration
+SuccessExitStatus=1
 ExecStart=/usr/bin/podman run \
     --detach \
+    --init \
     --conmon-pidfile %t/%N.pid \
     --cidfile %t/%N.cid \
     --cgroups=no-conmon \
@@ -36,8 +38,6 @@ ExecStart=/usr/bin/podman run \
     ${CROWDSEC_FIREWALL_BOUNCER_IMAGE}
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
-ExecReload=runagent -m ${MODULE_ID} expand-bouncer-configuration
-ExecReload=/usr/bin/podman kill -s HUP %N
 PIDFile=%t/%N.pid
 Type=forking
 

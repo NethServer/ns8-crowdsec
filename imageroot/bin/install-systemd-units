@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# install the main controller service
+install -m 644 "${AGENT_INSTALL_DIR}/crowdsec.service" "/etc/systemd/system/${MODULE_ID}.service"
+
+# install the firewall bouncer service
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-firewall-bouncer.service" >"/etc/systemd/system/${MODULE_ID}-firewall-bouncer.service"
+
+# create the service to update the crowdsec hub for collections
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-upgrade-hub.service" >"/etc/systemd/system/${MODULE_ID}-upgrade-hub.service"
+
+# create the timer to update the crowdsec hub for collections
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-upgrade-hub.timer" >"/etc/systemd/system/${MODULE_ID}-upgrade-hub.timer"
+
+# reload and start service
+systemctl daemon-reload
