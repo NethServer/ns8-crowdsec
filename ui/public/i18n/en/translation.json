@@ -54,7 +54,12 @@
     "token_not_valid":"The token provided is not valid",
     "whitelists_tips": "No ban will occur for members of this list",
     "smarthost_is_disabled": "Email notifications are disabled",
-    "smarthosts_is_needed_to_send_notifications": "To receive mail notifications from Crowdsec, change the cluster's email settings"
+    "smarthosts_is_needed_to_send_notifications": "To receive mail notifications from Crowdsec, change the cluster's email settings",
+    "whitelists_pattern": "Invalid CIDR, IP or FQDN: {value}",
+    "whitelists_format": "Invalid CIDR, IP or FQDN: {value}",
+    "whitelists_string_lte": "Invalid CIDR, IP or FQDN: {value}",
+    "receiver_emails_string_lte": "Invalid email address: {value}",
+    "receiver_emails_format": "Invalid email address: {value}"
   },
   "unban":{
     "title": "Banned IP",
