@@ -381,29 +381,6 @@ export default {
       this.enroll_instance = config.enroll_instance;
       this.mail_configured = config.mail_configured;
     },
-    validateConfigureModule() {
-      this.clearErrors(this);
-      let isValidationOk = true;
-
-      function validateEmail(email) {
-        var re = /\S+@\S+\.\S+/;
-        return re.test(email);
-      }
-
-      if (this.receiver_emails) {
-        const array = this.receiver_emails.split("\n");
-        array.forEach((element) => {
-          var email = validateEmail(element.trim());
-          if (!email) {
-            this.error.receiver_emails =
-              this.$t("settings.bad_email_address") + " ' " + element + " '";
-            this.focusElement("receiver_emails");
-            isValidationOk = false;
-          }
-        });
-      }
-      return isValidationOk;
-    },
     configureModuleValidationFailed(validationErrors) {
       this.loading.configureModule = false;
 
@@ -415,11 +392,7 @@ export default {
       }
     },
     async configureModule() {
-      const isValidationOk = this.validateConfigureModule();
-      if (!isValidationOk) {
-        return;
-      }
-
+      this.clearErrors(this);
       this.loading.configureModule = true;
       const taskAction = "configure-module";
       const eventId = this.getUuid();
