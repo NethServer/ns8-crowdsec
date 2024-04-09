@@ -57,7 +57,9 @@
     "smarthosts_is_needed_to_send_notifications": "To receive mail notifications from Crowdsec, change the cluster's email settings",
     "whitelists_pattern": "CIDR, IP or FQDN ({value}) is not valid",
     "whitelists_format": "CIDR, IP or FQDN ({value}) is not valid",
-    "receiver_emails_string_lte": "Email address not valid: {value}"
+    "whitelists_string_lte": "CIDR, IP or FQDN ({value}) is not valid",
+    "receiver_emails_string_lte": "Email address not valid: {value}",
+    "receiver_emails_format": "Email address not valid: {value}"
   },
   "unban":{
     "title": "Banned IP",
