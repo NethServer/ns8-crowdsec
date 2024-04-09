@@ -413,7 +413,7 @@ export default {
         return re.test(test);
       }
       function validateHostname(test) {
-        var re = /^(?!:\/\/)(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+        var re = /^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
         return re.test(test);
       }
 
