@@ -388,7 +388,9 @@ export default {
         const param = validationError.parameter;
 
         // set i18n error message
-        this.error[param] = this.$t("settings." + validationError.error, {"value": validationError.value});
+        this.error[param] = this.$t("settings." + validationError.error, {
+          value: validationError.value,
+        });
       }
     },
     async configureModule() {
