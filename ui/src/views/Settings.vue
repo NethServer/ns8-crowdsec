@@ -389,33 +389,6 @@ export default {
         var re = /\S+@\S+\.\S+/;
         return re.test(email);
       }
-      function validateIpv4(test) {
-        //https://regex101.com/r/dT0vT3/1
-        var re =
-          /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-        return re.test(test);
-      }
-      function validateNetworkIpv4(test) {
-        var re =
-          /^(?:(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(?:3[0-2]|[12]*\d),)*(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(?:3[0-2]|[12]*\d)$/;
-        return re.test(test);
-      }
-      function validateNetworkIpv6(test) {
-        //https://regex101.com/r/o6qEkY/1
-        var re =
-          /(?:(?:(?:[A-F0-9]{1,4}:){6}|(?=(?:[A-F0-9]{0,4}:){0,6}(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?![:.\w]))(([0-9A-F]{1,4}:){0,5}|:)((:[0-9A-F]{1,4}){1,5}:|:)|::(?:[A-F0-9]{1,4}:){5})(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}|(?=(?:[A-F0-9]{0,4}:){0,7}[A-F0-9]{0,4}(?![:.\w]))(([0-9A-F]{1,4}:){1,7}|:)((:[0-9A-F]{1,4}){1,7}|:)|(?:[A-F0-9]{1,4}:){7}:|:(:[A-F0-9]{1,4}){7})(?![:.\w])\/(?:12[0-8]|1[01][0-9]|[1-9]?[0-9])/;
-        return re.test(test);
-      }
-      function validateIpv6(test) {
-        //https://regex101.com/r/iP2mG8/1
-        var re =
-          /^([0-9A-Fa-f]{0,4}:){2,7}([0-9A-Fa-f]{1,4}$|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4})$/;
-        return re.test(test);
-      }
-      function validateHostname(test) {
-        var re = /^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
-        return re.test(test);
-      }
 
       if (this.receiver_emails) {
         const array = this.receiver_emails.split("\n");
@@ -429,22 +402,6 @@ export default {
           }
         });
       }
-      if (this.whitelists) {
-        const array = this.whitelists.split("\n");
-        array.forEach((element) => {
-          var hostname = validateHostname(element.trim().toLowerCase());
-          var ipv4 = validateIpv4(element.trim());
-          var ipv6 = validateIpv6(element.trim());
-          var NetworkIPV4 = validateNetworkIpv4(element.trim());
-          var NetworkIPV6 = validateNetworkIpv6(element.trim());
-          if (!hostname && !ipv4 && !ipv6 && !NetworkIPV4 && !NetworkIPV6) {
-            this.error.whitelists =
-              this.$t("settings.bad_IP_or_hostname") + " ' " + element + " '";
-            this.focusElement("whitelists");
-            isValidationOk = false;
-          }
-        });
-      }
       return isValidationOk;
     },
     configureModuleValidationFailed(validationErrors) {
@@ -454,7 +411,7 @@ export default {
         const param = validationError.parameter;
 
         // set i18n error message
-        this.error[param] = this.$t("settings." + validationError.error);
+        this.error[param] = this.$t("settings." + validationError.error, {"value": validationError.value});
       }
     },
     async configureModule() {
