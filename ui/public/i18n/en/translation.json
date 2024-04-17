@@ -51,7 +51,7 @@
     "bad_IP_or_hostname": "Bad CIDR, IP or FQDN",
     "processing": "Processing...",
     "required": "Required",
-    "token_not_valid":"The token provided is not valid",
+    "token_not_valid": "The token provided is not valid",
     "whitelists_tips": "No ban will occur for members of this list",
     "smarthost_is_disabled": "Email notifications are disabled",
     "smarthosts_is_needed_to_send_notifications": "To receive mail notifications from Crowdsec, change the cluster's email settings",
@@ -61,7 +61,7 @@
     "receiver_emails_string_lte": "Invalid email address: {value}",
     "receiver_emails_format": "Invalid email address: {value}"
   },
-  "unban":{
+  "unban": {
     "title": "Banned IP",
     "unban_tooltip": "IP addresses that failed multiple login attempts are listed here. You can unban them if needed",
     "no_bans": "No active bans",
