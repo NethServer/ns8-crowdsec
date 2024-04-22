@@ -26,9 +26,6 @@ systemctl enable --now "${MODULE_ID}.service"
 systemctl enable --now "${MODULE_ID}-upgrade-hub.timer"
 
 # Install default collections
-podman exec -i ${MODULE_ID} cscli hub update
-podman exec -i ${MODULE_ID} cscli hub upgrade
-
 podman exec -i ${MODULE_ID} cscli collections install \
     crowdsecurity/apache2 \
     crowdsecurity/base-http-scenarios \
