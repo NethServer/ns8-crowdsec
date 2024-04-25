@@ -2,8 +2,11 @@
 Description=Timer of crowdsec hub update
 
 [Timer]
-OnActiveSec=15 minutes
-OnUnitInactiveSec=15 days
+Persistent=true
+OnCalendar=*-*-1,15 00:00:00
+AccuracySec=1h
+RandomizedDelaySec=15days
+FixedRandomDelay=true
 
 [Install]
 WantedBy=timers.target
