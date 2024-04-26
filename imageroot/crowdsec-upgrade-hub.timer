@@ -2,7 +2,7 @@
 Description=Timer of crowdsec hub update
 
 [Timer]
-OnActiveSec=15 minutes
+OnActiveSec=4 hours
 OnUnitInactiveSec=15 days
 
 [Install]
