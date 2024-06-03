@@ -6,10 +6,8 @@
 #
 
 import os
-import json
 import agent
 import agent.tasks
-import sys
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -36,7 +34,7 @@ if receiver_emails and smtp['enabled']:
         "smtp_username": smtp['username'],
         "smtp_password": smtp['password'],
         "smtp_port": smtp['port'],
-        "sender_email": smtp['username'],
+        "sender_email": os.environ['MODULE_ID']+'@'+agent.get_hostname(),
         "receiver_emails": receiver_emails.split(","),
         "encryption_type": "none" if smtp['encrypt_smtp'] == "none" else "starttls" if smtp['encrypt_smtp'] == "starttls" else "ssltls",
         "auth_type": "login",
