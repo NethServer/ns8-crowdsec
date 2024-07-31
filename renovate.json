@@ -1,23 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ],
-  "branchPrefix": "renovate-",
-  "branchNameStrict": true,
-  "ignorePaths": [
-    "**/ui/**"
-  ],
-  "regexManagers": [
-    {
-      "fileMatch": [
-        "build-images.sh"
-      ],
-      "matchStrings": [
-        "docker.io\/crowdsecurity\/crowdsec:(?<currentValue>[^\\s]+)\""
-      ],
-      "depNameTemplate": "crowdsecurity/crowdsec",
-      "datasourceTemplate": "docker"
-    }
+    "local>NethServer/.github:renovate-config"
   ]
 }
