@@ -6,10 +6,10 @@
 #
 
 import os
-import json
 import agent
 import agent.tasks
 import re
+import shutil
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -160,3 +160,7 @@ if whitelists:
         output = template.render(properties)
         with open("crowdsec_config/postoverflows/s01-whitelist/nethserver-postoverflows-whitelists.yaml","w") as f:
             f.write(output)
+
+## expand the tainted configuration files
+os.makedirs("crowdsec_config/hub/parsers/s01-parse/crowdsecurity", exist_ok=True)
+shutil.copyfile("../tainted/nextcloud-logs.yaml", "crowdsec_config/hub/parsers/s01-parse/crowdsecurity/nextcloud-logs.yaml")
