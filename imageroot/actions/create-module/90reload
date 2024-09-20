@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2024 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+set -e
+exec 1>&2 # Send any output to stderr, to not alter the action response protocol
+
+# We have introduced a tainted configuration file, we need to reload the service
+systemctl reload ${MODULE_ID}.service
