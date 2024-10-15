@@ -34,7 +34,7 @@ api:
     insecure_skip_verify: false
     credentials_path: /etc/crowdsec/local_api_credentials.yaml
   server:
-    log_level: info
+    log_level: error # quiet the exchanges with the bouncers : GET /v1/decisions/stream
     listen_uri: 127.0.0.1:{{api_port}}
     profiles_path: /etc/crowdsec/profiles.yaml
     trusted_ips: # IP ranges, or IPs which can have admin API access
