@@ -89,9 +89,7 @@
                     ref="ban_local_network"
                   >
                     <template slot="tooltip">
-                      <span
-                        v-html="$t('settings.ban_local_network_tips')"
-                      ></span>
+                      <span>{{ $t("settings.ban_local_network_tips") }}</span>
                     </template>
                     <template slot="text-left">{{
                       $t("settings.disabled")
@@ -112,7 +110,7 @@
                     ref="dyn_bantime"
                   >
                     <template slot="tooltip">
-                      <span v-html="$t('settings.dyn_bantime_tips')"></span>
+                      <span>{{ $t("settings.dyn_bantime_tips") }}</span>
                     </template>
                     <template slot="text-left">{{
                       $t("settings.disabled")
@@ -152,9 +150,7 @@
                     ref="enable_online_api"
                   >
                     <template slot="tooltip">
-                      <span
-                        v-html="$t('settings.disable_online_api_tips')"
-                      ></span>
+                      <span>{{ $t("settings.disable_online_api_tips") }}</span>
                     </template>
                     <template slot="text-left">{{
                       $t("settings.disabled")
@@ -187,11 +183,11 @@
                       tooltipDirection="right"
                     >
                       <template slot="tooltip">
-                        <div
-                          v-html="
-                            $t('settings.enroll_instance_must_be_real_token')
-                          "
-                        ></div>
+                        <div>
+                          {{
+                            $t("settings.enroll_instance_must_be_real_token")
+                          }}
+                        </div>
                       </template>
                     </NsTextInput>
                   </template>
@@ -211,11 +207,9 @@
                     tooltipDirection="right"
                   >
                     <template slot="tooltip">
-                      <div
-                        v-html="
-                          $t('settings.helo_host_must_be_relevant_for_smtp')
-                        "
-                      ></div>
+                      <div>
+                        {{ $t("settings.helo_host_must_be_relevant_for_smtp") }}
+                      </div>
                     </template>
                   </NsTextInput>
                 </template>
