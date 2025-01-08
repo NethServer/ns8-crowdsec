@@ -16,7 +16,7 @@
             >
               <template slot="trigger"></template>
               <template slot="content">
-                <div>{{ $t("unban.unban_tooltip") }}></div>
+                <div>{{ $t("unban.unban_tooltip") }}</div>
               </template>
             </cv-interactive-tooltip>
           </h2>
