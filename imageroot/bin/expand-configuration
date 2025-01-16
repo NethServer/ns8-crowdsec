@@ -164,3 +164,4 @@ if whitelists:
 ## expand the tainted configuration files
 os.makedirs("crowdsec_config/hub/parsers/s01-parse/crowdsecurity", exist_ok=True)
 shutil.copyfile("../tainted/nextcloud-logs.yaml", "crowdsec_config/hub/parsers/s01-parse/crowdsecurity/nextcloud-logs.yaml")
+shutil.copyfile("../tainted/nethvoice-whitelist.yaml", "crowdsec_config/hub/parsers/s02-enrich/crowdsecurity/nethvoice-whitelist.yaml")
