@@ -15,3 +15,4 @@ whitelist:
    - evt.Meta.http_status == '404' && evt.Meta.http_verb == 'GET' && evt.Meta.http_path contains '/freepbx/rest/mobileapp/'
    - evt.Meta.http_status == '403' && evt.Meta.http_verb == 'GET' && evt.Meta.http_path contains '/freepbx/rest/migration'
    - evt.Meta.http_status == '403' && evt.Meta.http_verb == 'GET' && evt.Meta.http_path contains '/freepbx/rest/login' # dangerous, this field is done by a user that has not been authenticated
+   - evt.Meta.http_verb == 'GET' && evt.Meta.http_path contains '/janus/' # http code not provided
