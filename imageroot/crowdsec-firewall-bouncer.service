@@ -22,7 +22,6 @@ RestartSec=10
 LimitNOFILE=65536
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/%N.pid %t/%N.cid
-ExecStartPre=runagent -m ${MODULE_ID} configure_nftables
 ExecStartPre=runagent -m ${MODULE_ID} expand-bouncer-configuration
 SuccessExitStatus=1
 ExecStart=/usr/bin/podman run \
