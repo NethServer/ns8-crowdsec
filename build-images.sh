@@ -32,8 +32,7 @@ reponame="crowdsec-firewall-bouncer"
 container=$(buildah from docker.io/alpine:3.21.2)
 
 # add to the container the crowdsec-firewall-bouncer
-buildah add ${container} ${bouncer_tmp_dir}/crowdsec-firewall-bouncer-v*/crowdsec-firewall-bouncer /usr/local/bin/crowdsec-firewall-bouncer
-buildah run ${container} chmod 755 /usr/local/bin/crowdsec-firewall-bouncer
+buildah add --chmod 750 ${container} ${bouncer_tmp_dir}/crowdsec-firewall-bouncer-v*/crowdsec-firewall-bouncer /usr/local/bin/crowdsec-firewall-bouncer
 
 buildah config \
     --workingdir="/" \
