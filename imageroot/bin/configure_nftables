@@ -28,22 +28,13 @@ if ! table_exists "crowdsec6"; then
      nft add table ip6 crowdsec6
 fi
 
-# create CAPI blacklist
+# verify if the set exists
 if ! set_exists "ip" "crowdsec-blacklists-CAPI"; then
      nft add set ip crowdsec crowdsec-blacklists-CAPI { type ipv4_addr\; flags timeout\; elements = {} }
 fi
 
 if ! set_exists "ip6" "crowdsec6-blacklists-CAPI"; then
      nft add set ip6 crowdsec6 crowdsec6-blacklists-CAPI { type ipv6_addr\; flags timeout\; elements = {} }
-fi
-
-# create LAPI blacklist
-if ! set_exists "ip" "crowdsec-blacklists-crowdsec"; then
-     nft add set ip crowdsec crowdsec-blacklists-crowdsec { type ipv4_addr\; flags timeout\; elements = {} }
-fi
-
-if ! set_exists "ip6" "crowdsec6-blacklists-crowdsec"; then
-     nft add set ip6 crowdsec6 crowdsec6-blacklists-crowdsec { type ipv6_addr\; flags timeout\; elements = {} }
 fi
 
 # verify if the chain exists
