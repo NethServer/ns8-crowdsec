@@ -8,23 +8,32 @@
 # Terminate on error
 set -e
 
+# cleanup on exit
+cleanup_list=()
+trap 'rm -rf "${bouncer_tmp_dir}" crowdsec-firewall-bouncer-linux-amd64.tgz' EXIT
+
 # Prepare variables for later use
 images=()
 # The image will be pushed to GitHub container registry
 repobase="${REPOBASE:-ghcr.io/nethserver}"
-crowdsec_firewall_bouncer_version="v0.0.31"
-# Create a new empty container image fro crowdsec-firewall-bouncer
+
+# The crowdsec-firewall-bouncer versions can be found : https://github.com/crowdsecurity/cs-firewall-bouncer/releases
+curl --netrc --fail -L -o crowdsec-firewall-bouncer-linux-amd64.tgz \
+    https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.31/crowdsec-firewall-bouncer-linux-amd64.tgz
+
+# After updates add the new value to CHECKSUM file: sha256sum crowdsec-firewall-bouncer-linux-amd64.tgz
+sha256sum -c CHECKSUM
+
+bouncer_tmp_dir=$(mktemp -d)
+tar -C "${bouncer_tmp_dir}" -x -v -z -f crowdsec-firewall-bouncer-linux-amd64.tgz
+
+# Create a new empty container image for crowdsec-firewall-bouncer
 reponame="crowdsec-firewall-bouncer"
 container=$(buildah from docker.io/alpine:3.21.2)
-# The crowdsec-firewall-bouncer versions can be found : https://github.com/crowdsecurity/cs-firewall-bouncer/releases
-# change the version in the apt below
-buildah run --env crowdsec_firewall_bouncer_version=${crowdsec_firewall_bouncer_version} "${container}" /bin/sh <<'EOF'
- wget -qO - \
-    "https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/${crowdsec_firewall_bouncer_version}/crowdsec-firewall-bouncer-linux-amd64.tgz" \
-    | tar -xz -C /tmp/ \
-    && mv /tmp/crowdsec-firewall-bouncer*/crowdsec-firewall-bouncer /usr/local/bin/crowdsec-firewall-bouncer \
-    && chmod +x /usr/local/bin/crowdsec-firewall-bouncer && rm -rf /tmp/*
-EOF
+
+# add to the container the crowdsec-firewall-bouncer
+buildah add ${container} ${bouncer_tmp_dir}/crowdsec-firewall-bouncer-v*/crowdsec-firewall-bouncer /usr/local/bin/crowdsec-firewall-bouncer
+buildah run ${container} chmod 755 /usr/local/bin/crowdsec-firewall-bouncer
 
 buildah config \
     --workingdir="/" \
