@@ -7,9 +7,9 @@
 
 import os
 import agent
-import agent.tasks
 import re
 import shutil
+import sys
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -128,6 +128,18 @@ if whitelists:
         # test domain name
         if re.search(r'([A-Za-z0-9-\.]+\.[A-Za-z]+$)', test):
             whitelist_fqdn.append(test)
+        # test if the whitelist is a valid cidr
+        elif re.search("./[0-9]+$", test):
+            continue
+        # test ipv4
+        elif re.search(r'([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', test):
+            continue
+        # test ipv6
+        elif re.search(r'(?:[a-zA-Z0-9]{0,4}:?){1,8}|(?:[a-zA-Z0-9]{0,4}:?){1,4}(?:[0-9]{1,3}\.){3}[0-9]{1,3}', test):
+            continue
+        else:
+            print(f"Invalid domain name format: {test}", file=sys.stderr)
+            continue
 
     properties = {
         "whitelist_fqdn": sorted(set(whitelist_fqdn)),
