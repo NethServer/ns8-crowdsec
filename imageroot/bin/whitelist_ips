@@ -67,13 +67,6 @@ if wait_for_crowdsec():
         except socket.gaierror:
             ip = "159.65.203.113"
             agent.run_helper("cscli", "allowlists", "add", "nethserver_whitelist", ip)
-    else:
-        try:
-            ip = socket.gethostbyname("sos.nethesis.it")
-            agent.run_helper("cscli", "allowlists", "remove", "nethserver_whitelist", ip)
-        except socket.gaierror:
-            ip = "159.65.203.113"
-            agent.run_helper("cscli", "allowlists", "remove", "nethserver_whitelist", ip)
 
 else:
     print("CrowdSec did not start in time.", file=sys.stderr)
