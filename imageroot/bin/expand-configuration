@@ -157,3 +157,9 @@ if whitelists:
 os.makedirs("crowdsec_config/hub/parsers/s01-parse/crowdsecurity", exist_ok=True)
 shutil.copyfile("../tainted/nextcloud-logs.yaml", "crowdsec_config/hub/parsers/s01-parse/crowdsecurity/nextcloud-logs.yaml")
 shutil.copyfile("../tainted/nethvoice-whitelist-http-probing.yaml", "crowdsec_config/parsers/s02-enrich/nethvoice-whitelist-http-probing.yaml")
+# copy the freepbx parser and scenarios
+os.makedirs("crowdsec_config/parsers/s01-parse/crowdsecurity", exist_ok=True)
+os.makedirs("crowdsec_config/scenarios", exist_ok=True)
+shutil.copyfile("../tainted/freepbx-logs.yaml", "crowdsec_config/parsers/s01-parse/crowdsecurity/freepbx-logs.yaml")
+shutil.copyfile("../tainted/freepbx-user-enum.yaml", "crowdsec_config/scenarios/freepbx-user-enum.yaml")
+shutil.copyfile("../tainted/freepbx-bf.yaml", "crowdsec_config/scenarios/freepbx-bf.yaml")
