@@ -1,6 +1,6 @@
 type: leaky
 name: nethesis/freepbx-bf
-description: "Detect freeswitch auth bruteforce"
+description: "Detect freepbx auth bruteforce"
 filter: "evt.Meta.service startsWith 'freepbx' && evt.Meta.sub_type == 'auth_failure'"
 leakspeed: "10s"
 capacity: 5
@@ -15,7 +15,7 @@ labels:
 ---
 type: leaky
 name: nethesis/freepbx-slow-bf
-description: "Detect freeswitch auth bruteforce"
+description: "Detect freepbx auth bruteforce"
 filter: "evt.Meta.service startsWith 'freepbx' && evt.Meta.sub_type == 'auth_failure'"
 leakspeed: "1m"
 capacity: 20
