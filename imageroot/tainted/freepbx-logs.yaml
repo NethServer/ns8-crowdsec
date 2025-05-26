@@ -1,4 +1,4 @@
-name: crowdsecurity/freepbx-logs
+name: nethesis/freepbx-logs
 description: "Parse Freepbx logs"
 filter: "evt.Parsed.program startsWith 'freepbx'"
 onsuccess: next_stage

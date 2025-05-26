@@ -1,5 +1,5 @@
 type: leaky
-name: crowdsecurity/freepbx_user_enum
+name: nethesis/freepbx_user_enum
 description: "Detect freepbx user enumeration bruteforce"
 filter: "evt.Meta.service startsWith 'freepbx' && evt.Meta.sub_type == 'auth_failure'"
 distinct: evt.Meta.target_user

@@ -1,5 +1,5 @@
 type: leaky
-name: crowdsecurity/freepbx-bf
+name: nethesis/freepbx-bf
 description: "Detect freeswitch auth bruteforce"
 filter: "evt.Meta.service startsWith 'freepbx' && evt.Meta.sub_type == 'auth_failure'"
 leakspeed: "10s"
@@ -14,7 +14,7 @@ labels:
 
 ---
 type: leaky
-name: crowdsecurity/freepbx-slow-bf
+name: nethesis/freepbx-slow-bf
 description: "Detect freeswitch auth bruteforce"
 filter: "evt.Meta.service startsWith 'freepbx' && evt.Meta.sub_type == 'auth_failure'"
 leakspeed: "1m"
