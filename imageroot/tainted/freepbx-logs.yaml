@@ -1,0 +1,26 @@
+name: nethesis/freepbx-logs
+description: "Parse Freepbx logs"
+filter: "evt.Parsed.program startsWith 'freepbx'"
+onsuccess: next_stage
+pattern_syntax:
+  TIMESTAMP: '%{YEAR}-%{MONTHNUM}-%{MONTHDAY} %{HOUR}:%{MINUTE}:%{SECOND}'
+nodes:
+- grok:
+    pattern: '%{TIMESTAMP:timestamp}.*NOTICE.*:\d+ %{GREEDYDATA:parsedmessage}'
+    apply_on: message
+  nodes:
+  - grok:
+      pattern: '.*: Registration from ''<sip:%{USERNAME:username}@%{IPORHOST}>'' failed for ''%{IPORHOST:remote_ip}:\d+''.*'
+      apply_on: parsedmessage
+      statics:
+        - meta: sub_type
+          value: auth_failure
+        - meta: target_user
+          expression: evt.Parsed.username
+statics:
+    - meta: service
+      value: freepbx
+    - meta: source_ip
+      expression: evt.Parsed.source_ip
+    - target: evt.StrTime
+      expression: evt.Parsed.timestamp

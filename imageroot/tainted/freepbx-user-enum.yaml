@@ -1,0 +1,13 @@
+type: leaky
+name: nethesis/freepbx_user_enum
+description: "Detect freepbx user enumeration bruteforce"
+filter: "evt.Meta.service startsWith 'freepbx' && evt.Meta.sub_type == 'auth_failure'"
+distinct: evt.Meta.target_user
+groupby: evt.Meta.source_ip
+leakspeed: 10s
+capacity: 5
+blackhole: 1m
+labels:
+  service: freepbx
+  type: bruteforce
+  remediation: true
