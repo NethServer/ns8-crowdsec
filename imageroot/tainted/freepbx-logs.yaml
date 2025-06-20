@@ -10,7 +10,7 @@ nodes:
     apply_on: message
   nodes:
   - grok:
-      pattern: '.*: Registration from ''<sip:%{USERNAME:username}@%{IPORHOST}>'' failed for ''%{IPORHOST:remote_ip}:%{NUMBER}''.*'
+      pattern: '.*: Registration from ''<sip:%{USERNAME:username}@%{IPORHOST}>'' failed for ''%{IPORHOST:source_ip}:%{NUMBER}''.*'
       apply_on: parsedmessage
       statics:
         - meta: sub_type
@@ -18,7 +18,7 @@ nodes:
         - meta: target_user
           expression: evt.Parsed.username
   - grok:
-      pattern: '.*: Request ''REGISTER'' from ''<sip:%{USERNAME:username}@%{IPORHOST}>'' failed for ''%{IPORHOST:remote_ip}:%{NUMBER}''.*'
+      pattern: '.*: Request ''REGISTER'' from ''<sip:%{USERNAME:username}@%{IPORHOST}>'' failed for ''%{IPORHOST:source_ip}:%{NUMBER}''.*'
       apply_on: parsedmessage
       statics:
         - meta: sub_type
