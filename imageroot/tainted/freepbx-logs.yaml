@@ -17,14 +17,6 @@ nodes:
           value: auth_failure
         - meta: target_user
           expression: evt.Parsed.username
-  - grok:
-      pattern: '.*: Request ''REGISTER'' from ''<sip:%{USERNAME:username}@%{IPORHOST}>'' failed for ''%{IPORHOST:source_ip}:%{NUMBER}''.*'
-      apply_on: parsedmessage
-      statics:
-        - meta: sub_type
-          value: auth_failure
-        - meta: target_user
-          expression: evt.Parsed.username
 statics:
     - meta: service
       value: freepbx
