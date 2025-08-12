@@ -19,7 +19,7 @@ repobase="${REPOBASE:-ghcr.io/nethserver}"
 
 # The crowdsec-firewall-bouncer versions can be found : https://github.com/crowdsecurity/cs-firewall-bouncer/releases
 curl --netrc --fail -L -o crowdsec-firewall-bouncer-linux-amd64.tgz \
-    https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.31/crowdsec-firewall-bouncer-linux-amd64.tgz
+    https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.34/crowdsec-firewall-bouncer-linux-amd64.tgz
 
 # After updates add the new value to CHECKSUM file: sha256sum crowdsec-firewall-bouncer-linux-amd64.tgz > CHECKSUM
 sha256sum -c CHECKSUM
