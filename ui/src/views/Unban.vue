@@ -288,7 +288,7 @@ export default {
         // 3h29m45s instead of 3h54m42.494246619s
         if (ban.decisions[0]) {
           const splitSecond = ban.decisions[0].duration.split(".");
-          ban.decisions[0].duration = splitSecond[0] + "s";
+          ban.decisions[0].duration = splitSecond[0];
           this.bans.push({
             duration: ban.decisions[0].duration,
             value: ban.decisions[0].value,
