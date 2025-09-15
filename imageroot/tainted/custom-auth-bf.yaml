@@ -1,3 +1,4 @@
+type: leaky
 name: nethesis/custom-auth-bf
 description: "Detect bruteforce attempts on custom authentication endpoints"
 filter: "evt.Meta.sub_type in ['bad_login_attempt', 'traefik_login']"
