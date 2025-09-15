@@ -1,0 +1,11 @@
+name: nethesis/custom-auth-bf
+description: "Detect bruteforce attempts on custom authentication endpoints"
+filter: "evt.Meta.sub_type in ['bad_login_attempt', 'traefik_login']"
+groupby: evt.Meta.source_ip
+leakspeed: 10m
+capacity: 5
+blackhole: 5m
+labels:
+  type: bruteforce
+  service: custom-auth
+  remediation: true
