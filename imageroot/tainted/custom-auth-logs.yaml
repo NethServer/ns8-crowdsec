@@ -3,7 +3,7 @@ description: "Parse custom authentication logs (api-moduled, traefik)"
 filter: "evt.Parsed.program in ['api-moduled', 'traefik']"
 onsuccess: next_stage
 pattern_syntax:
-  SYSLOG_TIMESTAMP: '%{MONTH} +%{MONTHDAY} %{TIME}'
+  SYSLOG_TIMESTAMP: '%{MONTH} +%{MONTHDAY} %{HOUR}:%{MINUTE}:%{SECOND}'
 nodes:
 - grok:
     pattern: '%{SYSLOG_TIMESTAMP:timestamp} %{HOSTNAME} api-moduled\[%{NUMBER}\]: Bad login attempt! Exit code %{NUMBER}; remote address: %{IP:source_ip}'
@@ -13,19 +13,21 @@ nodes:
         value: bad_login_attempt
       - meta: source_ip
         expression: evt.Parsed.source_ip
+
 - grok:
     pattern: '%{SYSLOG_TIMESTAMP:timestamp} %{HOSTNAME} traefik\[%{NUMBER}\]: %{IP:source_ip} - - \[%{DATA}\] "%{WORD:method} %{DATA:url} HTTP/%{DATA}" %{NUMBER:status} %{NUMBER} "-" "-" %{NUMBER} "%{DATA}" "%{DATA}" %{DATA}'
     apply_on: message
-    filter: "evt.Parsed.status == '401' && evt.Parsed.url == '/cluster-admin/api/login'"
-    statics:
-      - meta: sub_type
-        value: traefik_login
-      - meta: source_ip
-        expression: evt.Parsed.source_ip
-      - meta: url
-        expression: evt.Parsed.url
-      - meta: status
-        expression: evt.Parsed.status
+  filter: "evt.Parsed.status == '401' && evt.Parsed.url == '/cluster-admin/api/login'"
+  statics:
+    - meta: sub_type
+      value: traefik_login
+    - meta: source_ip
+      expression: evt.Parsed.source_ip
+    - meta: url
+      expression: evt.Parsed.url
+    - meta: status
+      expression: evt.Parsed.status
+
 statics:
   - meta: service
     value: custom-auth
