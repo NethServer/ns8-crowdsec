@@ -160,6 +160,10 @@ shutil.copyfile("../tainted/nethvoice-whitelist-http-probing.yaml", "crowdsec_co
 # copy the freepbx parser and scenarios
 os.makedirs("crowdsec_config/parsers/s01-parse", exist_ok=True)
 os.makedirs("crowdsec_config/scenarios", exist_ok=True)
+os.makedirs("crowdsec_config/collections", exist_ok=True)
 shutil.copyfile("../tainted/freepbx-logs.yaml", "crowdsec_config/parsers/s01-parse/freepbx-logs.yaml")
 shutil.copyfile("../tainted/freepbx-user-enum.yaml", "crowdsec_config/scenarios/freepbx-user-enum.yaml")
 shutil.copyfile("../tainted/freepbx-bf.yaml", "crowdsec_config/scenarios/freepbx-bf.yaml")
+shutil.copyfile("../tainted/custom-auth-logs.yaml", "crowdsec_config/parsers/s01-parse/custom-auth-logs.yaml")
+shutil.copyfile("../tainted/custom-auth-bf.yaml", "crowdsec_config/scenarios/custom-auth-bf.yaml")
+shutil.copyfile("../tainted/collections-custom-auth.yaml", "crowdsec_config/collections/collections-custom-auth.yaml")
