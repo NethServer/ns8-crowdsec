@@ -1,0 +1,7 @@
+type: collections
+name: nethesis/custom-auth
+description: "Collection for custom authentication parsers and scenarios to NS8 (cluster-admin, user-manager)"
+parsers:
+  - "./parsers/s01-parse/custom-auth-logs.yaml"
+scenarios:
+  - "./scenarios/custom-auth-bf.yaml"
