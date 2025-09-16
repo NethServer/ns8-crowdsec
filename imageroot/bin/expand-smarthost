@@ -11,7 +11,21 @@ import agent.tasks
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-helo_host = os.environ.get("HELO_HOST", "")
+def get_sender_email():
+    """Return the notification sender address, obtained from environment variables.
+    In order of priority consider:
+    1. SENDER_EMAIL environment variable (must be a complete email address)
+    2. MODULE_ID@HELO_HOST
+    3. MODULE_ID@<hostname -f>
+    """
+    if os.getenv("SENDER_EMAIL"):
+        sender_email = os.environ["SENDER_EMAIL"]
+    else:
+        domain_part = os.getenv("HELO_HOST") or agent.get_hostname()
+        sender_email = os.environ['MODULE_ID'] + '@' + domain_part
+    return sender_email
+
+helo_host = os.getenv("HELO_HOST") or agent.get_hostname()
 receiver_emails = os.environ.get("RECEIVER_EMAILS", "")
 
 smtp = agent.get_smarthost_settings(agent.redis_connect(use_replica=True))
@@ -34,7 +48,7 @@ if receiver_emails and smtp['enabled']:
         "smtp_username": smtp['username'],
         "smtp_password": smtp['password'],
         "smtp_port": smtp['port'],
-        "sender_email": os.environ['MODULE_ID']+'@'+agent.get_hostname(),
+        "sender_email": get_sender_email(),
         "receiver_emails": receiver_emails.split(","),
         "encryption_type": "none" if smtp['encrypt_smtp'] == "none" else "starttls" if smtp['encrypt_smtp'] == "starttls" else "ssltls",
         "auth_type": "login",
