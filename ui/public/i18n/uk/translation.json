@@ -37,8 +37,7 @@
         "whitelist_placeholder": "Один запис на рядок",
         "save": "Save",
         "helo_host": "Привіт _хост",
-        "whitelists_tips": "Для учасників цього списку бан не буде",
-        "enroll_instance_placeholder": "Іxxxxxxxxxxxxxxxxxxx"
+        "whitelists_tips": "Для учасників цього списку бан не буде"
     },
     "unban": {
         "title": "Забанений IP",

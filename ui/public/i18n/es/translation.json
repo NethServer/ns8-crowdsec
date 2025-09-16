@@ -53,8 +53,7 @@
         "whitelists_pattern": "CIDR, IP o FQDN incorrectos: {value}",
         "title": "Ajustes",
         "processing": "Procesando…",
-        "whitelist_placeholder": "Una entrada por línea",
-        "enroll_instance_placeholder": "xxxxxxxxxxxxxxxxxxx"
+        "whitelist_placeholder": "Una entrada por línea"
     },
     "unban": {
         "col_value": "Dirección IP",

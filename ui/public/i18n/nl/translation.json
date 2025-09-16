@@ -37,8 +37,7 @@
         "enable_online_api": "Schakel de centrale API in",
         "whitelists_pattern": "Ongeldig CIDR, IP or FQDN: {value}",
         "title": "Instellingen",
-        "processing": "Verwerken...",
-        "enroll_instance_placeholder": "xxxxxxxxxxxxxxxxxxx"
+        "processing": "Verwerken..."
     },
     "unban": {
         "title": "Geblokkeerd IP",
