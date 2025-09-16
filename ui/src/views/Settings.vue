@@ -171,7 +171,6 @@
                     </NsButton>
                     <NsTextInput
                       :label="$t('settings.enroll_instance')"
-                      :placeholder="$t('settings.enroll_instance_placeholder')"
                       v-model="enroll_instance"
                       class="mg-bottom mg-left"
                       :invalid-message="error.enroll_instance"
