@@ -16,23 +16,124 @@ timeout: 20s          # Time to wait for response from the plugin before conside
 # The output goes in the email message body
 {% raw %}
 format: |
-  {{range . -}}
-    {{$alert := . -}}
-    {{range .Decisions -}}
-      <html><body><p><a href=https://www.whois.com/whois/{{.Value}}>{{.Value}}</a> will get <b>{{.Type}}</b> for next <b>{{.Duration}}</b> for triggering <b>{{.Scenario}}</b> on machine <b>{{$alert.MachineID}}</b>.</p> <p><a href=https://www.shodan.io/host/{{.Value}}>Shodan</a></p></body></html>
-    {{end -}}
-  {{end -}}
+  <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; }
+        .alert { max-width: 600px; margin: 20px auto; background: #fff; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .header { background: #d32f2f; color: #fff; padding: 10px; font-size: 16px; font-weight: bold; }
+        .content { padding: 15px; }
+        .section { margin-bottom: 15px; }
+        .section h3 { margin: 0 0 5px 0; font-size: 14px; color: #333; }
+        .section p { margin: 0; font-size: 13px; }
+        .links a { margin-left: 5px; display: inline-block; margin-right: 10px; text-decoration: none; color: #1565c0; }
+        .content p { margin-left: 5px;}
+        .alert-message {
+          background-color: #f0f0f0;
+          color: #d32f2f;
+          padding: 10px;
+          border-left: 4px solid #d32f2f;
+          font-family: monospace;
+          font-size: 13px;
+          overflow-x: auto;
+          border-radius: 4px;
+        }
+        .attack-period-table {
+          width: 100%;
+          border-collapse: collapse;   /* pas d'espaces entre les cellules */
+          font-size: 13px;
+          margin-top: 5px;
+        }
+        .attack-period-table td:first-child {
+          padding-left: 5px;
+          padding-right: 2px;
+          width: 50px;
+          text-align: left;
+        }
+        .attack-period-table td:last-child {
+          padding-left: 2px;
+          padding-right: 5px;
+        }
+      </style>
+    </head>
+    <body>
+      {{ range . }}
+        {{$alert := .}}
+        {{ range .Decisions }}
+          <div class="alert">
+            <div class="header">
+              CrowdSec decision for {{ .Value }} - {{ .Scenario }}
+            </div>
+            <div class="content">
+              <div class="section">
+                <h3>Decision</h3>
+                <p>{{ .Value }} → <b>{{ .Type }}</b> for <b>{{ .Duration }} after {{$alert.EventsCount}} attempts</b></p>
+              </div>
+              <div class="section">
+                <h3>Origin & Scope</h3>
+                <p>Origin: {{ .Origin }}<br>
+                   Scope: {{ .Scope }}</p>
+              </div>
+              <div class="section">
+                <h3>Scenario</h3>
+                <p>Scenario: {{ .Scenario }}<br>
+              </div>
+              <div class="section">
+                <h3>Attack period</h3>
+                <table class="attack-period-table">
+                  <tr>
+                    <td>From:</td>
+                    <td>{{$alert.StartAt}}</td>
+                  </tr>
+                  <tr>
+                    <td>To:</td>
+                    <td>{{$alert.StopAt}}</td>
+                  </tr>
+                </table>
+              </div>
+              <div class="section">
+                <h3>Message</h3>
+                  <pre class="alert-message">{{$alert.Message}}</pre>
+              </div>
+              <div class="section">
+                <h3>Source</h3>
+                <p>IP: {{ $alert.Source.Value }}<br>
+                   AS: {{ $alert.Source.AsName }}<br>
+                   ASNumber: {{ $alert.Source.AsNumber }}<br>
+                   Country: {{ $alert.Source.Cn }}</p>
+              </div>
+              <div class="section">
+                <h3>Crowdsec instance</h3>
+                <p>{% endraw %}{{ fqdn }}{% raw %}</p>
+              </div>
+              <div class="section links">
+                <h3>Actions</h3>
+                <a href="https://{% endraw %}{{ fqdn }}{% raw %}/cluster-admin/#/apps/{% endraw %}{{ module_id }}{% raw %}?page=unban">Unban</a>
+              </div>
+              <div class="section links">
+                <h3>See reputation, ASN and scan data for this IP at third-party sites:</h3>
+                <a href="https://www.whois.com/whois/{{ .Value }}">Whois</a>
+                <a href="https://www.shodan.io/host/{{ .Value }}">Shodan</a>
+                <a href="https://www.virustotal.com/gui/ip-address/{{ .Value }}/relations">Virustotal</a>
+              </div>
+            </div>
+          </div>
+        {{ end }}
+      {{ end }}
+    </body>
+  </html>
 {% endraw %}
 
+# SMTP server configuration
 helo_host: {{helo_host}}
 smtp_host: {{smtp_host}} # example:smtp.gmail.com
 smtp_username: {{smtp_username}}       # Replace with your actual username
 smtp_password: {{smtp_password}}      # Replace with your actual password
 smtp_port: {{smtp_port}}           # Common values are any of [25, 465, 587, 2525]
 auth_type:  {{auth_type}}          # Valid choices are "none", "crammd5", "login", "plain"
-sender_name: "CrowdSec"
+sender_name: "CrowdSec Notifications"
 sender_email: {{sender_email}}        # example: foo@gmail.com
-email_subject: "CrowdSec Notification"
+email_subject: "Notification of {{module_id}} activity at {{fqdn}}"
 receiver_emails:
 {% for email in receiver_emails %}
   - {{email}}
