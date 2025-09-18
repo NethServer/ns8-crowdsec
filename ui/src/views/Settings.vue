@@ -190,25 +190,31 @@
                       </template>
                     </NsTextInput>
                   </template>
-                  <cv-slider
-                    :light="true"
+                  <NsTextInput
+                    :label="$t('settings.group_threshold_label')"
+                    :placeholder="$t('settings.group_threshold_placeholder')"
+                    v-model="group_threshold"
                     class="mg-bottom mg-left"
-                    :label="$t('settings.group_threshold')"
+                    type="number"
+                    min="1"
+                    max="500"
+                    step="1"
+                    :invalid-message="error.group_threshold"
                     :disabled="
                       loading.getConfiguration ||
                       loading.configureModule ||
                       !mail_configured
                     "
-                    :min="'1'"
-                    :max="'500'"
-                    :value="group_threshold"
-                    v-model="group_threshold"
-                    :step="'1'"
-                    :step-multiplier="'1'"
-                    :min-label="$t('settings.Min')"
-                    :max-label="$t('settings.Max')"
+                    ref="group_threshold"
+                    tooltipAlignment="center"
+                    tooltipDirection="right"
                   >
-                  </cv-slider>
+                    <template slot="tooltip">
+                      <div>
+                        {{ $t("settings.group_threshold_tooltips") }}
+                      </div>
+                    </template>
+                  </NsTextInput>
                   <NsTextInput
                     :label="$t('settings.helo_host')"
                     :placeholder="$t('settings.helo_host_placeholder')"
@@ -311,6 +317,7 @@ export default {
         dyn_bantime: "",
         whitelists: "",
         enable_online_api: "",
+        group_threshold: "",
       },
     };
   },
@@ -407,8 +414,25 @@ export default {
         });
       }
     },
-    async configureModule() {
+    validateConfigureModule() {
       this.clearErrors(this);
+
+      let isValidationOk = true;
+      if (this.group_threshold < 1 || this.group_threshold > 500) {
+        this.error.group_threshold = this.$t("error.group_threshold_must_be_1to500");
+
+        if (isValidationOk) {
+          this.focusElement("group_threshold");
+        }
+        isValidationOk = false;
+      }
+      return isValidationOk;
+    },
+    async configureModule() {
+      const isValidationOk = this.validateConfigureModule();
+      if (!isValidationOk) {
+        return;
+      }
       this.loading.configureModule = true;
       const taskAction = "configure-module";
       const eventId = this.getUuid();
