@@ -54,7 +54,8 @@ if receiver_emails and smtp['enabled']:
         "auth_type": "login",
         "helo_host": helo_host,
         "fqdn": agent.get_hostname(),
-        "module_id": os.environ['MODULE_ID']
+        "module_id": os.environ['MODULE_ID'],
+        "group_threshold": os.getenv("GROUP_THRESHOLD", 100),
     }
     template = jenv.get_template('email.yaml')
     output = template.render(properties)
