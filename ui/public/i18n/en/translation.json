@@ -58,7 +58,10 @@
     "whitelists_format": "Invalid CIDR, IP or FQDN: {value}",
     "whitelists_string_lte": "Invalid CIDR, IP or FQDN: {value}",
     "receiver_emails_string_lte": "Invalid email address: {value}",
-    "receiver_emails_format": "Invalid email address: {value}"
+    "receiver_emails_format": "Invalid email address: {value}",
+    "group_threshold": "Email are sent each 24h or when the number of new alerts reaches this threshold",
+    "Min": "Minimum",
+    "Max": "Maximum"
   },
   "unban": {
     "title": "Banned IP",
