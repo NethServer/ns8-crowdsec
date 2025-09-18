@@ -208,11 +208,6 @@
                     :min-label="$t('settings.Min')"
                     :max-label="$t('settings.Max')"
                   >
-                    <template slot="tooltip">
-                      <div>
-                        {{ $t("settings.group_threshold_must_be_positive") }}
-                      </div>
-                    </template>
                   </cv-slider>
                   <NsTextInput
                     :label="$t('settings.helo_host')"
