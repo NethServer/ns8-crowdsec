@@ -25,6 +25,6 @@ config["enable_online_api"] = True if os.getenv("DISABLE_ONLINE_API","False") ==
 config["ban_local_network"] = os.getenv("BAN_LOCAL_NETWORK", "False") == "True"
 config["enroll_instance"] = os.getenv("ENROLL_INSTANCE", "")
 config["mail_configured"] = True if smtp["host"] else False
-config["group_threshold"] = os.getenv("GROUP_THRESHOLD", 100)
+config["group_threshold"] = int(os.getenv("GROUP_THRESHOLD", 100))
 
 json.dump(config, fp=sys.stdout)
