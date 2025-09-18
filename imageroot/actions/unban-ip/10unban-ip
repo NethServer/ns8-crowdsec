@@ -20,5 +20,6 @@ if action == 'unban':
     agent.run_helper("podman", "exec", module_id, "cscli", "decision", "delete", "-i", ip).check_returncode()
 elif action == 'unban_all':
     agent.run_helper("podman", "exec", module_id, "cscli", "decision", "delete", "--all").check_returncode()
+    agent.run_helper("systemctl", "restart", module_id, module_id+"-firewall-bouncer").check_returncode()
 else:
     sys.exit(2)
