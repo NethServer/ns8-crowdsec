@@ -190,6 +190,30 @@
                       </template>
                     </NsTextInput>
                   </template>
+                  <cv-slider
+                    :light="true"
+                    class="mg-bottom mg-left"
+                    :label="$t('settings.group_threshold')"
+                    :disabled="
+                      loading.getConfiguration ||
+                      loading.configureModule ||
+                      !mail_configured
+                    "
+                    :min="'1'"
+                    :max="'500'"
+                    :value="group_threshold"
+                    v-model="group_threshold"
+                    :step="'1'"
+                    :step-multiplier="'1'"
+                    :min-label="$t('settings.Min')"
+                    :max-label="$t('settings.Max')"
+                  >
+                    <template slot="tooltip">
+                      <div>
+                        {{ $t("settings.group_threshold_must_be_positive") }}
+                      </div>
+                    </template>
+                  </cv-slider>
                   <NsTextInput
                     :label="$t('settings.helo_host')"
                     :placeholder="$t('settings.helo_host_placeholder')"
@@ -276,6 +300,7 @@ export default {
       dyn_bantime: true,
       whitelists: [],
       enable_online_api: true,
+      group_threshold: "100",
       loading: {
         getConfiguration: false,
         configureModule: false,
@@ -373,6 +398,7 @@ export default {
       this.ban_local_network = config.ban_local_network;
       this.enroll_instance = config.enroll_instance;
       this.mail_configured = config.mail_configured;
+      this.group_threshold = String(config.group_threshold);
     },
     configureModuleValidationFailed(validationErrors) {
       this.loading.configureModule = false;
@@ -422,6 +448,7 @@ export default {
             enable_online_api: this.enable_online_api,
             ban_local_network: this.ban_local_network,
             enroll_instance: this.enroll_instance,
+            group_threshold: parseInt(this.group_threshold),
           },
           extra: {
             title: this.$t("settings.configure_instance", {
