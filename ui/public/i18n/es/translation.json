@@ -53,7 +53,10 @@
         "whitelists_pattern": "CIDR, IP o FQDN incorrectos: {value}",
         "title": "Ajustes",
         "processing": "Procesando…",
-        "whitelist_placeholder": "Una entrada por línea"
+        "whitelist_placeholder": "Una entrada por línea",
+        "group_threshold_label": "Notification threshold",
+        "group_threshold_placeholder": "Between 1 and 500",
+        "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold"
     },
     "unban": {
         "col_value": "Dirección IP",
@@ -99,7 +102,8 @@
         "error": "Error",
         "network_timeout": "Tiempo de espera de la red agotado",
         "network_error": "Error en la red",
-        "validation_error": "Error en la validación"
+        "validation_error": "Error en la validación",
+        "group_threshold_must_be_1to500": "The threshold must be between 1 and 500"
     },
     "common": {
         "required": "Obligatorio",

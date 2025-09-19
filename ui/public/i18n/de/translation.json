@@ -37,7 +37,10 @@
         "whitelists_pattern": "fehlerhafte CIDR, IP oder FQDN: {value}",
         "title": "Einstellungen",
         "processing": "Verarbeitung läuft...",
-        "whitelist_placeholder": "ein Eintrag pro Zeile"
+        "whitelist_placeholder": "ein Eintrag pro Zeile",
+        "group_threshold_label": "Notification threshold",
+        "group_threshold_placeholder": "Between 1 and 500",
+        "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold"
     },
     "unban": {
         "title": "blockierte IP",
@@ -73,7 +76,8 @@
         "network_timeout": "Netzwerk-Zeitüberschreitung",
         "404": "Ressource nicht gefunden",
         "network_error": "Netzwerk-Fehler",
-        "validation_error": "Fehler bei der Validierung"
+        "validation_error": "Fehler bei der Validierung",
+        "group_threshold_must_be_1to500": "The threshold must be between 1 and 500"
     },
     "action": {
         "list-banned-ip": "blockierte IP-Adressen auflisten",
