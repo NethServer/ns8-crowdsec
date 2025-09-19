@@ -191,6 +191,31 @@
                     </NsTextInput>
                   </template>
                   <NsTextInput
+                    :label="$t('settings.group_threshold_label')"
+                    :placeholder="$t('settings.group_threshold_placeholder')"
+                    v-model="group_threshold"
+                    class="mg-bottom mg-left"
+                    type="number"
+                    min="1"
+                    max="500"
+                    step="1"
+                    :invalid-message="error.group_threshold"
+                    :disabled="
+                      loading.getConfiguration ||
+                      loading.configureModule ||
+                      !mail_configured
+                    "
+                    ref="group_threshold"
+                    tooltipAlignment="center"
+                    tooltipDirection="right"
+                  >
+                    <template slot="tooltip">
+                      <div>
+                        {{ $t("settings.group_threshold_tooltips") }}
+                      </div>
+                    </template>
+                  </NsTextInput>
+                  <NsTextInput
                     :label="$t('settings.helo_host')"
                     :placeholder="$t('settings.helo_host_placeholder')"
                     v-model="helo_host"
@@ -276,6 +301,7 @@ export default {
       dyn_bantime: true,
       whitelists: [],
       enable_online_api: true,
+      group_threshold: "100",
       loading: {
         getConfiguration: false,
         configureModule: false,
@@ -291,6 +317,7 @@ export default {
         dyn_bantime: "",
         whitelists: "",
         enable_online_api: "",
+        group_threshold: "",
       },
     };
   },
@@ -373,6 +400,7 @@ export default {
       this.ban_local_network = config.ban_local_network;
       this.enroll_instance = config.enroll_instance;
       this.mail_configured = config.mail_configured;
+      this.group_threshold = String(config.group_threshold);
     },
     configureModuleValidationFailed(validationErrors) {
       this.loading.configureModule = false;
@@ -386,8 +414,25 @@ export default {
         });
       }
     },
-    async configureModule() {
+    validateConfigureModule() {
       this.clearErrors(this);
+
+      let isValidationOk = true;
+      if (this.group_threshold < 1 || this.group_threshold > 500) {
+        this.error.group_threshold = this.$t("error.group_threshold_must_be_1to500");
+
+        if (isValidationOk) {
+          this.focusElement("group_threshold");
+        }
+        isValidationOk = false;
+      }
+      return isValidationOk;
+    },
+    async configureModule() {
+      const isValidationOk = this.validateConfigureModule();
+      if (!isValidationOk) {
+        return;
+      }
       this.loading.configureModule = true;
       const taskAction = "configure-module";
       const eventId = this.getUuid();
@@ -422,6 +467,7 @@ export default {
             enable_online_api: this.enable_online_api,
             ban_local_network: this.ban_local_network,
             enroll_instance: this.enroll_instance,
+            group_threshold: parseInt(this.group_threshold),
           },
           extra: {
             title: this.$t("settings.configure_instance", {

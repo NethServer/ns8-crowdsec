@@ -58,7 +58,10 @@
     "whitelists_format": "Invalid CIDR, IP or FQDN: {value}",
     "whitelists_string_lte": "Invalid CIDR, IP or FQDN: {value}",
     "receiver_emails_string_lte": "Invalid email address: {value}",
-    "receiver_emails_format": "Invalid email address: {value}"
+    "receiver_emails_format": "Invalid email address: {value}",
+    "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold",
+    "group_threshold_label": "Notification threshold",
+    "group_threshold_placeholder": "Between 1 and 500"
   },
   "unban": {
     "title": "Banned IP",
@@ -107,6 +110,7 @@
     "403": "Operation not authorized",
     "404": "Resource not found",
     "cannot_retrieve_module_info": "Cannot retrieve module info",
-    "cannot_retrieve_installed_modules": "Cannot retrieve installed modules"
+    "cannot_retrieve_installed_modules": "Cannot retrieve installed modules",
+    "group_threshold_must_be_1to500": "The threshold must be between 1 and 500"
   }
 }
