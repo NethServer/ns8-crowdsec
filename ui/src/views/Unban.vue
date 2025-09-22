@@ -96,7 +96,7 @@
               </template>
               <template slot="data">
                 <cv-data-table-row
-                  v-for="(row, rowIndex) in bans"
+                  v-for="(row, rowIndex) in tablePage"
                   :key="`${rowIndex}`"
                   :value="`${rowIndex}`"
                 >
