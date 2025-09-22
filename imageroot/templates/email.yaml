@@ -59,10 +59,7 @@ format: |
               </div>
               <div class="section">
                 <h3>Source</h3>
-                <p>IP: {{ $alert.Source.Value }}<br>
-                   AS: {{ $alert.Source.AsName }}<br>
-                   ASNumber: {{ $alert.Source.AsNumber }}<br>
-                   Country: {{ $alert.Source.Cn }}</p>
+                <p>AS: {{ $alert.Source.AsName }}, ASNumber: {{ $alert.Source.AsNumber }}, Country: {{ $alert.Source.Cn }}</p>
               </div>
               <div class="section links">
                 <h3>Actions</h3>
