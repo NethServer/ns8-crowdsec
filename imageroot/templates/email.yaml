@@ -38,22 +38,6 @@ format: |
           overflow-x: auto;
           border-radius: 4px;
         }
-        .attack-period-table {
-          width: 100%;
-          border-collapse: collapse;   /* pas d'espaces entre les cellules */
-          font-size: 13px;
-          margin-top: 5px;
-        }
-        .attack-period-table td:first-child {
-          padding-left: 5px;
-          padding-right: 2px;
-          width: 50px;
-          text-align: left;
-        }
-        .attack-period-table td:last-child {
-          padding-left: 2px;
-          padding-right: 5px;
-        }
       </style>
     </head>
     <body>
@@ -70,28 +54,6 @@ format: |
                 <p>{{ .Value }} → <b>{{ .Type }}</b> for <b>{{ .Duration }} after {{$alert.EventsCount}} attempts</b></p>
               </div>
               <div class="section">
-                <h3>Origin & Scope</h3>
-                <p>Origin: {{ .Origin }}<br>
-                   Scope: {{ .Scope }}</p>
-              </div>
-              <div class="section">
-                <h3>Scenario</h3>
-                <p>Scenario: {{ .Scenario }}<br>
-              </div>
-              <div class="section">
-                <h3>Attack period</h3>
-                <table class="attack-period-table">
-                  <tr>
-                    <td>From:</td>
-                    <td>{{$alert.StartAt}}</td>
-                  </tr>
-                  <tr>
-                    <td>To:</td>
-                    <td>{{$alert.StopAt}}</td>
-                  </tr>
-                </table>
-              </div>
-              <div class="section">
                 <h3>Message</h3>
                   <pre class="alert-message">{{$alert.Message}}</pre>
               </div>
@@ -101,10 +63,6 @@ format: |
                    AS: {{ $alert.Source.AsName }}<br>
                    ASNumber: {{ $alert.Source.AsNumber }}<br>
                    Country: {{ $alert.Source.Cn }}</p>
-              </div>
-              <div class="section">
-                <h3>Crowdsec instance</h3>
-                <p>{% endraw %}{{ fqdn }}{% raw %}</p>
               </div>
               <div class="section links">
                 <h3>Actions</h3>
