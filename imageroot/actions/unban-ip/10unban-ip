@@ -24,17 +24,11 @@ elif [[ "$action" == "unban_all" ]]; then
     # Unban all IPs
     # Using xargs to parallelize the deletion process for efficiency
     # The command lists all decisions, extracts the IPs, and deletes them in parallel
-    # The output is piped to wc -l to count how many IPs were unbanned
     # Note: Adjust the -P value in xargs based on system capabilities for optimal performance
-    count=$(podman exec ${MODULE_ID} cscli decisions list -o json \
+    # The counter will be handled more accurately by the bouncer, since a single IP can appear in multiple jails.
+    podman exec ${MODULE_ID} cscli decisions list -o json \
         | jq -r '.[].decisions[].value' \
-        | tee >(xargs -P10 -I{} podman exec ${MODULE_ID} cscli decisions delete -i {} >/dev/null 2>&1) \
-        | wc -l);
-    if [[ $count -gt 0 ]]; then
-        echo "Unbanned $count IP(s)"
-    else
-        echo "No IPs to unban"
-    fi
+        | podman exec -i ${MODULE_ID} xargs -l -P10 cscli decision delete -i >/dev/null 2>&1
 else
     echo "Unknown action: $action" >&2
     exit 1
