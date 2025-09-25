@@ -1,64 +1,41 @@
-#!/usr/bin/env python3
+#!/bin/bash
 
 #
-# Copyright (C) 2023 Nethesis S.r.l.
+# Copyright (C) 2025 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-import json
-import sys
-import agent
-import os
-import subprocess
-from concurrent.futures import ThreadPoolExecutor
+# Unban IP address(es) in CrowdSec
+# Usage:
+#   - action: "unban", ip: "<IP_ADDRESS>" to unban a specific IP
+#   - action: "unban_all" to unban all IPs
 
+exec 4>&1
+exec 1>&2
+set -e
 
-request = json.load(sys.stdin)
-ip = request['ip']
-action = request['action']
-module_id =  os.environ["MODULE_ID"]
+readarray -t input < <(jq -r '.action, .ip')
+action=${input[0]:?missing action argument}
+ip=${input[1]:?missing ip argument}
 
-def get_banned_ips():
-    """Retrieve all currently banned IPs."""
-    result = subprocess.run(
-        ["podman", "exec", os.environ['MODULE_ID'], "cscli", "decisions", "list", "-o", "json"],
-        capture_output=True,
-        text=True,
-        check=True
-    )
-    data = json.loads(result.stdout)
-    ips = set()
-    for item in data:
-        for decision in item.get("decisions", []):
-            ip = decision.get("value")
-            if ip:
-                ips.add(ip)
-    return list(ips)
-
-def unban_ip(ip):
-    """Remove ban for a single IP."""
-    subprocess.run(
-        ["podman", "exec", os.environ['MODULE_ID'], "cscli", "decisions", "delete", "-i", ip],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        check=True
-    )
-
-if action == 'unban':
-    agent.run_helper("podman", "exec", module_id, "cscli", "decision", "delete", "-i", ip).check_returncode()
-elif action == 'unban_all':
-    # we want to unban only IPs that the local api has banned and keep other decisions from central api (capi)
-    ips = get_banned_ips()
-    count = len(ips)
-
-    # remove bans in parallel to speed up the process
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        executor.map(unban_ip, ips)
-
-    # log the number of unbanned IPs
-    if count > 0:
-        print(f"{os.environ['MODULE_ID']} released {count} IPs via unban_all action", file=sys.stderr)
-    else:
-        print("No IPs were unbanned", file=sys.stderr)
-else:
-    sys.exit(2)
+if [[ "$action" == "unban" ]]; then
+    podman exec ${MODULE_ID} cscli decisions delete -i ${ip}
+elif [[ "$action" == "unban_all" ]]; then
+    # Unban all IPs
+    # Using xargs to parallelize the deletion process for efficiency
+    # The command lists all decisions, extracts the IPs, and deletes them in parallel
+    # The output is piped to wc -l to count how many IPs were unbanned
+    # Note: Adjust the -P value in xargs based on system capabilities for optimal performance
+    count=$(podman exec ${MODULE_ID} cscli decisions list -o json \
+        | jq -r '.[].decisions[].value' \
+        | tee >(xargs -P10 -I{} podman exec ${MODULE_ID} cscli decisions delete -i {} >/dev/null 2>&1) \
+        | wc -l);
+    if [[ $count -gt 0 ]]; then
+        echo "Unbanned $count IP(s)"
+    else
+        echo "No IPs to unban"
+    fi
+else
+    echo "Unknown action: $action" >&2
+    exit 1
+fi
