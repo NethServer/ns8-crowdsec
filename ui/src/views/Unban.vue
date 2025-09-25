@@ -149,8 +149,9 @@
     />
     <ConfirmReleaseIPAll
       :isShown="isShownConfirmUnbanIPAll"
+      :isLoading="loading.setUnbanAll"
       :core="core"
-      @hide="hideConfirmUnbanIP"
+      @hide="hideConfirmUnbanIPAll"
       @confirm="setUnbanAll(false)"
     />
   </div>
@@ -166,8 +167,8 @@ import {
   DateTimeService,
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
-import ConfirmReleaseIP from "@/components/ConfirmReleaseIP";
-import ConfirmReleaseIPAll from "@/components/ConfirmReleaseIPAll";
+import ConfirmReleaseIP from "@/components/ConfirmReleaseIP.vue";
+import ConfirmReleaseIPAll from "@/components/ConfirmReleaseIPAll.vue";
 import Unlocked20 from "@carbon/icons-vue/es/unlocked/20";
 export default {
   name: "Unban",
@@ -304,10 +305,14 @@ export default {
       this.showConfirmUnbanAll();
     },
     showConfirmUnbanAll() {
+      this.loading.setUnbanAll = false;
+      this.error.setUnbanAll = "";
       this.isShownConfirmUnbanIPAll = true;
     },
     hideConfirmUnbanIPAll() {
       this.isShownConfirmUnbanIPAll = false;
+      this.loading.setUnbanAll = false;
+      this.error.setUnbanAll = "";
     },
     toggleUnban(ban) {
       this.currentBan = ban;
