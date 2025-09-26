@@ -140,14 +140,14 @@
         </cv-column>
       </cv-row>
     </cv-grid>
-    <ConfirmReleaseIP
+    <ConfirmUnbanIpModal
       :isShown="isShownConfirmUnbanIp"
       :ban="currentBan"
       :core="core"
       @hide="hideConfirmUnbanIP"
       @confirm="setDeleteBan(false)"
     />
-    <ConfirmReleaseIPAll
+    <ConfirmUnbanAllIpsModal
       :isShown="isShownConfirmUnbanIPAll"
       :isLoading="loading.setUnbanAll"
       :core="core"
@@ -167,14 +167,14 @@ import {
   DateTimeService,
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
-import ConfirmReleaseIP from "@/components/ConfirmReleaseIP.vue";
-import ConfirmReleaseIPAll from "@/components/ConfirmReleaseIPAll.vue";
+import ConfirmUnbanIpModal from "@/components/ConfirmUnbanIpModal.vue";
+import ConfirmUnbanAllIpsModal from "@/components/ConfirmUnbanAllIpsModal.vue";
 import Unlocked20 from "@carbon/icons-vue/es/unlocked/20";
 export default {
   name: "Unban",
   components: {
-    ConfirmReleaseIP,
-    ConfirmReleaseIPAll,
+    ConfirmUnbanIpModal,
+    ConfirmUnbanAllIpsModal,
   },
   mixins: [
     QueryParamService,
