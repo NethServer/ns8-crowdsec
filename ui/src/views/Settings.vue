@@ -197,7 +197,7 @@
                     class="mg-bottom mg-left"
                     type="number"
                     min="1"
-                    max="500"
+                    max="10000"
                     step="1"
                     :invalid-message="error.group_threshold"
                     :disabled="
@@ -414,25 +414,7 @@ export default {
         });
       }
     },
-    validateConfigureModule() {
-      this.clearErrors(this);
-
-      let isValidationOk = true;
-      if (this.group_threshold < 1 || this.group_threshold > 500) {
-        this.error.group_threshold = this.$t("error.group_threshold_must_be_1to500");
-
-        if (isValidationOk) {
-          this.focusElement("group_threshold");
-        }
-        isValidationOk = false;
-      }
-      return isValidationOk;
-    },
     async configureModule() {
-      const isValidationOk = this.validateConfigureModule();
-      if (!isValidationOk) {
-        return;
-      }
       this.loading.configureModule = true;
       const taskAction = "configure-module";
       const eventId = this.getUuid();
