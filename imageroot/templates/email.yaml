@@ -88,6 +88,7 @@ format: |
                 <a href="https://{% endraw %}{{ fqdn }}{% raw %}/cluster-admin/#/apps/{% endraw %}{{ module_id }}{% raw %}?page=unban">Unban</a>
               </div>
               </br>
+              <p><b>{{len .}}</b> banned IP(s)</p>
       {{ range . }}
         {{$alert := .}}
         {{ range .Decisions }}
