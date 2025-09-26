@@ -79,30 +79,73 @@ format: |
           color: #c0392b;
           font-weight: bold;
         }
+        .read-more-toggle {
+          display: none;
+        }
+        .read-more-label {
+          color: #3498db;
+          cursor: pointer;
+          font-size: 14px;
+          text-decoration: underline;
+          margin-right: 10px;
+        }
+        .read-more-content {
+          display: none;
+          margin-bottom: 16px;
+        }
+        .read-more-toggle:checked + .read-more-label + .read-more-content {
+          display: block;
+        }
       </style>
     </head>
     <body>
       <h1> Crowdsec Instance {% endraw %}{{fqdn}}{% raw %}</h1>
-              <div class="actions">
-                <h3>Actions</h3>
-                <a href="https://{% endraw %}{{ fqdn }}{% raw %}/cluster-admin/#/apps/{% endraw %}{{ module_id }}{% raw %}?page=unban">Unban</a>
+      <div class="actions">
+        <h3>Actions</h3>
+        <a href="https://{% endraw %}{{ fqdn }}{% raw %}/cluster-admin/#/apps/{% endraw %}{{ module_id }}{% raw %}?page=unban">Unban</a>
+      </div>
+      <br>
+      <p><b>{{len .}}</b> banned IP(s)</p>
+
+      {{ $max := 10 }}
+      {{ range $i, $alert := . }}
+        {{ if lt $i $max }}
+          {{ range $alert.Decisions }}
+            <div class="alert">
+              <div class="alert-info">
+                {{ .Value }} → <span class="ban">{{ .Type }}</span> for <b>{{ .Duration }}</b> - {{.Scenario}}
               </div>
-              </br>
-              <p><b>{{len .}}</b> banned IP(s)</p>
-      {{ range . }}
-        {{$alert := .}}
-        {{ range .Decisions }}
-               <div class="alert">
-                 <div class="alert-info">
-                   {{ .Value }} → <span class="ban">{{ .Type }}</span> for <b>{{ .Duration }}</b> - {{.Scenario}}
-                 </div>
-                 <div class="alert-links">
-                   <a href="https://www.whois.com/whois/{{ .Value }}">Whois</a>
-                   <a href="https://www.shodan.io/host/{{ .Value }}">Shodan</a>
-                   <a href="https://www.virustotal.com/gui/ip-address/{{ .Value }}/relations">Virustotal</a>
-                 </div>
-               </div>
+              <div class="alert-links">
+                <a href="https://www.whois.com/whois/{{ .Value }}">Whois</a>
+                <a href="https://www.shodan.io/host/{{ .Value }}">Shodan</a>
+                <a href="https://www.virustotal.com/gui/ip-address/{{ .Value }}/relations">Virustotal</a>
+              </div>
+            </div>
+          {{ end }}
         {{ end }}
+      {{ end }}
+
+      {{ if gt (len .) $max }}
+        <input type="checkbox" id="read-more-toggle" class="read-more-toggle">
+        <label for="read-more-toggle" class="read-more-label">Read more →</label>
+        <div class="read-more-content">
+          {{ range $i, $alert := . }}
+            {{ if ge $i $max }}
+              {{ range $alert.Decisions }}
+                <div class="alert">
+                  <div class="alert-info">
+                    {{ .Value }} → <span class="ban">{{ .Type }}</span> for <b>{{ .Duration }}</b> - {{.Scenario}}
+                  </div>
+                  <div class="alert-links">
+                    <a href="https://www.whois.com/whois/{{ .Value }}">Whois</a>
+                    <a href="https://www.shodan.io/host/{{ .Value }}">Shodan</a>
+                    <a href="https://www.virustotal.com/gui/ip-address/{{ .Value }}/relations">Virustotal</a>
+                  </div>
+                </div>
+              {{ end }}
+            {{ end }}
+          {{ end }}
+        </div>
       {{ end }}
     </body>
   </html>
