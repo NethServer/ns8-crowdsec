@@ -19,7 +19,7 @@ action=${input[0]:?missing action argument}
 ip=${input[1]:?missing ip argument}
 
 if [[ "$action" == "unban" ]]; then
-    podman exec ${MODULE_ID} cscli decisions delete -i ${ip}
+    podman exec "${MODULE_ID}" cscli decisions delete -i "${ip}"
 elif [[ "$action" == "unban_all" ]]; then
     # Unban all IPs
     # Using xargs to parallelize the deletion process for efficiency
@@ -28,8 +28,8 @@ elif [[ "$action" == "unban_all" ]]; then
     # The counter will be handled more accurately by the bouncer, since a single IP can appear in multiple jails.
     podman exec ${MODULE_ID} cscli decisions list -o json \
         | jq -r '.[].decisions[].value' \
-        | podman exec -i ${MODULE_ID} xargs -l -P10 cscli decision delete -i >/dev/null 2>&1
+        | podman exec -i "${MODULE_ID}" xargs -l -P10 cscli decision delete -i &>/dev/null
 else
-    echo "Unknown action: $action" >&2
+    echo "Unknown action: $action"
     exit 1
 fi
