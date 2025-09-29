@@ -140,17 +140,18 @@
         </cv-column>
       </cv-row>
     </cv-grid>
-    <ConfirmReleaseIP
+    <ConfirmUnbanIpModal
       :isShown="isShownConfirmUnbanIp"
       :ban="currentBan"
       :core="core"
       @hide="hideConfirmUnbanIP"
       @confirm="setDeleteBan(false)"
     />
-    <ConfirmReleaseIPAll
+    <ConfirmUnbanAllIpsModal
       :isShown="isShownConfirmUnbanIPAll"
+      :isLoading="loading.setUnbanAll"
       :core="core"
-      @hide="hideConfirmUnbanIP"
+      @hide="hideConfirmUnbanIPAll"
       @confirm="setUnbanAll(false)"
     />
   </div>
@@ -166,14 +167,14 @@ import {
   DateTimeService,
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
-import ConfirmReleaseIP from "@/components/ConfirmReleaseIP";
-import ConfirmReleaseIPAll from "@/components/ConfirmReleaseIPAll";
+import ConfirmUnbanIpModal from "@/components/ConfirmUnbanIpModal.vue";
+import ConfirmUnbanAllIpsModal from "@/components/ConfirmUnbanAllIpsModal.vue";
 import Unlocked20 from "@carbon/icons-vue/es/unlocked/20";
 export default {
   name: "Unban",
   components: {
-    ConfirmReleaseIP,
-    ConfirmReleaseIPAll,
+    ConfirmUnbanIpModal,
+    ConfirmUnbanAllIpsModal,
   },
   mixins: [
     QueryParamService,
@@ -304,10 +305,14 @@ export default {
       this.showConfirmUnbanAll();
     },
     showConfirmUnbanAll() {
+      this.loading.setUnbanAll = false;
+      this.error.setUnbanAll = "";
       this.isShownConfirmUnbanIPAll = true;
     },
     hideConfirmUnbanIPAll() {
       this.isShownConfirmUnbanIPAll = false;
+      this.loading.setUnbanAll = false;
+      this.error.setUnbanAll = "";
     },
     toggleUnban(ban) {
       this.currentBan = ban;
