@@ -87,9 +87,6 @@ format: |
           font-weight: bold;
           color: #2c3e50;
         }
-        .footer .meta {
-          margin: 4px 0;
-        }
         .footer .disclaimer {
           font-size: 11px;
           color: #999;
@@ -99,10 +96,10 @@ format: |
     </head>
     <body>
       <div class="container">
-        <h1> Crowdsec Instance {% endraw %}{{fqdn}}{% raw %}</h1>
+        <h1> Crowdsec at {% endraw %}{{fqdn}}{% raw %}</h1>
         
         <div class="summary">
-          A total of <b>{{len .}}</b> IP(s) has been banned on this instance.
+          A total of <b>{{len .}}</b> IP(s) has been banned on this instance since <b>{{  (index . 0).CreatedAt | date "02 Jan 2006 15:04 MST" }}</b>
         </div>
         
         <div class="actions">
@@ -113,9 +110,7 @@ format: |
         </div>
         <div class="footer">
           <hr>
-          <div class="title">CrowdSec Notification</div>
-          <div class="meta">Instance: {% endraw %}{{fqdn}}{% raw %}</div>
-          <div class="meta">Module: {% endraw %}{{module_id}}{% raw %}</div>
+          <div class="title">Application {% endraw %}{{module_id}}{% raw %} at {% endraw %}{{fqdn}}{% raw %}</div>
           <div class="disclaimer">
             This message was generated automatically – please do not reply.
           </div>
