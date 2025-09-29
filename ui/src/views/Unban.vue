@@ -165,6 +165,7 @@ import {
   IconService,
   TaskService,
   DateTimeService,
+  PageTitleService
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
 import ConfirmUnbanIpModal from "@/components/ConfirmUnbanIpModal.vue";
@@ -182,6 +183,7 @@ export default {
     IconService,
     TaskService,
     DateTimeService,
+    PageTitleService
   ],
   pageTitle() {
     return this.$t("unban.title") + " - " + this.appName;
