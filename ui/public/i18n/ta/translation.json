@@ -58,7 +58,10 @@
         "enable_online_api": "Enable the central API",
         "whitelists_pattern": "Invalid CIDR, IP or FQDN: {value}",
         "title": "அமைப்புகள்",
-        "whitelist_placeholder": "One entry per line"
+        "whitelist_placeholder": "One entry per line",
+        "group_threshold_label": "Notification threshold",
+        "group_threshold_placeholder": "Between 1 and 500",
+        "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold"
     },
     "unban": {
         "col_value": "IP address",
@@ -107,6 +110,7 @@
         "network_timeout": "பிணைய நேரம் முடிந்தது",
         "404": "சான்று கிடைக்கவில்லை",
         "network_error": "பிணைய பிழை",
-        "validation_error": "சரிபார்ப்பு பிழை"
+        "validation_error": "சரிபார்ப்பு பிழை",
+        "group_threshold_must_be_1to500": "The threshold must be between 1 and 500"
     }
 }
