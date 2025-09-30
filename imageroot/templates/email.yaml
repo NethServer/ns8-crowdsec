@@ -19,111 +19,106 @@ format: |
   <html>
     <head>
       <style>
-        body { font-family: Arial, sans-serif; background: #f9f9f9; }
-        .alert { max-width: 600px; margin: 20px auto; background: #fff; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
-        .header { background: #d32f2f; color: #fff; padding: 10px; font-size: 16px; font-weight: bold; }
-        .content { padding: 15px; }
-        .section { margin-bottom: 15px; }
-        .section h3 { margin: 0 0 5px 0; font-size: 14px; color: #333; }
-        .section p { margin: 0; font-size: 13px; }
-        .links a { margin-left: 5px; display: inline-block; margin-right: 10px; text-decoration: none; color: #1565c0; }
-        .content p { margin-left: 5px;}
-        .alert-message {
-          background-color: #f0f0f0;
-          color: #d32f2f;
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f7f7f7;
+          margin: 0;
+          padding: 20px;
+          color: #333;
+        }
+        .container {
+          max-width: 700px;
+          margin: auto;
+          background: #ffffff;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+          color: #2c3e50;
+          font-size: 22px;
+          margin-bottom: 10px;
+          border-bottom: 2px solid #3498db;
+          padding-bottom: 5px;
+        }
+        h3 {
+          margin-top: 20px;
+          margin-bottom: 10px;
+          font-size: 18px;
+          color: #34495e;
+        }
+        .summary {
+          background: #ecf6fc;
           padding: 10px;
-          border-left: 4px solid #d32f2f;
-          font-family: monospace;
-          font-size: 13px;
-          overflow-x: auto;
+          border-left: 4px solid #3498db;
+          margin: 15px 0;
           border-radius: 4px;
         }
-        .attack-period-table {
-          width: 100%;
-          border-collapse: collapse;   /* pas d'espaces entre les cellules */
+        .actions {
+          margin: 20px 0;
+        }
+        .actions a {
+          display: inline-block;
+          margin-right: 10px;
+          padding: 8px 14px;
+          background-color: #3498db;
+          color: #fff;
+          text-decoration: none;
+          border-radius: 6px;
+          font-size: 14px;
+          transition: background-color 0.2s ease-in-out;
+        }
+        .actions a:hover {
+          background-color: #2980b9;
+        }
+        .footer {
+          margin-top: 30px;
           font-size: 13px;
-          margin-top: 5px;
+          color: #555;
+          text-align: center;
+          line-height: 1.5;
         }
-        .attack-period-table td:first-child {
-          padding-left: 5px;
-          padding-right: 2px;
-          width: 50px;
-          text-align: left;
+        .footer hr {
+          border: none;
+          border-top: 1px solid #e0e0e0;
+          margin: 25px 0;
         }
-        .attack-period-table td:last-child {
-          padding-left: 2px;
-          padding-right: 5px;
+        .footer .title {
+          font-weight: bold;
+          color: #2c3e50;
+        }
+        .footer .disclaimer {
+          font-size: 11px;
+          color: #999;
+          margin-top: 10px;
         }
       </style>
     </head>
     <body>
-      {{ range . }}
-        {{$alert := .}}
-        {{ range .Decisions }}
-          <div class="alert">
-            <div class="header">
-              CrowdSec decision for {{ .Value }} - {{ .Scenario }}
-            </div>
-            <div class="content">
-              <div class="section">
-                <h3>Decision</h3>
-                <p>{{ .Value }} → <b>{{ .Type }}</b> for <b>{{ .Duration }} after {{$alert.EventsCount}} attempts</b></p>
-              </div>
-              <div class="section">
-                <h3>Origin & Scope</h3>
-                <p>Origin: {{ .Origin }}<br>
-                   Scope: {{ .Scope }}</p>
-              </div>
-              <div class="section">
-                <h3>Scenario</h3>
-                <p>Scenario: {{ .Scenario }}<br>
-              </div>
-              <div class="section">
-                <h3>Attack period</h3>
-                <table class="attack-period-table">
-                  <tr>
-                    <td>From:</td>
-                    <td>{{$alert.StartAt}}</td>
-                  </tr>
-                  <tr>
-                    <td>To:</td>
-                    <td>{{$alert.StopAt}}</td>
-                  </tr>
-                </table>
-              </div>
-              <div class="section">
-                <h3>Message</h3>
-                  <pre class="alert-message">{{$alert.Message}}</pre>
-              </div>
-              <div class="section">
-                <h3>Source</h3>
-                <p>IP: {{ $alert.Source.Value }}<br>
-                   AS: {{ $alert.Source.AsName }}<br>
-                   ASNumber: {{ $alert.Source.AsNumber }}<br>
-                   Country: {{ $alert.Source.Cn }}</p>
-              </div>
-              <div class="section">
-                <h3>Crowdsec instance</h3>
-                <p>{% endraw %}{{ fqdn }}{% raw %}</p>
-              </div>
-              <div class="section links">
-                <h3>Actions</h3>
-                <a href="https://{% endraw %}{{ fqdn }}{% raw %}/cluster-admin/#/apps/{% endraw %}{{ module_id }}{% raw %}?page=unban">Unban</a>
-              </div>
-              <div class="section links">
-                <h3>See reputation, ASN and scan data for this IP at third-party sites:</h3>
-                <a href="https://www.whois.com/whois/{{ .Value }}">Whois</a>
-                <a href="https://www.shodan.io/host/{{ .Value }}">Shodan</a>
-                <a href="https://www.virustotal.com/gui/ip-address/{{ .Value }}/relations">Virustotal</a>
-              </div>
-            </div>
+      <div class="container">
+        <h1> Crowdsec at {% endraw %}{{fqdn}}{% raw %}</h1>
+        
+        <div class="summary">
+          A total of <b>{{len .}}</b> IP(s) has been banned on this instance since <b>{{  (index . 0).CreatedAt | date "02 Jan 2006 15:04 MST" }}</b>
+        </div>
+        
+        <div class="actions">
+          <h3>Quick Actions</h3>
+          <a href="https://{% endraw %}{{ fqdn }}{% raw %}/cluster-admin/#/apps/{% endraw %}{{ module_id }}{% raw %}?page=unban">
+            View Active Decisions
+          </a>
+        </div>
+        <div class="footer">
+          <hr>
+          <div class="title">Application {% endraw %}{{module_id}}{% raw %} at {% endraw %}{{fqdn}}{% raw %}</div>
+          <div class="disclaimer">
+            This message was generated automatically – please do not reply.
           </div>
-        {{ end }}
-      {{ end }}
+        </div>
+      </div>
     </body>
   </html>
 {% endraw %}
-
 # SMTP server configuration
 helo_host: {{helo_host}}
 smtp_host: {{smtp_host}} # example:smtp.gmail.com

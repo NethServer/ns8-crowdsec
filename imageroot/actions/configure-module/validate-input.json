@@ -33,7 +33,7 @@
         "group_threshold": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 500,
+            "maximum": 10000,
             "title": "group_threshold",
             "description": "Number of alerts to group before sending an email"
         },
