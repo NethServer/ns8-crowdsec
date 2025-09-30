@@ -37,7 +37,10 @@
         "whitelist_placeholder": "Один запис на рядок",
         "save": "Save",
         "helo_host": "Привіт _хост",
-        "whitelists_tips": "Для учасників цього списку бан не буде"
+        "whitelists_tips": "Для учасників цього списку бан не буде",
+        "group_threshold_label": "Notification threshold",
+        "group_threshold_placeholder": "Between 1 and 500",
+        "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold"
     },
     "unban": {
         "title": "Забанений IP",
@@ -67,7 +70,8 @@
         "network_timeout": "Network timeout",
         "404": "Resource not found",
         "network_error": "Network error",
-        "validation_error": "Validation error"
+        "validation_error": "Validation error",
+        "group_threshold_must_be_1to500": "The threshold must be between 1 and 500"
     },
     "action": {
         "list-banned-ip": "Список заборонених IP",

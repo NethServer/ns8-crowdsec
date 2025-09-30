@@ -9,7 +9,8 @@
         "network_timeout": "Timeout di rete",
         "generic_error": "Qualcosa è andato storto",
         "401": "Autenticazione non valida",
-        "403": "Operazione non autorizzata"
+        "403": "Operazione non autorizzata",
+        "group_threshold_must_be_1to500": "La soglia deve essere compresa tra 1 e 500"
     },
     "common": {
         "required": "Obbligatorio",
@@ -59,7 +60,7 @@
         "ban_local_network": "Consenti blocchi sulla rete locale",
         "enroll_instance_must_be_real_token": "La chiave di registrazione può essere ottenuta dal sito web di CrowdSec e garantisce l'accesso a diverse varianti della CrowdSec Community Blocklist.",
         "whitelists": "Consenti l'elenco di CIDR, IP e nomi di dominio pienamente qualificati",
-        "helo_host_must_be_relevant_for_smtp": "Se le notifiche sono contrassegnate come spam, imposta un dominio del mittente personalizzato. Sarà utilizzato anche per il comando HELO/EHLO. Lasciare vuoto per usare il nodo FQDN.",
+        "helo_host_must_be_relevant_for_smtp": "Se le notifiche sono contrassegnate come spam, imposta un dominio del mittente personalizzato. Sarà utilizzato anche per il comando HELO/EHLO. Lasciare vuoto per usare l'FQDN del nodo.",
         "required": "Necessario",
         "ban_local_network_tips": "Per default nessun blocco avviene sulla classe IP privata",
         "token_not_valid": "Il token immesso non è valido",
@@ -70,7 +71,10 @@
         "whitelists_format": "CIDR, IP o FQDN non valido: {value}",
         "receiver_emails_string_lte": "Indirizzo email non valido: {value}",
         "whitelists_string_lte": "CIDR, IP o FQDN non valido: {value}",
-        "whitelists_pattern": "CIDR, IP o FQDN non valido: {value}"
+        "whitelists_pattern": "CIDR, IP o FQDN non valido: {value}",
+        "group_threshold_label": "Soglia di notifica",
+        "group_threshold_placeholder": "Tra 1 e 500",
+        "group_threshold_tooltips": "Le email vengono inviate ogni 24 ore o quando il numero di nuovi avvisi raggiunge questa soglia"
     },
     "action": {
         "configure-module": "Configura modulo",
