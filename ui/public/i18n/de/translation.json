@@ -76,8 +76,7 @@
         "network_timeout": "Netzwerk-Zeitüberschreitung",
         "404": "Ressource nicht gefunden",
         "network_error": "Netzwerk-Fehler",
-        "validation_error": "Fehler bei der Validierung",
-        "group_threshold_must_be_1to500": "Der Schwellwert muss zwischen 1 und 500 liegen"
+        "validation_error": "Fehler bei der Validierung"
     },
     "action": {
         "list-banned-ip": "blockierte IP-Adressen auflisten",

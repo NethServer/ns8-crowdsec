@@ -70,8 +70,7 @@
         "network_timeout": "Netwerktime-out",
         "404": "Bron niet gevonden",
         "network_error": "Netwerkfout",
-        "validation_error": "Validatiefout",
-        "group_threshold_must_be_1to500": "De drempel moet tussen 1 en 500 liggen"
+        "validation_error": "Validatiefout"
     },
     "action": {
         "list-banned-ip": "Lijst met geblokkeerde IP-adres",
