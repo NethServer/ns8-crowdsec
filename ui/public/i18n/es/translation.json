@@ -102,8 +102,7 @@
         "error": "Error",
         "network_timeout": "Tiempo de espera de la red agotado",
         "network_error": "Error en la red",
-        "validation_error": "Error en la validación",
-        "group_threshold_must_be_1to500": "The threshold must be between 1 and 500"
+        "validation_error": "Error en la validación"
     },
     "common": {
         "required": "Obligatorio",

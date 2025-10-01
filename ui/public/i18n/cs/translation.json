@@ -81,8 +81,7 @@
         "error": "Error",
         "network_timeout": "Network timeout",
         "network_error": "Network error",
-        "validation_error": "Validation error",
-        "group_threshold_must_be_1to500": "The threshold must be between 1 and 500"
+        "validation_error": "Validation error"
     },
     "unban": {
         "title": "Banned IP",
