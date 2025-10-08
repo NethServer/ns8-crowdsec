@@ -35,6 +35,7 @@ ExecStart=/usr/bin/podman run \
     --replace --name=%N \
     --network=host \
     --env DISABLE_ONLINE_API=${DISABLE_ONLINE_API} \
+    --env CROWDSEC_SETUP_UNATTENDED_DISABLE=true \
     --volume  ./crowdsec_config:/etc/crowdsec:Z \
     --volume %N-data:/var/lib/crowdsec/data:Z \
     --volume ${CROWDSEC_JOURNAL}:/run/log/journal \
