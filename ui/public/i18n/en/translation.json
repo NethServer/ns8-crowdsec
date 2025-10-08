@@ -35,7 +35,7 @@
     "disabled": "Disabled",
     "specify_duration": "Specify duration",
     "dyn_bantime": "Dynamic ban time",
-    "dyn_bantime_tips": "Ban time is (number of attempts + 1) × 4 × the configured bantime duration",
+    "dyn_bantime_tips": "The ban duration increases with the number of failed attempts",
     "bantime": "Bantime",
     "minutes": "Minutes",
     "enable_online_api": "Enable the central API",
