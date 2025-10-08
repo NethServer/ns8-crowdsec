@@ -34,7 +34,7 @@
     "enabled": "Enabled",
     "disabled": "Disabled",
     "dyn_bantime": "Dynamic ban time",
-    "dyn_bantime_tips": "Ban time is calculated by ((number of attempts + 1) * 4) minutes",
+    "dyn_bantime_tips": "Ban time is (number of attempts + 1) × 4 × the configured bantime duration",
     "bantime": "Bantime",
     "minutes": "Minutes",
     "enable_online_api": "Enable the central API",
