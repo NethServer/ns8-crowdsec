@@ -128,7 +128,7 @@
                       class="mg-left"
                       v-model="bantime"
                       min="1"
-                      max="600"
+                      max="1440"
                       step="1"
                       stepMultiplier="10"
                       minLabel=""
