@@ -56,7 +56,8 @@
         "whitelist_placeholder": "One entry per line",
         "group_threshold_label": "Notification threshold",
         "group_threshold_placeholder": "Between 1 and 500",
-        "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold"
+        "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold",
+        "specify_duration": "Specify duration"
     },
     "action": {
         "list-banned-ip": "List banned IP",
@@ -81,8 +82,7 @@
         "error": "Error",
         "network_timeout": "Network timeout",
         "network_error": "Network error",
-        "validation_error": "Validation error",
-        "group_threshold_must_be_1to500": "The threshold must be between 1 and 500"
+        "validation_error": "Validation error"
     },
     "unban": {
         "title": "Banned IP",
