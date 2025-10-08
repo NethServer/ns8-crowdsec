@@ -119,7 +119,7 @@
                       $t("settings.enabled")
                     }}</template>
                   </NsToggle>
-                  <template v-if="!dyn_bantime">
+                  <template>
                     <NsSlider
                       :disabled="
                         loading.getConfiguration || loading.configureModule
