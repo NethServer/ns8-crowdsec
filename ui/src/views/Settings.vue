@@ -125,7 +125,7 @@
                     class="mg-bottom mg-left"
                   >
                     <cv-radio-button
-                      :label="$t('settings.simple')"
+                      :label="$t('settings.simple_fixed_increment')"
                       value="simple"
                       ref="dynamicBanTimeAdvanced"
                       v-model="dynamicBanTimeAdvanced"
@@ -134,7 +134,7 @@
                       "
                     />
                     <cv-radio-button
-                      :label="$t('settings.advanced')"
+                      :label="$t('settings.advanced_based_on_bantime')"
                       value="advanced"
                       ref="dynamicBanTimeAdvanced"
                       v-model="dynamicBanTimeAdvanced"
