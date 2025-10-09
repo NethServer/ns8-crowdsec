@@ -122,7 +122,7 @@
                   <cv-radio-group
                     v-if="dyn_bantime"
                     vertical
-                    class="mg-bottom mg-left"
+                    class="mg-bottom mg-left-slider"
                   >
                     <cv-radio-button
                       :label="$t('settings.simple_fixed_increment')"
@@ -152,7 +152,7 @@
                         loading.getConfiguration || loading.configureModule
                       "
                       :label="$t('settings.bantime')"
-                      class="mg-left"
+                      :class="dyn_bantime ? 'mg-left-slider' : 'mg-left'"
                       v-model="bantime"
                       min="1"
                       max="1440"
@@ -527,6 +527,9 @@ export default {
 }
 .mg-bottom {
   margin-bottom: $spacing-06;
+}
+.mg-left-slider {
+  margin-left: 3rem;
 }
 .toolbar {
   display: flex;
