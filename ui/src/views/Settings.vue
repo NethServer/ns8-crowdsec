@@ -119,13 +119,47 @@
                       $t("settings.enabled")
                     }}</template>
                   </NsToggle>
-                  <template>
-                    <NsSlider
+                  <label class="bx--label mg-left-slider">
+                    {{ $t("settings.ban_time_increment") }}
+                  </label>
+                  <cv-radio-group
+                    v-if="dyn_bantime"
+                    vertical
+                    class="mg-bottom mg-left-slider"
+                  >
+                    <cv-radio-button
+                      :label="$t('settings.simple_fixed_increment')"
+                      value="simple"
+                      ref="dynamicBanTimeSimple"
+                      v-model="dynamicBanTimeAdvanced"
                       :disabled="
                         loading.getConfiguration || loading.configureModule
                       "
-                      :label="$t('settings.bantime')"
-                      class="mg-left"
+                    />
+                    <cv-radio-button
+                      :label="$t('settings.advanced_based_on_bantime')"
+                      value="advanced"
+                      ref="dynamicBanTimeAdvanced"
+                      v-model="dynamicBanTimeAdvanced"
+                      :disabled="
+                        loading.getConfiguration || loading.configureModule
+                      "
+                    />
+                  </cv-radio-group>
+                  <template>
+                    <NsSlider
+                      v-if="
+                        !(dynamicBanTimeAdvanced === 'simple' && dyn_bantime)
+                      "
+                      :disabled="
+                        loading.getConfiguration || loading.configureModule
+                      "
+                      :label="
+                        dyn_bantime && dynamicBanTimeAdvanced === 'advanced'
+                          ? $t('settings.dynamic_bantime_increment')
+                          : $t('settings.static_bantime')
+                      "
+                      :class="dyn_bantime ? 'mg-left-slider' : 'mg-left'"
                       v-model="bantime"
                       min="1"
                       max="1440"
@@ -292,6 +326,7 @@ export default {
         page: "settings",
       },
       urlCheckInterval: null,
+      dynamicBanTimeAdvanced: false,
       enroll_instance: "",
       mail_configured: false,
       ban_local_network: false,
@@ -401,6 +436,9 @@ export default {
       this.enroll_instance = config.enroll_instance;
       this.mail_configured = config.mail_configured;
       this.group_threshold = String(config.group_threshold);
+      this.dynamicBanTimeAdvanced = config.dynamicBanTimeAdvanced
+        ? "advanced"
+        : "simple";
     },
     configureModuleValidationFailed(validationErrors) {
       this.loading.configureModule = false;
@@ -450,6 +488,8 @@ export default {
             ban_local_network: this.ban_local_network,
             enroll_instance: this.enroll_instance,
             group_threshold: parseInt(this.group_threshold),
+            dynamicBanTimeAdvanced:
+              this.dynamicBanTimeAdvanced === "advanced" ? true : false,
           },
           extra: {
             title: this.$t("settings.configure_instance", {
@@ -494,6 +534,9 @@ export default {
 }
 .mg-bottom {
   margin-bottom: $spacing-06;
+}
+.mg-left-slider {
+  margin-left: 3rem;
 }
 .toolbar {
   display: flex;

@@ -25,6 +25,7 @@ dyn_bantime = data.get("dyn_bantime", True)
 disable_online_api = False if data.get("enable_online_api", True) else True
 ban_local_network = data.get("ban_local_network", False)
 group_threshold = data.get("group_threshold", 100)
+dynamic_ban_time_advanced = data.get("dynamicBanTimeAdvanced", False)
 
 # Setup default values
 agent.set_env("HELO_HOST", helo_host)
@@ -35,3 +36,4 @@ agent.set_env("DYN_BANTIME", dyn_bantime)
 agent.set_env("DISABLE_ONLINE_API", disable_online_api)
 agent.set_env("BAN_LOCAL_NETWORK", ban_local_network)
 agent.set_env("GROUP_THRESHOLD", group_threshold)
+agent.set_env("DYNAMIC_BAN_TIME_ADVANCED", dynamic_ban_time_advanced)
