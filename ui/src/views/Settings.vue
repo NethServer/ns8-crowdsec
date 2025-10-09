@@ -119,8 +119,35 @@
                       $t("settings.enabled")
                     }}</template>
                   </NsToggle>
+                  <cv-radio-group
+                    v-if="dyn_bantime"
+                    vertical
+                    class="mg-bottom mg-left"
+                  >
+                    <cv-radio-button
+                      :label="$t('settings.simple')"
+                      value="simple"
+                      ref="dynamicBanTimeAdvanced"
+                      v-model="dynamicBanTimeAdvanced"
+                      :disabled="
+                        loading.getConfiguration || loading.configureModule
+                      "
+                    />
+                    <cv-radio-button
+                      :label="$t('settings.advanced')"
+                      value="advanced"
+                      ref="dynamicBanTimeAdvanced"
+                      v-model="dynamicBanTimeAdvanced"
+                      :disabled="
+                        loading.getConfiguration || loading.configureModule
+                      "
+                    />
+                  </cv-radio-group>
                   <template>
                     <NsSlider
+                      v-if="
+                        !(dynamicBanTimeAdvanced === 'simple' && dyn_bantime)
+                      "
                       :disabled="
                         loading.getConfiguration || loading.configureModule
                       "
@@ -292,6 +319,7 @@ export default {
         page: "settings",
       },
       urlCheckInterval: null,
+      dynamicBanTimeAdvanced: false,
       enroll_instance: "",
       mail_configured: false,
       ban_local_network: false,
@@ -401,6 +429,9 @@ export default {
       this.enroll_instance = config.enroll_instance;
       this.mail_configured = config.mail_configured;
       this.group_threshold = String(config.group_threshold);
+      this.dynamicBanTimeAdvanced = config.dynamicBanTimeAdvanced
+        ? "advanced"
+        : "simple";
     },
     configureModuleValidationFailed(validationErrors) {
       this.loading.configureModule = false;
@@ -450,6 +481,8 @@ export default {
             ban_local_network: this.ban_local_network,
             enroll_instance: this.enroll_instance,
             group_threshold: parseInt(this.group_threshold),
+            dynamicBanTimeAdvanced:
+              this.dynamicBanTimeAdvanced === "advanced" ? true : false,
           },
           extra: {
             title: this.$t("settings.configure_instance", {
