@@ -127,7 +127,7 @@
                     <cv-radio-button
                       :label="$t('settings.simple_fixed_increment')"
                       value="simple"
-                      ref="dynamicBanTimeAdvanced"
+                      ref="dynamicBanTimeSimple"
                       v-model="dynamicBanTimeAdvanced"
                       :disabled="
                         loading.getConfiguration || loading.configureModule
