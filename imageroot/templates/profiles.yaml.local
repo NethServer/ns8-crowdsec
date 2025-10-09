@@ -6,8 +6,8 @@ decisions:
  - type: ban
    duration: {{bantime}}
 {% if dyn_bantime %}
-# we math a (number of ban + 1) * 4 * bantime
-duration_expr: Sprintf('{{dyn_ban_value}}', (GetDecisionsCount(Alert.GetValue()) + 1) * 4 * {{bantime[:-1]}})
+# we math a (number of ban + 1) * dynamic_bantime_duration
+duration_expr: Sprintf('{{dyn_ban_value}}', (GetDecisionsCount(Alert.GetValue()) + 1) * {{dynamic_bantime_duration}})
 {% endif %}
 {% if email %}
 notifications:
