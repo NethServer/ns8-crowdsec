@@ -98,46 +98,69 @@
                       $t("settings.enabled")
                     }}</template>
                   </NsToggle>
-                  <NsToggle
-                    :label="$t('settings.dyn_bantime')"
-                    class="mg-left"
-                    value="dyn_bantime"
-                    :form-item="true"
-                    v-model="dyn_bantime"
-                    :disabled="
-                      loading.getConfiguration || loading.configureModule
-                    "
-                    ref="dyn_bantime"
-                  >
-                    <template slot="tooltip">
-                      <span>{{ $t("settings.dyn_bantime_tips") }}</span>
+                  <label class="bx--label mg-left">
+                    {{ $t("settings.bantime") }}
+                                        <template slot="tooltip">
+                      <span>{{ $t("settings.ban_local_network_tips") }}</span>
                     </template>
-                    <template slot="text-left">{{
-                      $t("settings.disabled")
-                    }}</template>
-                    <template slot="text-right">{{
-                      $t("settings.enabled")
-                    }}</template>
-                  </NsToggle>
-                  <template>
-                    <NsSlider
+                  </label>
+                  <cv-radio-group vertical class="mg-bottom mg-left">
+                    <cv-radio-button
+                      :label="$t('settings.static_bantime_increment')"
+                      value="static"
+                      ref="dynamicBanTimeDisabled
+                      "
+                      v-model="dyn_bantime"
                       :disabled="
                         loading.getConfiguration || loading.configureModule
                       "
-                      :label="$t('settings.bantime')"
-                      class="mg-left"
-                      v-model="bantime"
-                      min="1"
-                      max="1440"
-                      step="1"
-                      stepMultiplier="10"
-                      minLabel=""
-                      maxLabel=""
-                      :limitedLabel="$t('settings.specify_duration')"
-                      :invalidMessage="error.bantime"
-                      :unitLabel="$t('settings.minutes')"
                     />
-                  </template>
+                    <cv-radio-button
+                      :label="$t('settings.dynamic_bantime_increment')"
+                      value="dynamic"
+                      ref="dynamicBanTimeEnabled"
+                      v-model="dyn_bantime"
+                      :disabled="
+                        loading.getConfiguration || loading.configureModule
+                      "
+                    />
+                  </cv-radio-group>
+                  <NsSlider
+                    v-if="dyn_bantime === 'static'"
+                    :disabled="
+                      loading.getConfiguration || loading.configureModule
+                    "
+                    :label="$t('settings.static_bantime_duration')"
+                    class="mg-left"
+                    v-model="bantime"
+                    min="1"
+                    max="1440"
+                    step="1"
+                    stepMultiplier="10"
+                    minLabel=""
+                    maxLabel=""
+                    :limitedLabel="$t('settings.specify_duration')"
+                    :invalidMessage="error.bantime"
+                    :unitLabel="$t('settings.minutes')"
+                  />
+                  <NsSlider
+                    v-if="dyn_bantime === 'dynamic'"
+                    :disabled="
+                      loading.getConfiguration || loading.configureModule
+                    "
+                    :label="$t('settings.dynamic_bantime_duration')"
+                    class="mg-left"
+                    v-model="dynamicBantimeDuration"
+                    min="1"
+                    max="1440"
+                    step="1"
+                    stepMultiplier="10"
+                    minLabel=""
+                    maxLabel=""
+                    :limitedLabel="$t('settings.specify_duration')"
+                    :invalidMessage="error.bantime"
+                    :unitLabel="$t('settings.minutes')"
+                  />
                   <NsToggle
                     :label="$t('settings.enable_online_api')"
                     class="mg-left"
@@ -291,6 +314,7 @@ export default {
       q: {
         page: "settings",
       },
+      dynamicBantimeDuration: "4",
       urlCheckInterval: null,
       enroll_instance: "",
       mail_configured: false,
@@ -392,7 +416,7 @@ export default {
       this.helo_host = config.helo_host;
       this.receiver_emails = config.receiver_emails.join("\n");
       this.bantime = String(config.bantime);
-      this.dyn_bantime = config.dyn_bantime;
+      this.dyn_bantime = config.dyn_bantime ? "dynamic" : "static";
       this.whitelists = config.whitelists.join("\n");
       this.enable_online_api = config.enable_online_api;
       this.loading.getConfiguration = false;
@@ -401,6 +425,7 @@ export default {
       this.enroll_instance = config.enroll_instance;
       this.mail_configured = config.mail_configured;
       this.group_threshold = String(config.group_threshold);
+      this.dynamicBantimeDuration = String(config.dynamic_bantime_duration);
     },
     configureModuleValidationFailed(validationErrors) {
       this.loading.configureModule = false;
@@ -444,12 +469,13 @@ export default {
             helo_host: this.helo_host,
             receiver_emails: this.receiver_emails.toLowerCase().split("\n"),
             bantime: String(this.bantime),
-            dyn_bantime: this.dyn_bantime,
+            dyn_bantime: this.dyn_bantime === "dynamic",
             whitelists: this.whitelists.toLowerCase().split("\n"),
             enable_online_api: this.enable_online_api,
             ban_local_network: this.ban_local_network,
             enroll_instance: this.enroll_instance,
             group_threshold: parseInt(this.group_threshold),
+            dynamic_bantime_duration: this.dynamicBantimeDuration,
           },
           extra: {
             title: this.$t("settings.configure_instance", {
