@@ -36,6 +36,7 @@
     "specify_duration": "Specify duration",
     "dyn_bantime": "Dynamic ban time",
     "dyn_bantime_tips": "The ban duration increases with the number of failed attempts",
+    "simple": "Simple",
     "bantime": "Bantime",
     "minutes": "Minutes",
     "enable_online_api": "Enable the central API",
