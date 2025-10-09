@@ -151,7 +151,11 @@
                       :disabled="
                         loading.getConfiguration || loading.configureModule
                       "
-                      :label="$t('settings.bantime')"
+                      :label="
+                        dyn_bantime && dynamicBanTimeAdvanced === 'advanced'
+                          ? $t('settings.dynamic_bantime_increment')
+                          : $t('settings.static_bantime')
+                      "
                       :class="dyn_bantime ? 'mg-left-slider' : 'mg-left'"
                       v-model="bantime"
                       min="1"
