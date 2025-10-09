@@ -119,6 +119,9 @@
                       $t("settings.enabled")
                     }}</template>
                   </NsToggle>
+                  <label class="bx--label mg-left-slider">
+                    {{ $t("settings.ban_time_increment") }}
+                  </label>
                   <cv-radio-group
                     v-if="dyn_bantime"
                     vertical
