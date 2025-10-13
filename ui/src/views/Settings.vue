@@ -100,9 +100,15 @@
                   </NsToggle>
                   <label class="bx--label mg-left">
                     {{ $t("settings.bantime") }}
-                                        <template slot="tooltip">
-                      <span>{{ $t("settings.ban_local_network_tips") }}</span>
-                    </template>
+                    <cv-interactive-tooltip
+                      alignment="center"
+                      direction="bottom"
+                      class="info"
+                    >
+                      <template slot="content">
+                        {{ $t("settings.bantime_tips") }}
+                      </template>
+                    </cv-interactive-tooltip>
                   </label>
                   <cv-radio-group vertical class="mg-bottom mg-left">
                     <cv-radio-button
@@ -115,6 +121,24 @@
                         loading.getConfiguration || loading.configureModule
                       "
                     />
+                    <NsSlider
+                      v-if="dyn_bantime === 'static'"
+                      :disabled="
+                        loading.getConfiguration || loading.configureModule
+                      "
+                      :label="$t('settings.static_bantime_duration')"
+                      class="mg-left"
+                      v-model="bantime"
+                      min="1"
+                      max="1440"
+                      step="1"
+                      stepMultiplier="10"
+                      minLabel=""
+                      maxLabel=""
+                      :limitedLabel="$t('settings.specify_duration')"
+                      :invalidMessage="error.bantime"
+                      :unitLabel="$t('settings.minutes')"
+                    />
                     <cv-radio-button
                       :label="$t('settings.dynamic_bantime_increment')"
                       value="dynamic"
@@ -123,44 +147,27 @@
                       :disabled="
                         loading.getConfiguration || loading.configureModule
                       "
+                    >
+                    </cv-radio-button>
+                    <NsSlider
+                      v-if="dyn_bantime === 'dynamic'"
+                      :disabled="
+                        loading.getConfiguration || loading.configureModule
+                      "
+                      :label="$t('settings.dynamic_bantime_duration')"
+                      class="mg-left"
+                      v-model="dynamicBantimeDuration"
+                      min="1"
+                      max="1440"
+                      step="1"
+                      stepMultiplier="10"
+                      minLabel=""
+                      maxLabel=""
+                      :limitedLabel="$t('settings.specify_duration')"
+                      :invalidMessage="error.bantime"
+                      :unitLabel="$t('settings.minutes')"
                     />
                   </cv-radio-group>
-                  <NsSlider
-                    v-if="dyn_bantime === 'static'"
-                    :disabled="
-                      loading.getConfiguration || loading.configureModule
-                    "
-                    :label="$t('settings.static_bantime_duration')"
-                    class="mg-left"
-                    v-model="bantime"
-                    min="1"
-                    max="1440"
-                    step="1"
-                    stepMultiplier="10"
-                    minLabel=""
-                    maxLabel=""
-                    :limitedLabel="$t('settings.specify_duration')"
-                    :invalidMessage="error.bantime"
-                    :unitLabel="$t('settings.minutes')"
-                  />
-                  <NsSlider
-                    v-if="dyn_bantime === 'dynamic'"
-                    :disabled="
-                      loading.getConfiguration || loading.configureModule
-                    "
-                    :label="$t('settings.dynamic_bantime_duration')"
-                    class="mg-left"
-                    v-model="dynamicBantimeDuration"
-                    min="1"
-                    max="1440"
-                    step="1"
-                    stepMultiplier="10"
-                    minLabel=""
-                    maxLabel=""
-                    :limitedLabel="$t('settings.specify_duration')"
-                    :invalidMessage="error.bantime"
-                    :unitLabel="$t('settings.minutes')"
-                  />
                   <NsToggle
                     :label="$t('settings.enable_online_api')"
                     class="mg-left"
