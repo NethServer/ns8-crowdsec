@@ -35,7 +35,7 @@
     "disabled": "Disabled",
     "specify_duration": "Specify duration",
     "dyn_bantime": "Dynamic ban time",
-    "bantime_tips": "The fixed mode is a ban with a constant duration. The increasing mode increases the ban duration with the number of failed attempts and the increasing duration",
+    "bantime_tips": "The fixed mode applies a ban with a constant duration, while the incremental mode extends the ban duration based on the number of failed attempts.",
     "static_bantime_increment": "Fixed",
     "dynamic_bantime_increment": "Incremental",
     "dynamic_bantime_duration": "Base value",
