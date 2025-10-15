@@ -22,7 +22,8 @@
             ],
             "enable_online_api": true,
             "enroll_instance": "cl7ze8xdn00030vl70tyutuxjj",
-            "group_threshold": 100
+            "group_threshold": 100,
+            "dynamic_bantime_duration": "4"
         }
     ],
     "type": "object",
@@ -112,6 +113,12 @@
             "type": "string",
             "title": "enroll_instance",
             "description": "Enroll a crowdsec instance to app.crowdsec.net"
+        },
+        "dynamic_bantime_duration": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$",
+            "title": "dynamic_bantime_duration",
+            "description": "Base duration for dynamic bantime, in minutes"
         }
     }
 }
