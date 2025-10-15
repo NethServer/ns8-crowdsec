@@ -35,7 +35,6 @@
         "token_not_valid": "The token provided is not valid",
         "processing": "Processing...",
         "receiver_emails_format": "Invalid email address: {value}",
-        "dyn_bantime_tips": "Ban time is calculated by ((number of attempts + 1) * 4) minutes",
         "advanced": "Advanced",
         "dyn_bantime": "Dynamic ban time",
         "disabled": "முடக்கப்பட்டது",
@@ -61,7 +60,8 @@
         "whitelist_placeholder": "One entry per line",
         "group_threshold_label": "Notification threshold",
         "group_threshold_placeholder": "Between 1 and 500",
-        "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold"
+        "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold",
+        "specify_duration": "Specify duration"
     },
     "unban": {
         "col_value": "IP address",
@@ -110,7 +110,6 @@
         "network_timeout": "பிணைய நேரம் முடிந்தது",
         "404": "சான்று கிடைக்கவில்லை",
         "network_error": "பிணைய பிழை",
-        "validation_error": "சரிபார்ப்பு பிழை",
-        "group_threshold_must_be_1to500": "The threshold must be between 1 and 500"
+        "validation_error": "சரிபார்ப்பு பிழை"
     }
 }

@@ -9,8 +9,7 @@
         "network_timeout": "Timeout di rete",
         "generic_error": "Qualcosa è andato storto",
         "401": "Autenticazione non valida",
-        "403": "Operazione non autorizzata",
-        "group_threshold_must_be_1to500": "La soglia deve essere compresa tra 1 e 500"
+        "403": "Operazione non autorizzata"
     },
     "common": {
         "required": "Obbligatorio",
@@ -40,7 +39,6 @@
         "enabled": "Abilitato",
         "disable_online_api_tips": "La central API è utilizzata per ottenere le liste di blocco e consultare le metriche su app.crowdsec.net",
         "enable_online_api": "Abilita la central API",
-        "dyn_bantime_tips": "La durata del blocco è calcolata come (numero di tentativi + 1) * 4) minuti",
         "advanced": "Avanzate",
         "helo_host": "Dominio mittente (opzionale)",
         "bad_email_address": "Indirizzo email non valido",
@@ -73,8 +71,9 @@
         "whitelists_string_lte": "CIDR, IP o FQDN non valido: {value}",
         "whitelists_pattern": "CIDR, IP o FQDN non valido: {value}",
         "group_threshold_label": "Soglia di notifica",
-        "group_threshold_placeholder": "Tra 1 e 500",
-        "group_threshold_tooltips": "Le email vengono inviate ogni 24 ore o quando il numero di nuovi avvisi raggiunge questa soglia"
+        "group_threshold_placeholder": "Tra 1 e 10000",
+        "group_threshold_tooltips": "Le email vengono inviate ogni 24 ore o quando il numero di nuovi avvisi raggiunge questa soglia",
+        "specify_duration": "Specify duration"
     },
     "action": {
         "configure-module": "Configura modulo",
