@@ -79,7 +79,7 @@
                 <template slot="content">
                   <NsToggle
                     :label="$t('settings.ban_local_network')"
-                    class="mg-left"
+                    class="mg-top-md"
                     value="ban_local_network"
                     :form-item="true"
                     v-model="ban_local_network"
@@ -98,7 +98,7 @@
                       $t("settings.enabled")
                     }}</template>
                   </NsToggle>
-                  <label class="bx--label mg-left">
+                  <label class="bx--label">
                     {{ $t("settings.bantime") }}
                     <cv-interactive-tooltip
                       alignment="center"
@@ -110,7 +110,7 @@
                       </template>
                     </cv-interactive-tooltip>
                   </label>
-                  <cv-radio-group vertical class="mg-bottom mg-left">
+                  <cv-radio-group vertical class="mg-bottom">
                     <cv-radio-button
                       :label="$t('settings.static_bantime_increment')"
                       value="static"
@@ -127,7 +127,6 @@
                         loading.getConfiguration || loading.configureModule
                       "
                       :label="$t('settings.static_bantime_duration')"
-                      class="mg-left"
                       v-model="bantime"
                       min="1"
                       max="1440"
@@ -155,7 +154,6 @@
                         loading.getConfiguration || loading.configureModule
                       "
                       :label="$t('settings.dynamic_bantime_duration')"
-                      class="mg-left"
                       v-model="dynamicBantimeDuration"
                       min="1"
                       max="1440"
@@ -170,7 +168,6 @@
                   </cv-radio-group>
                   <NsToggle
                     :label="$t('settings.enable_online_api')"
-                    class="mg-left"
                     value="enable_online_api"
                     :form-item="true"
                     v-model="enable_online_api"
@@ -191,18 +188,19 @@
                   </NsToggle>
                   <template v-if="enable_online_api">
                     <NsButton
-                      kind="ghost"
-                      class="mg-left"
+                      kind="tertiary"
+                      size="field"
                       :icon="Launch20"
                       :disabled="loading.getConfiguration"
                       @click="goToAppCrowdsec"
+                      class="mg-bottom"
                     >
                       {{ $t("settings.open_app_crowdsec") }}
                     </NsButton>
                     <NsTextInput
                       :label="$t('settings.enroll_instance')"
                       v-model="enroll_instance"
-                      class="mg-bottom mg-left"
+                      class="mg-bottom"
                       :invalid-message="error.enroll_instance"
                       :disabled="
                         loading.getConfiguration || loading.configureModule
@@ -224,7 +222,7 @@
                     :label="$t('settings.group_threshold_label')"
                     :placeholder="$t('settings.group_threshold_placeholder')"
                     v-model="group_threshold"
-                    class="mg-bottom mg-left"
+                    class="mg-bottom"
                     type="number"
                     min="1"
                     max="10000"
@@ -249,7 +247,7 @@
                     :label="$t('settings.helo_host')"
                     :placeholder="$t('settings.helo_host_placeholder')"
                     v-model="helo_host"
-                    class="mg-bottom mg-left"
+                    class="mg-bottom"
                     :invalid-message="error.helo_host"
                     :disabled="
                       loading.getConfiguration ||
@@ -519,15 +517,15 @@ export default {
 
 <style scoped lang="scss">
 @import "../styles/carbon-utils";
-.mg-left {
-  margin-left: 2rem;
-}
+
 .maxwidth {
   max-width: 38rem;
 }
+
 .mg-bottom {
   margin-bottom: $spacing-06;
 }
+
 .toolbar {
   display: flex;
   align-items: center;
