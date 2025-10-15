@@ -93,8 +93,7 @@ properties = {
     "email": True if smtp['enabled'] and receiver_emails else False,
     "bantime": os.environ.get('BANTIME','1')+'m',
     "dyn_bantime": os.environ.get('DYN_BANTIME',"True") == "True",
-    "dynamic_bantime_duration": os.environ.get('DYNAMIC_BANTIME_DURATION','4') + 'm',
-    "dyn_ban_value": '%d' + ''.join(filter(lambda x: not x.isdigit(), os.environ.get('DYNAMIC_BANTIME_DURATION','4')+'m')),
+    "dynamic_bantime_duration": os.environ.get('DYNAMIC_BANTIME_DURATION','4'),
 }
 template = jenv.get_template('profiles.yaml.local')
 output = template.render(properties)

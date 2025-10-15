@@ -5,9 +5,9 @@ filters:
 {% if dyn_bantime %}
 decisions:
  - type: ban
-   duration: {{dynamic_bantime_duration}}
+   duration: {{dynamic_bantime_duration}}m
 # we math a (number of ban + 1) * dynamic_bantime_duration
-duration_expr: Sprintf('{{dyn_ban_value}}', (GetDecisionsCount(Alert.GetValue()) + 1) * {{dynamic_bantime_duration[:-1]}})
+duration_expr: Sprintf('%dm', (GetDecisionsCount(Alert.GetValue()) + 1) * {{dynamic_bantime_duration}})
 {% else %}
 decisions:
  - type: ban
