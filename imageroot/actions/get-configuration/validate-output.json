@@ -118,7 +118,7 @@
             "type": "string",
             "pattern": "^[1-9][0-9]*$",
             "title": "dynamic_bantime_duration",
-            "description": "Base duration for dynamic bantime"
+            "description": "Base duration for dynamic bantime, in minutes"
         }
     }
 }
