@@ -61,7 +61,12 @@
         "group_threshold_label": "Notification threshold",
         "group_threshold_placeholder": "Between 1 and 500",
         "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold",
-        "specify_duration": "Specify duration"
+        "specify_duration": "Specify duration",
+        "static_bantime_duration": "Value",
+        "bantime_tips": "The 'Fixed' mode applies a ban with a constant duration, while the 'Incremental' mode extends the ban duration based on the number of failed attempts.",
+        "dynamic_bantime_duration": "Base value",
+        "static_bantime_increment": "Fixed",
+        "dynamic_bantime_increment": "Incremental"
     },
     "unban": {
         "col_value": "IP address",
