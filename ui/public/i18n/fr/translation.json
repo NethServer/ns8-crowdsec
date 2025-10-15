@@ -1,6 +1,5 @@
 {
     "settings": {
-        "dyn_bantime_tips": "Ban time is calculated by ((number of attempts + 1) * 4) minutes",
         "advanced": "Advanced",
         "dyn_bantime": "Dynamic ban time",
         "receiver_emails_format": "Invalid email address: {value}",
@@ -40,7 +39,8 @@
         "whitelist_placeholder": "One entry per line",
         "group_threshold_label": "Notification threshold",
         "group_threshold_placeholder": "Between 1 and 500",
-        "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold"
+        "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold",
+        "specify_duration": "Specify duration"
     },
     "common": {
         "required": "Required",
@@ -75,8 +75,7 @@
         "network_timeout": "Network timeout",
         "404": "Resource not found",
         "network_error": "Network error",
-        "validation_error": "Validation error",
-        "group_threshold_must_be_1to500": "The threshold must be between 1 and 500"
+        "validation_error": "Validation error"
     },
     "action": {
         "list-banned-ip": "List banned IP",

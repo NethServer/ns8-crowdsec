@@ -8,7 +8,6 @@
         "ban_local_network_tips": "private IP-Adressbereiche werden standardmäßig nicht blockiert",
         "save": "Speichern",
         "enabled": "Aktiviert",
-        "dyn_bantime_tips": "Die Block-Zeit errechnet sich wie folgt: ((Anzahl der Versuche+ 1) * 4) Minuten",
         "dyn_bantime": "dynamische Block-Zeit",
         "disable_online_api_tips": "Die zentrale API dient dazu, Blacklists abzurufen und die Metriken unter app.crowdsec.net einzusehen",
         "helo_host": "Absender-Domain (optional)",
@@ -40,7 +39,8 @@
         "whitelist_placeholder": "ein Eintrag pro Zeile",
         "group_threshold_label": "Benachrichtigungsschwelle",
         "group_threshold_placeholder": "Zwischen 1 und 500",
-        "group_threshold_tooltips": "E-Mails werden nach 24 Stunden gesendet oder wenn die Anzahl der neuen Alarme diesen Schwellwert überschreitet."
+        "group_threshold_tooltips": "E-Mails werden nach 24 Stunden gesendet oder wenn die Anzahl der neuen Alarme diesen Schwellwert überschreitet.",
+        "specify_duration": "Specify duration"
     },
     "unban": {
         "title": "blockierte IP",
@@ -76,8 +76,7 @@
         "network_timeout": "Netzwerk-Zeitüberschreitung",
         "404": "Ressource nicht gefunden",
         "network_error": "Netzwerk-Fehler",
-        "validation_error": "Fehler bei der Validierung",
-        "group_threshold_must_be_1to500": "Der Schwellwert muss zwischen 1 und 500 liegen"
+        "validation_error": "Fehler bei der Validierung"
     },
     "action": {
         "list-banned-ip": "blockierte IP-Adressen auflisten",

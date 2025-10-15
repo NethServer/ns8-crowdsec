@@ -1,7 +1,6 @@
 {
     "settings": {
         "receiver_emails_format": "Ongeldig e-mailadres: {value}",
-        "dyn_bantime_tips": "De bantijd wordt berekend als ((aantal pogingen + 1) * 4) minuten",
         "advanced": "Geavanceerd",
         "helo_host": "Verzenddomein (optioneel)",
         "bad_email_address": "Onjuist e-mailadres",
@@ -40,7 +39,8 @@
         "processing": "Verwerken...",
         "group_threshold_label": "Meldingsdrempel",
         "group_threshold_placeholder": "Tussen 1 en 500",
-        "group_threshold_tooltips": "E-mails worden elke 24 uur verzonden of wanneer het aantal nieuwe waarschuwingen deze drempel bereikt"
+        "group_threshold_tooltips": "E-mails worden elke 24 uur verzonden of wanneer het aantal nieuwe waarschuwingen deze drempel bereikt",
+        "specify_duration": "Specify duration"
     },
     "unban": {
         "title": "Geblokkeerd IP",
@@ -70,8 +70,7 @@
         "network_timeout": "Netwerktime-out",
         "404": "Bron niet gevonden",
         "network_error": "Netwerkfout",
-        "validation_error": "Validatiefout",
-        "group_threshold_must_be_1to500": "De drempel moet tussen 1 en 500 liggen"
+        "validation_error": "Validatiefout"
     },
     "action": {
         "list-banned-ip": "Lijst met geblokkeerde IP-adres",
