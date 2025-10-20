@@ -29,7 +29,7 @@ tar -C "${bouncer_tmp_dir}" -x -v -z -f crowdsec-firewall-bouncer-linux-amd64.tg
 
 # Create a new empty container image for crowdsec-firewall-bouncer
 reponame="crowdsec-firewall-bouncer"
-container=$(buildah from docker.io/alpine:3.22.1)
+container=$(buildah from docker.io/alpine:3.22.2)
 
 # add to the container the crowdsec-firewall-bouncer
 buildah add --chmod 750 ${container} ${bouncer_tmp_dir}/crowdsec-firewall-bouncer-v*/crowdsec-firewall-bouncer /usr/local/bin/crowdsec-firewall-bouncer
