@@ -76,7 +76,7 @@ buildah config --entrypoint=/ \
     --label="org.nethserver.max-per-node=1" \
     --label="org.nethserver.authorizations=" \
     --label="org.nethserver.rootfull=1" \
-    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.6.11-debian ${repobase}/crowdsec-firewall-bouncer:${IMAGETAG:-latest}" \
+    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.7.3-debian ${repobase}/crowdsec-firewall-bouncer:${IMAGETAG:-latest}" \
     --label="org.nethserver.tcp-ports-demand=2" \
     "${container}"
 # Commit the image
