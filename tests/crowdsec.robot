@@ -14,6 +14,21 @@ Check if bouncer is installed correctly
     Should Be Equal As Integers    ${rc}    0
     Should Contain    ${output}    Revoked?      false
 
+Display cscli collections list
+    ${output}    ${rc}=    Execute Command    runagent -m ${module_id} cscli collections list    return_rc=True
+    Log    ${output}
+    Should Be Equal As Integers    ${rc}    0
+
+Display cscli scenarios list
+    ${output}    ${rc}=    Execute Command    runagent -m ${module_id} cscli scenarios list    return_rc=True
+    Log    ${output}
+    Should Be Equal As Integers    ${rc}    0
+
+Display cscli parsers list
+    ${output}    ${rc}=    Execute Command    runagent -m ${module_id} cscli parsers list    return_rc=True
+    Log    ${output}
+    Should Be Equal As Integers    ${rc}    0
+
 Check if crowdsec can ban 10.10.10.10
     ${output}    ${rc}=    Execute Command    runagent -m ${module_id} cscli decisions add -i 10.10.10.10    return_rc=True
     Should Be Equal As Integers    ${rc}    0
@@ -38,6 +53,7 @@ Check if crowdsec can unban 10.10.10.10
 Check if crowdsec is removed correctly
     ${rc}=    Execute Command    remove-module --no-preserve ${module_id}    return_rc=True    return_stdout=False
     Should Be Equal As Integers    ${rc}    0
+
 
 
 *** Keywords ***
