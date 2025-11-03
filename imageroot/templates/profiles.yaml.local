@@ -2,12 +2,16 @@ name: default_ip_remediation
 #debug: true
 filters:
  - Alert.Remediation == true && Alert.GetScope() == "Ip"
+{% if dyn_bantime %}
+decisions:
+ - type: ban
+   duration: {{dynamic_bantime_duration}}m
+# we math a (number of ban + 1) * dynamic_bantime_duration
+duration_expr: Sprintf('%dm', (GetDecisionsCount(Alert.GetValue()) + 1) * {{dynamic_bantime_duration}})
+{% else %}
 decisions:
  - type: ban
    duration: {{bantime}}
-{% if dyn_bantime %}
-# we math a (number of ban + 1) * 4 (units of `duration_expr` comes from `duration`)
-duration_expr: Sprintf('{{dyn_ban_value}}', (GetDecisionsCount(Alert.GetValue()) + 1) * 4)
 {% endif %}
 {% if email %}
 notifications:

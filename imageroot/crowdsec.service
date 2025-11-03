@@ -35,14 +35,17 @@ ExecStart=/usr/bin/podman run \
     --replace --name=%N \
     --network=host \
     --env DISABLE_ONLINE_API=${DISABLE_ONLINE_API} \
+    --env CROWDSEC_SETUP_UNATTENDED_DISABLE=true \
     --volume  ./crowdsec_config:/etc/crowdsec:Z \
     --volume %N-data:/var/lib/crowdsec/data:Z \
     --volume ${CROWDSEC_JOURNAL}:/run/log/journal \
     ${CROWDSEC_IMAGE}
+ExecStartPost=/usr/local/bin/runagent -m %N whitelist_ips
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
 ExecReload=/usr/local/bin/runagent -m %N expand-configuration
 ExecReload=/usr/local/bin/runagent -m %N expand-smarthost
+ExecReload=/usr/local/bin/runagent -m %N whitelist_ips
 ExecReload=/usr/bin/podman kill -s HUP %N
 PIDFile=%t/%N.pid
 Type=forking

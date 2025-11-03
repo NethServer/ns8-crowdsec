@@ -21,7 +21,9 @@
                 "12123564.org"
             ],
             "enable_online_api": true,
-            "enroll_instance": "cl7ze8xdn00030vl70tyutuxjj"
+            "enroll_instance": "cl7ze8xdn00030vl70tyutuxjj",
+            "group_threshold": 100,
+            "dynamic_bantime_duration": "4"
         }
     ],
     "type": "object",
@@ -33,9 +35,17 @@
         "whitelists",
         "enable_online_api",
         "ban_local_network",
-        "enroll_instance"
+        "enroll_instance",
+        "group_threshold"
     ],
     "properties": {
+        "group_threshold": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "title": "group_threshold",
+            "description": "Number of alerts to group before sending an email"
+        },
         "helo_host": {
             "anyOf": [
                 {
@@ -103,6 +113,12 @@
             "type": "string",
             "title": "enroll_instance",
             "description": "Enroll a crowdsec instance to app.crowdsec.net"
+        },
+        "dynamic_bantime_duration": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$",
+            "title": "dynamic_bantime_duration",
+            "description": "Base duration for dynamic bantime, in minutes"
         }
     }
 }

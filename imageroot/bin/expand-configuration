@@ -6,10 +6,10 @@
 #
 
 import os
-import json
 import agent
-import agent.tasks
 import re
+import shutil
+import sys
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -93,18 +93,19 @@ properties = {
     "email": True if smtp['enabled'] and receiver_emails else False,
     "bantime": os.environ.get('BANTIME','1')+'m',
     "dyn_bantime": os.environ.get('DYN_BANTIME',"True") == "True",
-    "dyn_ban_value": '%d' + ''.join(filter(lambda x: not x.isdigit(), os.environ.get('BANTIME','1')+'m'))
+    "dynamic_bantime_duration": os.environ.get('DYNAMIC_BANTIME_DURATION','4'),
 }
 template = jenv.get_template('profiles.yaml.local')
 output = template.render(properties)
 with open("crowdsec_config/profiles.yaml.local","w") as f:
     f.write(output)
 
-# whitelist
+# whitelist 
+# we want to withelist only fqdn name with crowdsec 1.6.8
+# IP/cidr are managed by https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists/
 
 # remove file if exists first
 files = [
-            "crowdsec_config/parsers/s02-enrich/nethserver-parsers-whitelists.yaml",
             "crowdsec_config/postoverflows/s01-whitelist/nethserver-postoverflows-whitelists.yaml"
         ]
 
@@ -117,14 +118,9 @@ for f in files:
 # if the Env var exists then write the configuration files
 whitelists = os.environ.get("WHITELISTS", "")
 if whitelists:
-    # we want to sort ip, network and fqdn name
-    whitelists_ip = []
-    whitelists_cidr = []
     whitelist_fqdn = []
 
-    # we whitelist
-    # <re.Match object; span=(0, 12), match='10.10.10.0/8'>
-    # <re.Match object; span=(0, 7), match='8.8.8.8'>
+    # we whitelist only the domain name
     # <re.Match object; span=(0, 8), match='foo.com'>
     # <re.Match object; span=(0, 12), match='12123564.com'>
     # <re.Match object; span=(0, 13), match='foo.foo.com'>
@@ -132,31 +128,43 @@ if whitelists:
         # test domain name
         if re.search(r'([A-Za-z0-9-\.]+\.[A-Za-z]+$)', test):
             whitelist_fqdn.append(test)
-        # test cidr
+        # test if the whitelist is a valid cidr
         elif re.search("./[0-9]+$", test):
-            whitelists_cidr.append(test)
+            continue
         # test ipv4
         elif re.search(r'([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', test):
-            whitelists_ip.append(test)
+            continue
         # test ipv6
         elif re.search(r'(?:[a-zA-Z0-9]{0,4}:?){1,8}|(?:[a-zA-Z0-9]{0,4}:?){1,4}(?:[0-9]{1,3}\.){3}[0-9]{1,3}', test):
-            whitelists_ip.append(test)
+            continue
+        else:
+            print(f"Invalid domain name format: {test}", file=sys.stderr)
+            continue
 
     properties = {
-        "whitelists_ip": sorted(set(whitelists_ip)),
-        "whitelists_cidr": sorted(set(whitelists_cidr)),
         "whitelist_fqdn": sorted(set(whitelist_fqdn)),
     }
 
-    # write the templates
-    if properties['whitelists_ip'] or  properties['whitelists_cidr']:
-        template = jenv.get_template('nethserver-parsers-whitelists.yaml')
-        output = template.render(properties)
-        with open("crowdsec_config/parsers/s02-enrich/nethserver-parsers-whitelists.yaml","w") as f:
-            f.write(output)
+    # whitelist ip/cidr are managed by https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists/
 
     if properties['whitelist_fqdn']:
         template = jenv.get_template('nethserver-postoverflows-whitelists.yaml')
         output = template.render(properties)
         with open("crowdsec_config/postoverflows/s01-whitelist/nethserver-postoverflows-whitelists.yaml","w") as f:
             f.write(output)
+
+## expand the tainted configuration files
+os.makedirs("crowdsec_config/hub/parsers/s01-parse/crowdsecurity", exist_ok=True)
+shutil.copyfile("../tainted/nextcloud-logs.yaml", "crowdsec_config/hub/parsers/s01-parse/crowdsecurity/nextcloud-logs.yaml")
+shutil.copyfile("../tainted/nethvoice-whitelist-http-probing.yaml", "crowdsec_config/parsers/s02-enrich/nethvoice-whitelist-http-probing.yaml")
+
+# remove freepbx related custom parser and scenario as we don't support #7629
+files_to_remove = [
+    "crowdsec_config/parsers/s01-parse/freepbx-logs.yaml",
+    "crowdsec_config/scenarios/freepbx-user-enum.yaml",
+    "crowdsec_config/scenarios/freepbx-bf.yaml"]
+for file in files_to_remove:
+    try:
+        os.remove(file)
+    except FileNotFoundError:
+        pass

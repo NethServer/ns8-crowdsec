@@ -4,8 +4,8 @@ name: email_default   # Must match the registered plugin in the profile
 # One of "trace", "debug", "info", "warn", "error", "off"
 log_level: info
 
-# group_wait:         # Time to wait collecting alerts before relaying a message to this plugin, eg "30s"
-# group_threshold:    # Amount of alerts that triggers a message before <group_wait> has expired, eg "10"
+group_wait: 24h        # Time to wait collecting alerts before relaying a message to this plugin, eg "30s"
+group_threshold: {{group_threshold}}   # Amount of alerts that triggers a message before <group_wait> has expired, eg "10"
 # max_retry:          # Number of attempts to relay messages to plugins in case of error
 timeout: 20s          # Time to wait for response from the plugin before considering the attempt a failure, eg "10s"
 
@@ -16,23 +16,119 @@ timeout: 20s          # Time to wait for response from the plugin before conside
 # The output goes in the email message body
 {% raw %}
 format: |
-  {{range . -}}
-    {{$alert := . -}}
-    {{range .Decisions -}}
-      <html><body><p><a href=https://www.whois.com/whois/{{.Value}}>{{.Value}}</a> will get <b>{{.Type}}</b> for next <b>{{.Duration}}</b> for triggering <b>{{.Scenario}}</b> on machine <b>{{$alert.MachineID}}</b>.</p> <p><a href=https://www.shodan.io/host/{{.Value}}>Shodan</a></p></body></html>
-    {{end -}}
-  {{end -}}
+  <html>
+    <head>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f7f7f7;
+          margin: 0;
+          padding: 20px;
+          color: #333;
+        }
+        .container {
+          max-width: 700px;
+          margin: auto;
+          background: #ffffff;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+          color: #2c3e50;
+          font-size: 22px;
+          margin-bottom: 10px;
+          border-bottom: 2px solid #3498db;
+          padding-bottom: 5px;
+        }
+        h3 {
+          margin-top: 20px;
+          margin-bottom: 10px;
+          font-size: 18px;
+          color: #34495e;
+        }
+        .summary {
+          background: #ecf6fc;
+          padding: 10px;
+          border-left: 4px solid #3498db;
+          margin: 15px 0;
+          border-radius: 4px;
+        }
+        .actions {
+          margin: 20px 0;
+        }
+        .actions a {
+          display: inline-block;
+          margin-right: 10px;
+          padding: 8px 14px;
+          background-color: #3498db;
+          color: #fff;
+          text-decoration: none;
+          border-radius: 6px;
+          font-size: 14px;
+          transition: background-color 0.2s ease-in-out;
+        }
+        .actions a:hover {
+          background-color: #2980b9;
+        }
+        .footer {
+          margin-top: 30px;
+          font-size: 13px;
+          color: #555;
+          text-align: center;
+          line-height: 1.5;
+        }
+        .footer hr {
+          border: none;
+          border-top: 1px solid #e0e0e0;
+          margin: 25px 0;
+        }
+        .footer .title {
+          font-weight: bold;
+          color: #2c3e50;
+        }
+        .footer .disclaimer {
+          font-size: 11px;
+          color: #999;
+          margin-top: 10px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1> Crowdsec at {% endraw %}{{fqdn}}{% raw %}</h1>
+        
+        <div class="summary">
+          A total of <b>{{len .}}</b> IP(s) has been banned on this instance since <b>{{  (index . 0).CreatedAt | date "02 Jan 2006 15:04 MST" }}</b>
+        </div>
+        
+        <div class="actions">
+          <h3>Quick Actions</h3>
+          <a href="https://{% endraw %}{{ fqdn }}{% raw %}/cluster-admin/#/apps/{% endraw %}{{ module_id }}{% raw %}?page=unban">
+            View Active Decisions
+          </a>
+        </div>
+        <div class="footer">
+          <hr>
+          <div class="title">Application {% endraw %}{{module_id}}{% raw %} at {% endraw %}{{fqdn}}{% raw %}</div>
+          <div class="disclaimer">
+            This message was generated automatically – please do not reply.
+          </div>
+        </div>
+      </div>
+    </body>
+  </html>
 {% endraw %}
-
+# SMTP server configuration
 helo_host: {{helo_host}}
 smtp_host: {{smtp_host}} # example:smtp.gmail.com
 smtp_username: {{smtp_username}}       # Replace with your actual username
 smtp_password: {{smtp_password}}      # Replace with your actual password
 smtp_port: {{smtp_port}}           # Common values are any of [25, 465, 587, 2525]
 auth_type:  {{auth_type}}          # Valid choices are "none", "crammd5", "login", "plain"
-sender_name: "CrowdSec"
+sender_name: "CrowdSec Notifications"
 sender_email: {{sender_email}}        # example: foo@gmail.com
-email_subject: "CrowdSec Notification"
+email_subject: "Notification of {{module_id}} activity at {{fqdn}}"
 receiver_emails:
 {% for email in receiver_emails %}
   - {{email}}

@@ -16,7 +16,7 @@
             >
               <template slot="trigger"></template>
               <template slot="content">
-                <div v-html="$t('unban.unban_tooltip')"></div>
+                <div>{{ $t("unban.unban_tooltip") }}</div>
               </template>
             </cv-interactive-tooltip>
           </h2>
@@ -96,17 +96,17 @@
               </template>
               <template slot="data">
                 <cv-data-table-row
-                  v-for="(row, rowIndex) in bans"
+                  v-for="(row, rowIndex) in tablePage"
                   :key="`${rowIndex}`"
                   :value="`${rowIndex}`"
                 >
-                  <cv-data-table-row>
-                    <div class="mg-top mg-left gray">
+                  <cv-data-table-cell>
+                    <div>
                       {{
                         formatDate(new Date(row.created_at), "yyyy-MM-dd HH.mm")
                       }}
                     </div>
-                  </cv-data-table-row>
+                  </cv-data-table-cell>
                   <cv-data-table-cell>
                     {{ row.value }}
                   </cv-data-table-cell>
@@ -140,17 +140,18 @@
         </cv-column>
       </cv-row>
     </cv-grid>
-    <ConfirmReleaseIP
+    <ConfirmUnbanIpModal
       :isShown="isShownConfirmUnbanIp"
       :ban="currentBan"
       :core="core"
       @hide="hideConfirmUnbanIP"
       @confirm="setDeleteBan(false)"
     />
-    <ConfirmReleaseIPAll
+    <ConfirmUnbanAllIpsModal
       :isShown="isShownConfirmUnbanIPAll"
+      :isLoading="loading.setUnbanAll"
       :core="core"
-      @hide="hideConfirmUnbanIP"
+      @hide="hideConfirmUnbanIPAll"
       @confirm="setUnbanAll(false)"
     />
   </div>
@@ -164,16 +165,17 @@ import {
   IconService,
   TaskService,
   DateTimeService,
+  PageTitleService
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
-import ConfirmReleaseIP from "@/components/ConfirmReleaseIP";
-import ConfirmReleaseIPAll from "@/components/ConfirmReleaseIPAll";
+import ConfirmUnbanIpModal from "@/components/ConfirmUnbanIpModal.vue";
+import ConfirmUnbanAllIpsModal from "@/components/ConfirmUnbanAllIpsModal.vue";
 import Unlocked20 from "@carbon/icons-vue/es/unlocked/20";
 export default {
   name: "Unban",
   components: {
-    ConfirmReleaseIP,
-    ConfirmReleaseIPAll,
+    ConfirmUnbanIpModal,
+    ConfirmUnbanAllIpsModal,
   },
   mixins: [
     QueryParamService,
@@ -181,6 +183,7 @@ export default {
     IconService,
     TaskService,
     DateTimeService,
+    PageTitleService
   ],
   pageTitle() {
     return this.$t("unban.title") + " - " + this.appName;
@@ -288,7 +291,7 @@ export default {
         // 3h29m45s instead of 3h54m42.494246619s
         if (ban.decisions[0]) {
           const splitSecond = ban.decisions[0].duration.split(".");
-          ban.decisions[0].duration = splitSecond[0] + "s";
+          ban.decisions[0].duration = splitSecond[0];
           this.bans.push({
             duration: ban.decisions[0].duration,
             value: ban.decisions[0].value,
@@ -304,10 +307,14 @@ export default {
       this.showConfirmUnbanAll();
     },
     showConfirmUnbanAll() {
+      this.loading.setUnbanAll = false;
+      this.error.setUnbanAll = "";
       this.isShownConfirmUnbanIPAll = true;
     },
     hideConfirmUnbanIPAll() {
       this.isShownConfirmUnbanIPAll = false;
+      this.loading.setUnbanAll = false;
+      this.error.setUnbanAll = "";
     },
     toggleUnban(ban) {
       this.currentBan = ban;
@@ -428,13 +435,7 @@ export default {
   display: flex;
   justify-content: space-between;
 }
-.mg-top {
-  margin-top: 1em;
-}
 .mg-left {
   margin-left: 1em;
-}
-.gray {
-  color: #525252;
 }
 </style>
