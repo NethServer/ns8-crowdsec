@@ -2,15 +2,5 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>NethServer/.github:ns8"
-  ],
-  "regexManagers": [
-    {
-      "fileMatch": ["build-images.sh"],
-      "matchStrings": [
-        "crowdsec-firewall-bouncer/releases/download/v(?<currentVersion>[0-9.]+)/crowdsec-firewall-bouncer-linux-amd64.tgz"
-      ],
-      "depNameTemplate": "crowdsecurity/cs-firewall-bouncer",
-      "datasourceTemplate": "github-releases"
-    }
   ]
 }
