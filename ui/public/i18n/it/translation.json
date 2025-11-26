@@ -14,7 +14,7 @@
     "common": {
         "required": "Obbligatorio",
         "work_in_progress": "In lavorazione",
-        "processing": "In elaborazione…"
+        "processing": "Elaborazione in corso…"
     },
     "status": {
         "title": "Stato",
