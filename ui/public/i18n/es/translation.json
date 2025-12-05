@@ -4,7 +4,7 @@
         "created": "Creado",
         "name": "Nombre",
         "no_images": "Sin imágenes",
-        "app_volumes": "Volumen de la aplicación| Volumen de las aplicaciones",
+        "app_volumes": "Volumen de la aplicación | Volúmenes de las aplicaciones",
         "services": "Servicio | Servicios",
         "app_images": "Imagen de la aplicación| Imágenes de las aplicaciones",
         "no_services": "Sin servicios",
@@ -13,7 +13,7 @@
         "title": "Estado",
         "installation_node": "Nodo de la instalación",
         "node": "Nodo",
-        "no_volumes": "Sin volumenes"
+        "no_volumes": "Sin volúmenes"
     },
     "settings": {
         "save": "Guardar",
@@ -50,7 +50,7 @@
         "receiver_emails_list": "Introduce una dirección de correo electrónico por línea",
         "enable_online_api": "Habilitar la API central",
         "whitelists_pattern": "CIDR, IP o FQDN incorrectos: {value}",
-        "title": "Ajustes",
+        "title": "Configuración",
         "processing": "Procesando…",
         "whitelist_placeholder": "Una entrada por línea",
         "group_threshold_label": "Notification threshold",
@@ -86,22 +86,22 @@
     },
     "action": {
         "get-module-info": "Obtener información del módulo",
-        "get-status": "Obtener el estado",
+        "get-status": "Obtener estado",
         "list-banned-ip": "Lista de ip baneadas",
         "unban-ip": "Desbanear la dirección ip",
         "unban_ip_status": "Lista de direcciones ip baneadas",
-        "list-backup-repositories": "Mostrar repositorios de respaldo",
-        "list-installed-modules": "Lista de módulos instalados",
-        "list-backups": "Mostrar copias de seguridad",
-        "configure-module": "Configurar el módulo",
-        "get-configuration": "Obtener los ajustes",
-        "get-name": "Obtener el nombre"
+        "list-backup-repositories": "Enumerar repositorios de respaldo",
+        "list-installed-modules": "Enumerar módulos instalados",
+        "list-backups": "Enumerar respaldos",
+        "configure-module": "Configurar módulo",
+        "get-configuration": "Obtener configuración",
+        "get-name": "Obtener nombre"
     },
     "error": {
         "404": "Recurso no encontrado",
         "403": "Operación no autorizada",
         "cannot_retrieve_installed_modules": "No se pueden recuperar los módulos instalados",
-        "401": "Autentificación inválida",
+        "401": "Autenticación no válida",
         "cannot_retrieve_module_info": "No se puede recuperar la información del módulo",
         "generic_error": "Algo ha salido mal",
         "error": "Error",
