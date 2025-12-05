@@ -99,7 +99,7 @@ format: |
         <h1> Crowdsec at {% endraw %}{{fqdn}}{% raw %}</h1>
         
         <div class="summary">
-          A total of <b>{{len .}}</b> IP(s) has been banned on this instance since <b>{{  (index . 0).CreatedAt | date "02 Jan 2006 15:04 MST" }}</b>
+          A total of <b>{{len .}}</b> decision(s) has been taken on this instance since <b>{{  (index . 0).CreatedAt | date "02 Jan 2006 15:04 MST" }}</b>
         </div>
         
         <div class="actions">
