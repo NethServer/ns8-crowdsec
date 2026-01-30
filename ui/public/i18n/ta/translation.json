@@ -1,18 +1,18 @@
 {
     "common": {
         "required": "தேவை",
-        "work_in_progress": "வேலை முன்னேற்றத்தில் உள்ளது",
-        "processing": "செயலாக்கம் ..."
+        "work_in_progress": "வேலை நடந்து கொண்டிருக்கிறது",
+        "processing": "செயலாக்குகிறது..."
     },
     "status": {
-        "services": "பணி | சேவைகள்",
+        "services": "சேவை | சேவைகள்",
         "app_instance": "பயன்பாட்டு நிகழ்வு",
         "title": "நிலை",
         "created": "உருவாக்கப்பட்டது",
         "size": "அளவு",
         "name": "பெயர்",
         "no_images": "படங்கள் இல்லை",
-        "app_volumes": "பயன்பாட்டு தொகுதி | பயன்பாட்டு தொகுதிகள்",
+        "app_volumes": "பயன்பாட்டின் அளவு | பயன்பாட்டின் தொகுதிகள்",
         "app_images": "பயன்பாட்டு படம் | பயன்பாட்டு படங்கள்",
         "no_services": "சேவைகள் இல்லை",
         "mount": "மவுண்ட்",
@@ -21,7 +21,7 @@
         "no_volumes": "தொகுதிகள் இல்லை"
     },
     "settings": {
-        "configure_instance": "{நிகழ்வை) உள்ளமை",
+        "configure_instance": "{instance} ஐ உள்ளமை",
         "helo_host": "Helo_host",
         "disable_online_api_tips": "The central API is used to retrieve blacklists and to have a glance on metrics at app.crowdsec.net",
         "enroll_instance": "Enroll this CrowdSec instance",
@@ -90,7 +90,7 @@
         "title": "பற்றி"
     },
     "action": {
-        "list-backup-repositories": "காப்புப்பிரதி களஞ்சியங்களை பட்டியலிடுங்கள்",
+        "list-backup-repositories": "காப்புப் பிரதி களஞ்சியங்களைப் பட்டியலிடுங்கள்",
         "get-module-info": "தொகுதி தகவலைப் பெறுங்கள்",
         "list-backups": "காப்புப்பிரதிகளை பட்டியலிடுங்கள்",
         "get-status": "அந்தச்தைப் பெறுங்கள்",
@@ -98,23 +98,23 @@
         "list-banned-ip": "List banned IP",
         "unban-ip": "Unban IP address",
         "unban_ip_status": "List banned IP addresses",
-        "list-installed-modules": "நிறுவப்பட்ட தொகுதிகள் பட்டியல்",
+        "list-installed-modules": "நிறுவப்பட்ட தொகுதிகளை பட்டியலிடுங்கள்",
         "get-configuration": "உள்ளமைவைப் பெறுங்கள்",
-        "get-name": "பெயரைப் பெறுங்கள்"
+        "get-name": "பெயர் பெறவும்"
     },
     "task": {
-        "cannot_create_task": "பணியை உருவாக்க முடியாது {action}"
+        "cannot_create_task": "பணி {action} ஐ உருவாக்க முடியாது"
     },
     "error": {
         "403": "செயல்பாடு அங்கீகரிக்கப்படவில்லை",
         "cannot_retrieve_installed_modules": "நிறுவப்பட்ட தொகுதிகளை மீட்டெடுக்க முடியாது",
         "401": "தவறான ஏற்பு",
-        "cannot_retrieve_module_info": "தொகுதி தகவலை மீட்டெடுக்க முடியாது",
-        "generic_error": "ஏதோ தவறு நடந்தது",
+        "cannot_retrieve_module_info": "தொகுதி தகவலை மீட்டெடுக்க முடியவில்லை",
+        "generic_error": "ஏதோ தவறாகிவிட்டது",
         "error": "பிழை",
-        "network_timeout": "பிணைய நேரம் முடிந்தது",
+        "network_timeout": "பிணையம் நேரம் முடிந்தது",
         "404": "சான்று கிடைக்கவில்லை",
-        "network_error": "பிணைய பிழை",
+        "network_error": "பிணையம் பிழை",
         "validation_error": "சரிபார்ப்பு பிழை"
     }
 }
