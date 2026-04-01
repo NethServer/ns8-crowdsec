@@ -34,7 +34,7 @@ def update_metrics(targets):
     trx = agent.redis_connect(privileged=True).pipeline()
     trx.hset(f"module/{module_id}/metrics_targets", "crowdsec", yaml.dump(targets))
 
-    for dashboard_key in ["crowdsec_overview"]:
+    for dashboard_key in ["crowdsec_overview", "crowdsec_metrics"]:
         with open(f"../etc/grafana/{dashboard_key}.json", "r") as f:
             dashboard_content = f.read()
         trx.hset(f"module/{module_id}/metrics_dashboards", dashboard_key, dashboard_content)
