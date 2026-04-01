@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import os
+import yaml
+import agent
+
+module_id = os.environ['MODULE_ID']
+agent_id = os.environ['AGENT_ID']
+node_id = int(os.environ['NODE_ID'])
+
+env_tcp_ports = os.environ["TCP_PORTS"].split(',')
+prometheus_tcp_port = env_tcp_ports[1]
+
+def main():
+    global module_id, node_id
+    rdb_ro = agent.redis_connect()
+    ip_address = rdb_ro.hget(f'node/{node_id}/vpn', 'ip_address') or '127.0.0.1'
+    targets = [{
+        "targets": [f"{ip_address}:{prometheus_tcp_port}"],
+        "labels": {
+            "module_id": module_id,
+            "node": node_id, # no "_id" suffix for Metrics
+        },
+    }]
+    update_metrics(targets)
+
+def update_metrics(targets):
+    global module_id, agent_id
+    trx = agent.redis_connect(privileged=True).pipeline()
+    trx.hset(f"module/{module_id}/metrics_targets", "crowdsec", yaml.dump(targets))
+    trx.publish(f"{agent_id}/event/metrics-target-changed", "{}")
+    trx.execute()
+
+if __name__ == "__main__":
+    main()
