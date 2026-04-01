@@ -24,7 +24,22 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 5,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [
+        "crowdsec"
+      ],
+      "targetBlank": false,
+      "title": "CrowdSec Dashboards",
+      "tooltip": "",
+      "type": "dashboards",
+      "url": ""
+    }
+  ],
   "panels": [
     {
       "collapsed": false,
@@ -1040,7 +1055,9 @@
   "preload": false,
   "refresh": "",
   "schemaVersion": 42,
-  "tags": [],
+  "tags": [
+    "crowdsec"
+  ],
   "templating": {
     "list": []
   },
@@ -1050,7 +1067,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Crowdsec Overview",
+  "title": "CrowdSec Overview",
   "uid": "hjmZdB4nk",
   "version": 1
 }

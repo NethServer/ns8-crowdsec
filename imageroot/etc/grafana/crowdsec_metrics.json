@@ -2768,9 +2768,7 @@
   "preload": false,
   "schemaVersion": 42,
   "tags": [
-    "crowdsec",
-    "appsec",
-    "security"
+    "crowdsec"
   ],
   "templating": {
     "list": [
