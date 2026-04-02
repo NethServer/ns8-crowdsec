@@ -51,7 +51,7 @@ if True:
     )
     ports = os.environ["TCP_PORTS"].split(',')
 
-    rdb_ro = agent.redis_connect()
+    rdb_ro = agent.redis_connect(privileged=False)
     ip_address = rdb_ro.hget(f'node/{node_id}/vpn', 'ip_address') or '127.0.0.1'
 
     properties = {"api_port": ports[0], "metrics_port": ports[1], "ip_address": ip_address}
