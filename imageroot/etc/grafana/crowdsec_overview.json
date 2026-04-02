@@ -136,7 +136,7 @@
           "refId": "A"
         }
       ],
-      "title": "Running Crowdsec",
+      "title": "Running CrowdSec",
       "transparent": true,
       "type": "stat"
     },

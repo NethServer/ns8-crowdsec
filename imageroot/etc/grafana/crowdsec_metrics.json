@@ -47,7 +47,7 @@
       },
       "id": 19,
       "panels": [],
-      "title": "Overwiew",
+      "title": "Overview",
       "type": "row"
     },
     {
@@ -1043,7 +1043,7 @@
                   "Value #B": "Blocked",
                   "Value #blocked": "Blocked",
                   "Value #processed": "Processed",
-                  "appsec_engine": "AppSec Enginge"
+                  "appsec_engine": "AppSec Engine"
                 }
               }
             }
@@ -2813,8 +2813,9 @@
       },
       {
         "current": {
-          "text": "10.5.4.1:20001",
-          "value": "10.5.4.1:20001"
+          "selected": false,
+          "text": "",
+          "value": ""
         },
         "datasource": {
           "type": "prometheus",
