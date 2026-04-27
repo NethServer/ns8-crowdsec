@@ -89,7 +89,7 @@
         "list-banned-ip": "Elenca IP bloccati",
         "unban-ip": "Sblocca indirizzo IP",
         "unban_ip_status": "Elenco indirizzi IP bloccati",
-        "list-backup-repositories": "Elenca repository di backup",
+        "list-backup-repositories": "Elenca i repository di backup",
         "list-installed-modules": "Elenca moduli installati",
         "list-backups": "Elenca backup"
     },
