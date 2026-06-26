@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# cscli capi status ignores --output json, parse plain text output
+
+set -e
+
+output=$(podman exec "$MODULE_ID" cscli capi status 2>&1)
+
+connected=$(echo "$output" | grep -q "successfully interact" && echo true || echo false)
+enrolled=$(echo "$output" | grep -q "enrolled in the console" && echo true || echo false)
+# config_disabled: only true when cscli explicitly reports disabled AND CAPI is not connected
+# (avoids false positive from "Pulling community blocklist is disabled")
+if [[ $connected == "true" ]]; then
+    config_disabled=false
+else
+    config_disabled=$(echo "$output" | grep -qi "disabled" && echo true || echo false)
+fi
+subscription=$(echo "$output" | grep "Subscription type:" | awk '{print $NF}')
+sharing=$(echo "$output" | grep -q "Sharing signals is enabled" && echo true || echo false)
+pull_community=$(echo "$output" | grep -q "Pulling community blocklist is enabled" && echo true || echo false)
+pull_console=$(echo "$output" | grep -q "Pulling blocklists from the console is enabled" && echo true || echo false)
+
+jq -n \
+    --argjson config_disabled "$config_disabled" \
+    --argjson connected "$connected" \
+    --argjson enrolled "$enrolled" \
+    --arg subscription "$subscription" \
+    --argjson sharing "$sharing" \
+    --argjson pull_community "$pull_community" \
+    --argjson pull_console "$pull_console" \
+    '{config_disabled:$config_disabled,connected:$connected,enrolled:$enrolled,subscription:$subscription,sharing:$sharing,pull_community:$pull_community,pull_console:$pull_console}'
