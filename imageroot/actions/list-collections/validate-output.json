@@ -1,0 +1,61 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "list-collections output",
+    "$id": "http://schema.nethserver.org/crowdsec/list-collections-output.json",
+    "description": "List of installed CrowdSec collections",
+    "examples": [
+        [
+            {
+                "name": "crowdsecurity/linux",
+                "status": "enabled",
+                "local_version": "0.2",
+                "local_path": "/etc/crowdsec/collections/linux.yaml",
+                "description": "Detect attacks against Linux systems",
+                "up_to_date": true,
+                "tainted": false
+            }
+        ]
+    ],
+    "type": "array",
+    "items": {
+        "type": "object",
+        "required": ["name", "status"],
+        "properties": {
+            "name": {
+                "type": "string",
+                "title": "name",
+                "description": "Collection name"
+            },
+            "status": {
+                "type": "string",
+                "title": "status",
+                "description": "Collection status (e.g. enabled, disabled)"
+            },
+            "local_version": {
+                "type": "string",
+                "title": "local_version",
+                "description": "Installed version of the collection"
+            },
+            "local_path": {
+                "type": "string",
+                "title": "local_path",
+                "description": "Path to the collection file on disk"
+            },
+            "description": {
+                "type": ["string", "null"],
+                "title": "description",
+                "description": "Human-readable description of the collection"
+            },
+            "up_to_date": {
+                "type": "boolean",
+                "title": "up_to_date",
+                "description": "Whether the installed version matches the latest available"
+            },
+            "tainted": {
+                "type": "boolean",
+                "title": "tainted",
+                "description": "Whether the collection has been locally modified"
+            }
+        }
+    }
+}
