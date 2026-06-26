@@ -1,0 +1,28 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "toggle-collection input",
+    "$id": "http://schema.nethserver.org/crowdsec/toggle-collection-input.json",
+    "description": "Enable or disable a CrowdSec collection",
+    "examples": [
+        {
+            "name": "crowdsecurity/linux",
+            "action": "install"
+        }
+    ],
+    "type": "object",
+    "required": ["name", "action"],
+    "additionalProperties": false,
+    "properties": {
+        "name": {
+            "type": "string",
+            "title": "name",
+            "description": "Collection name"
+        },
+        "action": {
+            "type": "string",
+            "title": "action",
+            "enum": ["install", "remove"],
+            "description": "Action to perform on the collection"
+        }
+    }
+}

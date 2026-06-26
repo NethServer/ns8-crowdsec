@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# enable or disable a collection
+
+set -e
+
+input=$(cat)
+name=$(echo "$input" | jq -r '.name')
+action=$(echo "$input" | jq -r '.action')
+
+podman exec "$MODULE_ID" cscli collections $action "$name"
+podman exec "$MODULE_ID" kill -HUP 1
