@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# list alerts
+
+set -e
+
+list=$(podman exec "$MODULE_ID" cscli alerts list --output json)
+
+if [[ $list == 'null' ]]; then
+    echo '[]'
+else
+    echo "$list"
+fi
