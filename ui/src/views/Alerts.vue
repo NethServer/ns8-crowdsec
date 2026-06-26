@@ -59,16 +59,36 @@
       <cv-row>
         <cv-column>
           <cv-tile light>
+            <div class="data-table-filters">
+              <div style="flex: 2;">
+                <cv-search
+                  v-model="alertsSearchFilter"
+                  :placeholder="$t('alerts.search_alerts')"
+                  :label="$t('alerts.search_alerts')"
+                  :clear-aria-label="core.$t('common.clear_search')"
+                ></cv-search>
+              </div>
+              <div style="flex: 1; min-width: 220px;">
+                <cv-select
+                  v-model="alertsLimit"
+                  :label="$t('alerts.history_label')"
+                >
+                  <cv-select-option
+                    v-for="opt in alertsLimitOptions"
+                    :key="opt.value"
+                    :value="opt.value"
+                  >{{ opt.label }}</cv-select-option>
+                </cv-select>
+              </div>
+            </div>
             <NsDataTable
-              :allRows="alerts"
+              :allRows="filteredAlerts"
               :columns="i18nTableColumns"
               :rawColumns="tableColumns"
               :sortable="true"
               :pageSizes="[10, 25, 50, 100]"
               :overflow-menu="true"
-              :isSearchable="check_alerts"
-              :searchPlaceholder="$t('alerts.search_alerts')"
-              :searchClearLabel="core.$t('common.clear_search')"
+              :isSearchable="false"
               :noSearchResultsLabel="core.$t('common.no_search_results')"
               :noSearchResultsDescription="
                 core.$t('common.no_search_results_description')
@@ -201,10 +221,11 @@ export default {
       Restart20,
       TrashCan20,
       urlCheckInterval: null,
+      alertsLimit: "500",
+      alertsSearchFilter: "",
       tablePage: [],
       tableColumns: ["created_at", "scenario", "source_ip", "source_cn", "decision_types", "events_count"],
       alerts: [],
-      check_alerts: false,
       isShownConfirmDelete: false,
       isShownInspectAlert: false,
       currentAlertDetail: null,
@@ -226,6 +247,32 @@ export default {
       return this.tableColumns.map((column) => {
         return this.$t("alerts.col_" + column);
       });
+    },
+    filteredAlerts() {
+      const q = this.alertsSearchFilter.trim().toLowerCase();
+      if (!q) return this.alerts;
+      return this.alerts.filter(
+        (a) =>
+          (a.source_ip || "").toLowerCase().includes(q) ||
+          (a.scenario || "").toLowerCase().includes(q) ||
+          (a.source_cn || "").toLowerCase().includes(q) ||
+          (a.decision_types || "").toLowerCase().includes(q)
+      );
+    },
+    alertsLimitOptions() {
+      return [
+        { value: "500",  label: this.$t("alerts.history_option", { count: 500 }) },
+        { value: "1000", label: this.$t("alerts.history_option", { count: 1000 }) },
+        { value: "2000", label: this.$t("alerts.history_option", { count: 2000 }) },
+        { value: "3000", label: this.$t("alerts.history_option", { count: 3000 }) },
+        { value: "4000", label: this.$t("alerts.history_option", { count: 4000 }) },
+        { value: "all",  label: this.$t("alerts.history_all") },
+      ];
+    },
+  },
+  watch: {
+    alertsLimit() {
+      this.listAlerts();
     },
   },
   beforeRouteEnter(to, from, next) {
@@ -259,6 +306,7 @@ export default {
       const res = await to(
         this.createModuleTaskForApp(this.instanceName, {
           action: taskAction,
+          data: { limit: this.alertsLimit },
           extra: {
             title: this.$t("action." + taskAction),
             isNotificationHidden: true,
@@ -376,6 +424,7 @@ export default {
     listAlertsCompleted(taskContext, taskResult) {
       const listAlerts = taskResult.output;
       listAlerts.forEach((alert) => {
+        if (alert.scenario && alert.scenario.startsWith("update :")) return;
         this.alerts.push({
           id: alert.id,
           created_at: alert.created_at,
@@ -386,7 +435,6 @@ export default {
           events_count: alert.events_count,
         });
       });
-      this.check_alerts = this.alerts.length ? true : false;
       this.loading.listAlerts = false;
     },
   },

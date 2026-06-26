@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "list-alerts input",
+    "$id": "http://schema.nethserver.org/crowdsec/list-alerts-input.json",
+    "description": "List CrowdSec alerts with an optional result limit",
+    "examples": [
+        {
+            "limit": "500"
+        },
+        {
+            "limit": "all"
+        }
+    ],
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "limit": {
+            "type": "string",
+            "title": "Limit",
+            "description": "Maximum number of alerts to return, or 'all' for no limit",
+            "enum": ["500", "1000", "2000", "3000", "4000", "all"]
+        }
+    }
+}
