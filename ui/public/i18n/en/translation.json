@@ -166,7 +166,8 @@
         "no_results": "IP not found in CAPI blocklist",
         "view_cti": "View IP reputation",
         "request_removal": "Request removal",
-        "reload": "Refresh"
+        "reload": "Refresh",
+        "syncing": "Synchronizing CAPI blocklist..."
     },
     "about": {
         "title": "About"
