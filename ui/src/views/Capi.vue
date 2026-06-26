@@ -98,6 +98,7 @@
             >
               <span v-if="loading.getCapiCount">
                 <cv-skeleton-text :width="'200px'"></cv-skeleton-text>
+                {{ $t("capi.syncing") }}
               </span>
               <span v-else-if="capiCount !== null">
                 {{ $t("capi.ip_count", { count: capiCount }) }}
@@ -293,6 +294,10 @@ export default {
       const eventId = this.getUuid();
       this.loading.getCapiCount = true;
       this.error.getCapiCount = "";
+      this._capiCountTimeout = setTimeout(() => {
+        this.capiCount = 0;
+        this.loading.getCapiCount = false;
+      }, 10000);
       this.core.$root.$once(
         `${taskAction}-aborted-${eventId}`,
         this.getCapiCountAborted
@@ -315,15 +320,18 @@ export default {
       if (err) {
         console.error(`error creating task ${taskAction}`, err);
         this.error.getCapiCount = this.getErrorMessage(err);
+        clearTimeout(this._capiCountTimeout);
         this.loading.getCapiCount = false;
       }
     },
     getCapiCountAborted(taskResult, taskContext) {
       console.error(`${taskContext.action} aborted`, taskResult);
+      clearTimeout(this._capiCountTimeout);
       this.capiCount = 0;
       this.loading.getCapiCount = false;
     },
     getCapiCountCompleted(taskContext, taskResult) {
+      clearTimeout(this._capiCountTimeout);
       this.capiCount = taskResult.output.count;
       this.loading.getCapiCount = false;
     },
