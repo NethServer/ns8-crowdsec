@@ -84,6 +84,7 @@
           :loading="loading.listBackupRepositories || loading.listBackups"
           :coreContext="core"
           light
+          class="min-height-card"
         />
       </cv-column>
       <cv-column :md="4" :max="4">
@@ -99,6 +100,7 @@
           context="module"
           :moduleId="instanceName"
           light
+          class="min-height-card"
         />
       </cv-column>
     </cv-row>
@@ -114,22 +116,35 @@
           <NsEmptyState :title="$t('status.no_services')"> </NsEmptyState>
         </cv-tile>
       </cv-column>
-      <cv-column
-        v-else
-        v-for="(service, index) in status.services"
-        :key="index"
-        :md="4"
-        :max="4"
-      >
-        <NsSystemdServiceCard
-          light
-          class="min-height-card"
-          :serviceName="service.name"
-          :active="service.active"
-          :failed="service.failed"
-          :enabled="service.enabled"
-          :icon="Cube32"
-        />
+      <cv-column v-else-if="!failedServices.length">
+        <cv-tile light>
+          <NsEmptyState :title="$t('status.all_services_ok')">
+            <template #pictogram><CircleCheckPictogram /></template>
+          </NsEmptyState>
+        </cv-tile>
+      </cv-column>
+      <cv-column v-else>
+        <div
+          class="
+            card-grid
+            grid-cols-1
+            md:grid-cols-2
+            xl:grid-cols-3
+            3xl:grid-cols-4
+          "
+        >
+          <NsSystemdServiceCard
+            v-for="(service, index) in failedServices"
+            :key="index"
+            light
+            class="min-height-card"
+            :serviceName="service.name"
+            :active="service.active"
+            :failed="service.failed"
+            :enabled="service.enabled"
+            :icon="Cube32"
+          />
+        </div>
       </cv-column>
     </cv-row>
     <cv-row v-else>
@@ -304,6 +319,9 @@ export default {
   },
   computed: {
     ...mapState(["instanceName", "instanceLabel", "core", "appName"]),
+    failedServices() {
+      return (this.status && this.status.services || []).filter(s => s.failed);
+    },
     installationNodeTitle() {
       if (this.status && this.status.node) {
         if (this.status.node_ui_name) {
