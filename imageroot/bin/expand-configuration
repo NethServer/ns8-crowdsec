@@ -54,7 +54,13 @@ if True:
     rdb_ro = agent.redis_connect(privileged=False)
     ip_address = rdb_ro.hget(f'node/{node_id}/vpn', 'ip_address') or '127.0.0.1'
 
-    properties = {"api_port": ports[0], "metrics_port": ports[1], "ip_address": ip_address}
+    properties = {
+        "api_port": ports[0],
+        "metrics_port": ports[1],
+        "ip_address": ip_address,
+        "enable_online_api": os.environ.get('DISABLE_ONLINE_API', 'False') != 'True',
+        "pull_community_blocklist": os.environ.get('PULL_COMMUNITY_BLOCKLIST', 'True') == 'True',
+    }
 
     template = jenv.get_template('config.yaml.local')
     output = template.render(properties)
