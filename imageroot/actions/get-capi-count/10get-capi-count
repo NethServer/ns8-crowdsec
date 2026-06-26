@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Count CAPI decisions without loading all IPs to the UI
+
+set -e
+
+list=$(podman exec "$MODULE_ID" cscli decisions list --origin CAPI --output json)
+
+if [[ $list == 'null' || -z $list ]]; then
+    jq -n '{count: 0}'
+else
+    echo "$list" | jq '{count: (if (.[0] | has("decisions")) then ([.[].decisions // [] | .[]] | length) else length end)}'
+fi
