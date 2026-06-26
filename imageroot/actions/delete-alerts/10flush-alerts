@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Flush all alerts from the database
+
+set -e
+
+podman exec "$MODULE_ID" cscli alerts delete --all
+echo '{}'
