@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Purge CAPI decisions when Central API or community blocklist pull is disabled
+
+input=$(cat)
+
+if echo "$input" | jq -e '.enable_online_api == false or .pull_community_blocklist == false' > /dev/null; then
+    podman exec "$MODULE_ID" cscli decisions delete --all --origin CAPI || true
+    # flush nft sets immediately — bouncer sync can take several seconds
+    nft flush set ip crowdsec crowdsec-blacklists-CAPI 2>/dev/null || true
+    nft flush set ip6 crowdsec6 crowdsec6-blacklists-CAPI 2>/dev/null || true
+fi
