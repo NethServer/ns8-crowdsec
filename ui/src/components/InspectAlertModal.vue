@@ -171,6 +171,10 @@ h5.mg-top-md {
   margin-bottom: 0.5rem;
 }
 
+::v-deep .bx--structured-list {
+  margin-bottom: 0;
+}
+
 ::v-deep .bx--pagination {
   background-color: transparent;
   border-top: 1px solid $ui-03;
