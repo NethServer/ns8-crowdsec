@@ -122,4 +122,17 @@ export default {
 
 <style lang="scss">
 @import "styles/carbon-utils";
+
+// data table filters container (mirrors ns8-core _core.scss)
+.data-table-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+
+  .bx--select-input {
+    height: 3rem;
+  }
+}
 </style>

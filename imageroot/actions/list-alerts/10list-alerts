@@ -7,7 +7,14 @@
 
 set -e
 
-list=$(podman exec "$MODULE_ID" cscli alerts list --output json)
+input=$(cat)
+limit=$(echo "$input" | jq -r '.limit // "500"')
+
+if [[ "$limit" == "all" ]]; then
+    list=$(podman exec "$MODULE_ID" cscli alerts list --all --output json)
+else
+    list=$(podman exec "$MODULE_ID" cscli alerts list --limit "$limit" --output json)
+fi
 
 if [[ $list == 'null' ]]; then
     echo '[]'

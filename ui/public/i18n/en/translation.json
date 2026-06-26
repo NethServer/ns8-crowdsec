@@ -120,6 +120,9 @@
         "no_events": "No events",
         "yes": "Yes",
         "no": "No",
+        "history_label": "History",
+        "history_option": "Last {count} events",
+        "history_all": "All events",
         "delete_alerts": "Delete all detections",
         "confirm_delete_title": "Delete all detections",
         "confirm_delete_message": "All CrowdSec detection events will be permanently removed from the database. Existing bans and decisions will not be affected. This action cannot be undone."
