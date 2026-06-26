@@ -1,0 +1,10 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "delete-alerts output",
+    "$id": "http://schema.nethserver.org/crowdsec/delete-alerts-output.json",
+    "description": "Result of flushing all CrowdSec alerts",
+    "examples": [
+        {}
+    ],
+    "type": "object"
+}
