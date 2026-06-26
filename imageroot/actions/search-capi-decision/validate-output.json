@@ -1,0 +1,87 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "search-capi-decision output",
+    "$id": "http://schema.nethserver.org/crowdsec/search-capi-decision-output.json",
+    "description": "Whether the searched IP is present in the CAPI community blocklist, with matching decisions",
+    "examples": [
+        {
+            "found": true,
+            "decisions": [
+                {
+                    "id": 45002,
+                    "origin": "CAPI",
+                    "scenario": "ssh:bruteforce",
+                    "scope": "Ip",
+                    "type": "ban",
+                    "duration": "165h34m2s",
+                    "value": "107.189.1.82",
+                    "simulated": false
+                }
+            ]
+        },
+        {
+            "found": false,
+            "decisions": []
+        }
+    ],
+    "type": "object",
+    "required": ["found", "decisions"],
+    "properties": {
+        "found": {
+            "type": "boolean",
+            "title": "found",
+            "description": "True if the IP is covered by at least one CAPI decision"
+        },
+        "decisions": {
+            "type": "array",
+            "title": "decisions",
+            "description": "CAPI decisions matching the searched IP",
+            "items": {
+                "type": "object",
+                "required": ["id", "origin", "scenario", "scope", "type", "duration", "value", "simulated"],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "id",
+                        "description": "Unique decision identifier"
+                    },
+                    "origin": {
+                        "type": "string",
+                        "title": "origin",
+                        "description": "Source of the decision"
+                    },
+                    "scenario": {
+                        "type": "string",
+                        "title": "scenario",
+                        "description": "CrowdSec scenario that triggered the decision"
+                    },
+                    "scope": {
+                        "type": "string",
+                        "title": "scope",
+                        "description": "Scope of the decision (e.g. Ip, Range)"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "type",
+                        "description": "Decision type (e.g. ban)"
+                    },
+                    "duration": {
+                        "type": "string",
+                        "title": "duration",
+                        "description": "Remaining ban duration (e.g. 165h34m2s)"
+                    },
+                    "value": {
+                        "type": "string",
+                        "title": "value",
+                        "description": "IP address targeted by the decision"
+                    },
+                    "simulated": {
+                        "type": "boolean",
+                        "title": "simulated",
+                        "description": "Whether the decision is in simulation mode only"
+                    }
+                }
+            }
+        }
+    }
+}

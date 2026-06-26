@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Search for a specific IP in CAPI decisions — server-side filtering, fast
+
+set -e
+
+input=$(cat)
+ip=$(echo "$input" | jq -r '.ip')
+
+list=$(podman exec "$MODULE_ID" cscli decisions list --origin CAPI --output json)
+
+if [[ $list == 'null' || -z $list ]]; then
+    jq -n '{found: false, decisions: []}'
+    exit 0
+fi
+
+decisions=$(echo "$list" | jq --arg ip "$ip" '
+  if (.[0] | has("decisions")) then
+    [.[].decisions // [] | .[] | select(.value == $ip)]
+  else
+    [.[] | select(.value == $ip)]
+  end
+')
+if [[ $(echo "$decisions" | jq 'length') -gt 0 ]]; then
+    jq -n --argjson d "$decisions" '{found: true, decisions: $d}'
+else
+    jq -n '{found: false, decisions: []}'
+fi
