@@ -217,6 +217,26 @@
                         </div>
                       </template>
                     </NsTextInput>
+                    <NsToggle
+                      :label="$t('settings.pull_community_blocklist')"
+                      value="pull_community_blocklist"
+                      :form-item="true"
+                      v-model="pull_community_blocklist"
+                      :disabled="
+                        loading.getConfiguration || loading.configureModule
+                      "
+                      ref="pull_community_blocklist"
+                    >
+                      <template slot="tooltip">
+                        <span>{{ $t("settings.pull_community_blocklist_tips") }}</span>
+                      </template>
+                      <template slot="text-left">{{
+                        $t("settings.disabled")
+                      }}</template>
+                      <template slot="text-right">{{
+                        $t("settings.enabled")
+                      }}</template>
+                    </NsToggle>
                   </template>
                   <NsTextInput
                     :label="$t('settings.group_threshold_label')"
@@ -330,6 +350,7 @@ export default {
       dyn_bantime: true,
       whitelists: [],
       enable_online_api: true,
+      pull_community_blocklist: true,
       group_threshold: "100",
       loading: {
         getConfiguration: false,
@@ -346,6 +367,7 @@ export default {
         dyn_bantime: "",
         whitelists: "",
         enable_online_api: "",
+        pull_community_blocklist: "",
         group_threshold: "",
       },
     };
@@ -424,6 +446,7 @@ export default {
       this.dyn_bantime = config.dyn_bantime ? "dynamic" : "static";
       this.whitelists = config.whitelists.join("\n");
       this.enable_online_api = config.enable_online_api;
+      this.pull_community_blocklist = config.pull_community_blocklist !== undefined ? config.pull_community_blocklist : true;
       this.loading.getConfiguration = false;
       this.focusElement("receiver_emails");
       this.ban_local_network = config.ban_local_network;
@@ -477,6 +500,7 @@ export default {
             dyn_bantime: this.dyn_bantime === "dynamic",
             whitelists: this.whitelists.toLowerCase().split("\n"),
             enable_online_api: this.enable_online_api,
+            pull_community_blocklist: this.pull_community_blocklist,
             ban_local_network: this.ban_local_network,
             enroll_instance: this.enroll_instance,
             group_threshold: parseInt(this.group_threshold),
