@@ -28,6 +28,24 @@ const routes = [
       import(/* webpackChunkName: "about" */ "../views/Unban.vue"),
   },
   {
+    path: "/alerts",
+    name: "Alerts",
+    component: () =>
+      import(/* webpackChunkName: "alerts" */ "../views/Alerts.vue"),
+  },
+  {
+    path: "/collections",
+    name: "Collections",
+    component: () =>
+      import(/* webpackChunkName: "collections" */ "../views/Collections.vue"),
+  },
+  {
+    path: "/capi",
+    name: "Capi",
+    component: () =>
+      import(/* webpackChunkName: "capi" */ "../views/Capi.vue"),
+  },
+  {
     path: "/about",
     name: "About",
     // route level code-splitting
