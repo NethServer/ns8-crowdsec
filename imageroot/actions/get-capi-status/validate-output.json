@@ -1,0 +1,57 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "get-capi-status output",
+    "$id": "http://schema.nethserver.org/crowdsec/get-capi-status-output.json",
+    "description": "CrowdSec Central API connection status",
+    "examples": [
+        {
+            "connected": true,
+            "enrolled": true,
+            "subscription": "COMMUNITY",
+            "sharing": true,
+            "pull_community": true,
+            "pull_console": true
+        }
+    ],
+    "type": "object",
+    "required": [
+        "connected",
+        "enrolled",
+        "subscription",
+        "sharing",
+        "pull_community",
+        "pull_console"
+    ],
+    "properties": {
+        "connected": {
+            "type": "boolean",
+            "title": "connected",
+            "description": "Whether the instance can successfully reach the Central API"
+        },
+        "enrolled": {
+            "type": "boolean",
+            "title": "enrolled",
+            "description": "Whether the instance is enrolled in the CrowdSec console"
+        },
+        "subscription": {
+            "type": "string",
+            "title": "subscription",
+            "description": "Subscription type (e.g. COMMUNITY, PRO)"
+        },
+        "sharing": {
+            "type": "boolean",
+            "title": "sharing",
+            "description": "Whether signal sharing with the Central API is enabled"
+        },
+        "pull_community": {
+            "type": "boolean",
+            "title": "pull_community",
+            "description": "Whether pulling the community blocklist is enabled"
+        },
+        "pull_console": {
+            "type": "boolean",
+            "title": "pull_console",
+            "description": "Whether pulling blocklists from the console is enabled"
+        }
+    }
+}
