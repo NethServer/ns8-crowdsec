@@ -90,7 +90,7 @@
         "delete_bans": "Unban all"
     },
     "alerts": {
-        "title": "Detection Events",
+        "title": "Detections",
         "no_alerts": "No detection events",
         "reload_alerts": "Refresh",
         "search_alerts": "Search by IP, scenario...",
