@@ -115,7 +115,9 @@ Besides the CrowdSec hub collections, ns8-crowdsec ships custom parsers/scenario
 - SIP brute-force attacks against Kamailio authentication
 
 These protections are enabled by default for new installations.
-For existing installations, the protections are disabled by default and can be enabled by setting the `NETHVOICE_COLLECTION_ENABLED=True` variable in the module's `.env` file:
+For existing installations, the protections are disabled by default and can be managed from the Web interface.
+
+From CLI, the protection can be enabled/disabled by setting the `NETHVOICE_COLLECTION_ENABLED=True` variable in the module's `.env` file:
 
     runagent -m crowdsec1 python3 -c 'import agent ; agent.set_env("NETHVOICE_COLLECTION_ENABLED", "True")'
 

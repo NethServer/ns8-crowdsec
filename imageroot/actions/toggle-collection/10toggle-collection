@@ -11,5 +11,16 @@ input=$(cat)
 name=$(echo "$input" | jq -r '.name')
 action=$(echo "$input" | jq -r '.action')
 
-podman exec "$MODULE_ID" cscli collections $action "$name"
-podman exec "$MODULE_ID" kill -HUP 1
+# nethesis/nethvoice is a fake collection bundling NethVoice and Kamailio
+# custom parsers/scenarios, toggled via an env flag instead of cscli
+case "$name" in
+    nethesis/nethvoice)
+        value=$([[ "$action" == "install" ]] && echo True || echo False)
+        python3 -c "import agent; agent.set_env('NETHVOICE_COLLECTION_ENABLED', '$value')"
+        systemctl reload "${MODULE_ID}.service"
+        ;;
+    *)
+        podman exec "$MODULE_ID" cscli collections $action "$name"
+        systemctl reload "${MODULE_ID}.service"
+        ;;
+esac
