@@ -5,8 +5,13 @@ filter: "evt.Meta.log_type == 'kamailio_auth_fail'"
 groupby: "evt.Meta.source_ip"
 capacity: 5
 leakspeed: "10s"
-blackhole: 1m
+blackhole: "1m"
 labels:
+  confidence: 2
+  spoofable: 0
+  classification:
+    - attack.T1110
+  behavior: "sip:bruteforce"
+  label: "Kamailio SIP brute force"
   service: sip
-  type: bruteforce
   remediation: true
