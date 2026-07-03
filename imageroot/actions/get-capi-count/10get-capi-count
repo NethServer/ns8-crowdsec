@@ -11,7 +11,7 @@ set -e
 
 list=$(podman exec "$MODULE_ID" cscli decisions list --origin CAPI --output json)
 
-if [[ $list == 'null' || -z $list ]]; then
+if [[ $list == 'null' || $list == '[]' || -z $list ]]; then
     jq -n '{count: 0}'
 else
     echo "$list" | jq '{count: (if (.[0] | has("decisions")) then ([.[].decisions // [] | .[]] | length) else length end)}'
