@@ -105,6 +105,22 @@ Then run the tool as
 - inspect a scenario: `cscli scenarios inspect crowdsecurity/ssh-bf`
 - inspect a parser: `cscli parsers inspect crowdsecurity/sshd-logs`
   
+## NethVoice / Kamailio scenarios
+
+Besides the CrowdSec hub collections, ns8-crowdsec ships custom, always-installed parsers/scenarios to detect:
+
+- HTTP brute-force and exploit-scan attacks against the NethVoice CTI middleware
+- SIP brute-force attacks against Kamailio authentication
+
+This is not a real CrowdSec hub collection (it won't show up with `cscli collections list`), so it is exposed as a single fake collection named `nethesis/nethvoice` through the `list-collections`/`toggle-collection` actions and the Collections page of the UI, backed by the `NETHVOICE_COLLECTION_ENABLED` flag (enabled by default).
+
+    api-cli run toggle-collection --agent module/crowdsec1 --data - <<EOF
+    {
+        "name": "nethesis/nethvoice",
+        "action": "remove"
+    }
+    EOF
+
 ## Instance enroll request
 
 You can see the metrics of crowdsec at https://app.crowdsec.net/, for this purpose you need to create a login for a single user or an organization in the website, then in the top right menu click in `enroll an instance` and retrieve the keys, then enroll your container and restart it.

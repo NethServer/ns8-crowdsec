@@ -10,7 +10,19 @@ set -e
 list=$(podman exec "$MODULE_ID" cscli collections list --all --output json)
 
 if [[ $list == 'null' ]]; then
-    echo '[]'
+    collections='[]'
 else
-    echo "$list" | jq '.collections // .'
+    collections=$(echo "$list" | jq '.collections // .')
 fi
+
+# nethesis/nethvoice is not a real CrowdSec hub collection: it bundles the
+# always-installed NethVoice and Kamailio custom parsers/scenarios, exposed
+# here as a single fake collection so it can be listed/toggled like the real
+# ones.
+status=$([[ "${NETHVOICE_COLLECTION_ENABLED:-True}" == "True" ]] && echo enabled || echo disabled)
+
+fake=$(jq -n --arg status "$status" '[
+{name: "nethesis/nethvoice", status: $status, description: "Detect brute-force and exploit-scan attacks against the NethVoice (SIP and HTTP)", local_version: "-", up_to_date: true, tainted: false}
+]')
+
+echo "$collections" | jq --argjson fake "$fake" '. + $fake'

@@ -168,8 +168,11 @@ if whitelists:
 os.makedirs("crowdsec_config/hub/parsers/s01-parse/crowdsecurity", exist_ok=True)
 shutil.copyfile("../tainted/nextcloud-logs.yaml", "crowdsec_config/hub/parsers/s01-parse/crowdsecurity/nextcloud-logs.yaml")
 
-# NethVoice and kamailio parsers/scenarios are always installed, same as the
-# other tainted items above.
+# NethVoice and kamailio parsers/scenarios are exposed as fake collections
+# (nethesis/nethvoice, nethesis/kamailio) toggleable via toggle-collection.
+# A single flag controls both groups.
+nethvoice_enabled = os.environ.get("NETHVOICE_COLLECTION_ENABLED", "True") == "True"
+
 nethvoice_files = [
     ("../tainted/nethvoice-whitelist-http-probing.yaml", "crowdsec_config/parsers/s02-enrich/nethvoice-whitelist-http-probing.yaml"),
     ("../tainted/nethvoice-middleware-logs.yaml", "crowdsec_config/parsers/s01-parse/nethvoice-middleware-logs.yaml"),
@@ -180,8 +183,14 @@ nethvoice_files = [
 ]
 
 for src, dest in nethvoice_files:
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
-    shutil.copyfile(src, dest)
+    if nethvoice_enabled:
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        shutil.copyfile(src, dest)
+    else:
+        try:
+            os.remove(dest)
+        except FileNotFoundError:
+            pass
 
 # remove freepbx related custom parser and scenario as we don't support #7629
 files_to_remove = [
