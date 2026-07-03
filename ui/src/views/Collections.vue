@@ -208,7 +208,7 @@ export default {
   },
   methods: {
     isCollectionEnabled(row) {
-      return row.status.split(",").includes("enabled");
+      return row.status.includes("enabled");
     },
     openCrowdSecHub() {
       window.open("https://app.crowdsec.net/hub/collections", "_blank", "noopener,noreferrer");
