@@ -147,9 +147,7 @@
         "tooltip": "Collections are bundles of parsers and scenarios. Each collection adds detection support for a specific service (e.g. SSH, Nginx, WordPress). The corresponding service must be installed on the server. Enable a collection to start monitoring that service, disable it to stop.",
         "hub_title": "CrowdSec Hub",
         "hub_description": "Visit the Hub to see exactly what is included and what each collection detects.",
-        "hub_action": "Open CrowdSec Hub",
-        "tainted": "tainted",
-        "tainted_tooltip": "This collection has been locally modified and may differ from the official version"
+        "hub_action": "Open CrowdSec Hub"
     },
     "capi": {
         "title": "Threat Intelligence",
