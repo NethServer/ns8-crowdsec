@@ -111,6 +111,7 @@ Besides the CrowdSec hub collections, ns8-crowdsec ships custom, always-installe
 
 - HTTP brute-force and exploit-scan attacks against the NethVoice CTI middleware
 - Brute-force attacks against the NethVoice admin API login endpoint (`/freepbx/rest/login`)
+- Brute-force attacks against the NethVoice reports application login (`reports-api`)
 - SIP brute-force attacks against Kamailio authentication
 
 This is not a real CrowdSec hub collection (it won't show up with `cscli collections list`), so it is exposed as a single fake collection named `nethesis/nethvoice` through the `list-collections`/`toggle-collection` actions and the Collections page of the UI, backed by the `NETHVOICE_COLLECTION_ENABLED` flag (enabled by default).

@@ -178,6 +178,8 @@ nethvoice_files = [
     ("../tainted/nethvoice-middleware-bf.yaml", "crowdsec_config/scenarios/nethvoice-middleware-bf.yaml"),
     ("../tainted/nethvoice-http-exploit-scan.yaml", "crowdsec_config/scenarios/nethvoice-http-exploit-scan.yaml"),
     ("../tainted/nethvoice-admin-login-bf.yaml", "crowdsec_config/scenarios/nethvoice-admin-login-bf.yaml"),
+    ("../tainted/nethvoice-reports-logs.yaml", "crowdsec_config/parsers/s01-parse/nethvoice-reports-logs.yaml"),
+    ("../tainted/nethvoice-reports-bf.yaml", "crowdsec_config/scenarios/nethvoice-reports-bf.yaml"),
     ("../tainted/kamailio-logs.yaml", "crowdsec_config/parsers/s01-parse/kamailio-logs.yaml"),
     ("../tainted/kamailio-bf.yaml", "crowdsec_config/scenarios/kamailio-bf.yaml"),
 ]
