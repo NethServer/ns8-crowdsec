@@ -164,6 +164,7 @@ if whitelists:
             f.write(output)
 
 ## expand the tainted configuration files
+# nextcloud parser is always installed
 os.makedirs("crowdsec_config/hub/parsers/s01-parse/crowdsecurity", exist_ok=True)
 shutil.copyfile("../tainted/nextcloud-logs.yaml", "crowdsec_config/hub/parsers/s01-parse/crowdsecurity/nextcloud-logs.yaml")
 
