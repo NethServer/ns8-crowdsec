@@ -14,7 +14,7 @@ ip=$(echo "$input" | jq -r '.ip')
 
 list=$(podman exec "$MODULE_ID" cscli decisions list --origin CAPI --output json)
 
-if [[ $list == 'null' || -z $list ]]; then
+if [[ $list == 'null' || $list == '[]' || -z $list ]]; then
     jq -n '{found: false, decisions: []}'
     exit 0
 fi

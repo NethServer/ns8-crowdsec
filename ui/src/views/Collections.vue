@@ -90,8 +90,8 @@
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     <NsTag
-                      :label="row.status.includes('enabled') ? $t('settings.enabled') : $t('settings.disabled')"
-                      :kind="row.status.includes('enabled') ? 'green' : 'gray'"
+                      :label="row.status === 'enabled' ? $t('settings.enabled') : $t('settings.disabled')"
+                      :kind="row.status === 'enabled' ? 'green' : 'gray'"
                     />
                   </cv-data-table-cell>
                   <cv-data-table-cell>
@@ -104,9 +104,9 @@
                     <NsButton
                       kind="ghost"
                       size="small"
-                      @click="toggleCollectionMenu(row, row.status.includes('enabled') ? 'remove' : 'install')"
+                      @click="toggleCollectionMenu(row, row.status === 'enabled' ? 'remove' : 'install')"
                       :data-test-id="row.name + '-toggle'"
-                      >{{ row.status.includes('enabled') ? $t('collections.disable_collection') : $t('collections.enable_collection') }}
+                      >{{ row.status === 'enabled' ? $t('collections.disable_collection') : $t('collections.enable_collection') }}
                     </NsButton>
                   </cv-data-table-cell>
                 </cv-data-table-row>

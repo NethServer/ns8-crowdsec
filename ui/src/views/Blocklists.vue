@@ -429,18 +429,17 @@
     </cv-grid>
     <ConfirmUnbanIpModal
       :isShown="isShownConfirmUnbanIp"
-      :currentBan="currentBan"
-      @hideConfirmUnbanIp="hideConfirmUnbanIP"
-      @unbanIp="setDeleteBan"
-      :loading="loading.setDeleteBan"
-      :error="error.setDeleteBan"
+      :ban="currentBan"
+      :core="core"
+      @hide="hideConfirmUnbanIP"
+      @confirm="setDeleteBan"
     />
     <ConfirmUnbanAllIpsModal
       :isShown="isShownConfirmUnbanIPAll"
-      @hideConfirmUnbanIPAll="hideConfirmUnbanIPAll"
-      @unbanAllIps="setUnbanAll"
-      :loading="loading.setUnbanAll"
-      :error="error.setUnbanAll"
+      :isLoading="loading.setUnbanAll"
+      :core="core"
+      @hide="hideConfirmUnbanIPAll"
+      @confirm="setUnbanAll"
     />
   </div>
 </template>
@@ -506,6 +505,7 @@ export default {
       // community blocklist (capi)
       capiStatus: null,
       capiCount: null,
+      capiCountUnknown: false,
       capiDisabled: false,
       searchIp: "",
       searchDone: false,
@@ -564,6 +564,7 @@ export default {
   },
   beforeRouteLeave(to, from, next) {
     clearInterval(this.urlCheckInterval);
+    clearTimeout(this._capiCountTimeout);
     next();
   },
   created() {
@@ -794,6 +795,7 @@ export default {
       this.error.getCapiCount = "";
       this._capiCountTimeout = setTimeout(() => {
         this.capiCount = 0;
+        this.capiCountUnknown = true;
         this.loading.getCapiCount = false;
       }, 10000);
       this.core.$root.$once(
@@ -819,6 +821,8 @@ export default {
         console.error(`error creating task ${taskAction}`, err);
         this.error.getCapiCount = this.getErrorMessage(err);
         clearTimeout(this._capiCountTimeout);
+        this.capiCount = 0;
+        this.capiCountUnknown = true;
         this.loading.getCapiCount = false;
       }
     },
@@ -826,11 +830,13 @@ export default {
       console.error(`${taskContext.action} aborted`, taskResult);
       clearTimeout(this._capiCountTimeout);
       this.capiCount = 0;
+      this.capiCountUnknown = true;
       this.loading.getCapiCount = false;
     },
     getCapiCountCompleted(taskContext, taskResult) {
       clearTimeout(this._capiCountTimeout);
       this.capiCount = taskResult.output.count;
+      this.capiCountUnknown = false;
       this.loading.getCapiCount = false;
     },
     async searchCapiDecision() {
@@ -839,7 +845,7 @@ export default {
       this.searchFound = false;
       this.searchDecisions = [];
       this.searchDone = false;
-      if (this.capiCount === 0) {
+      if (this.capiCount === 0 && !this.capiCountUnknown) {
         this.searchDone = true;
         return;
       }
