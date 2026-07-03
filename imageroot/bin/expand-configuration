@@ -168,9 +168,8 @@ if whitelists:
 os.makedirs("crowdsec_config/hub/parsers/s01-parse/crowdsecurity", exist_ok=True)
 shutil.copyfile("../tainted/nextcloud-logs.yaml", "crowdsec_config/hub/parsers/s01-parse/crowdsecurity/nextcloud-logs.yaml")
 
-# NethVoice and kamailio parsers/scenarios are exposed as fake collections
-# (nethesis/nethvoice, nethesis/kamailio) toggleable via toggle-collection.
-# A single flag controls both groups.
+# NethVoice and kamailio parsers/scenarios are exposed as a single fake
+# collection (nethesis/nethvoice) toggleable via toggle-collection.
 nethvoice_enabled = os.environ.get("NETHVOICE_COLLECTION_ENABLED", "True") == "True"
 
 nethvoice_files = [
@@ -178,6 +177,7 @@ nethvoice_files = [
     ("../tainted/nethvoice-middleware-logs.yaml", "crowdsec_config/parsers/s01-parse/nethvoice-middleware-logs.yaml"),
     ("../tainted/nethvoice-middleware-bf.yaml", "crowdsec_config/scenarios/nethvoice-middleware-bf.yaml"),
     ("../tainted/nethvoice-http-exploit-scan.yaml", "crowdsec_config/scenarios/nethvoice-http-exploit-scan.yaml"),
+    ("../tainted/nethvoice-admin-login-bf.yaml", "crowdsec_config/scenarios/nethvoice-admin-login-bf.yaml"),
     ("../tainted/kamailio-logs.yaml", "crowdsec_config/parsers/s01-parse/kamailio-logs.yaml"),
     ("../tainted/kamailio-bf.yaml", "crowdsec_config/scenarios/kamailio-bf.yaml"),
 ]
