@@ -22,12 +22,6 @@ const routes = [
     component: Settings,
   },
   {
-    path: "/unban",
-    name: "Unban",
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/Unban.vue"),
-  },
-  {
     path: "/alerts",
     name: "Alerts",
     component: () =>
@@ -40,10 +34,10 @@ const routes = [
       import(/* webpackChunkName: "collections" */ "../views/Collections.vue"),
   },
   {
-    path: "/capi",
-    name: "Capi",
+    path: "/blocklists",
+    name: "Blocklists",
     component: () =>
-      import(/* webpackChunkName: "capi" */ "../views/Capi.vue"),
+      import(/* webpackChunkName: "blocklists" */ "../views/Blocklists.vue"),
   },
   {
     path: "/about",

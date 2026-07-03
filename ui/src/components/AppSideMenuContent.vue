@@ -22,11 +22,11 @@
         <span>{{ $t("status.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
-        @click="goToAppPage(instanceName, 'settings')"
-        :class="{ 'current-page': isLinkActive('settings') }"
+        @click="goToAppPage(instanceName, 'alerts')"
+        :class="{ 'current-page': isLinkActive('alerts') }"
       >
-        <template v-slot:nav-icon><Settings20 /></template>
-        <span>{{ $t("settings.title") }}</span>
+        <template v-slot:nav-icon><Report20 /></template>
+        <span>{{ $t("alerts.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
         @click="goToAppPage(instanceName, 'collections')"
@@ -36,25 +36,18 @@
         <span>{{ $t("collections.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
-        @click="goToAppPage(instanceName, 'alerts')"
-        :class="{ 'current-page': isLinkActive('alerts') }"
+        @click="goToAppPage(instanceName, 'blocklists')"
+        :class="{ 'current-page': isLinkActive('blocklists') }"
       >
-        <template v-slot:nav-icon><Warning20 /></template>
-        <span>{{ $t("alerts.title") }}</span>
+        <template v-slot:nav-icon><FirewallClassic20 /></template>
+        <span>{{ $t("blocklists.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
-        @click="goToAppPage(instanceName, 'unban')"
-        :class="{ 'current-page': isLinkActive('unban') }"
+        @click="goToAppPage(instanceName, 'settings')"
+        :class="{ 'current-page': isLinkActive('settings') }"
       >
-        <template v-slot:nav-icon><Error20 /></template>
-        <span>{{ $t("unban.title") }}</span>
-      </cv-side-nav-link>
-      <cv-side-nav-link
-        @click="goToAppPage(instanceName, 'capi')"
-        :class="{ 'current-page': isLinkActive('capi') }"
-      >
-        <template v-slot:nav-icon><Globe20 /></template>
-        <span>{{ $t("capi.title") }}</span>
+        <template v-slot:nav-icon><Settings20 /></template>
+        <span>{{ $t("settings.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
         @click="goToAppPage(instanceName, 'about')"
@@ -71,10 +64,9 @@
 import Settings20 from "@carbon/icons-vue/es/settings/20";
 import Information20 from "@carbon/icons-vue/es/information/20";
 import Activity20 from "@carbon/icons-vue/es/activity/20";
-import Error20 from "@carbon/icons-vue/es/error/20";
-import Warning20 from "@carbon/icons-vue/es/warning/20";
 import Catalog20 from "@carbon/icons-vue/es/catalog/20";
-import Globe20 from "@carbon/icons-vue/es/globe/20";
+import Report20 from "@carbon/icons-vue/es/report/20";
+import FirewallClassic20 from "@carbon/icons-vue/es/firewall--classic/20";
 import { mapState } from "vuex";
 import { QueryParamService, UtilService } from "@nethserver/ns8-ui-lib";
 
@@ -84,10 +76,9 @@ export default {
     Settings20,
     Information20,
     Activity20,
-    Error20,
-    Warning20,
     Catalog20,
-    Globe20,
+    Report20,
+    FirewallClassic20,
   },
   mixins: [QueryParamService, UtilService],
   data() {
