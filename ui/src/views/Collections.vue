@@ -96,19 +96,6 @@
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     {{ row.local_version || "-" }}
-                    <cv-interactive-tooltip
-                      v-if="row.status.includes('tainted')"
-                      alignment="center"
-                      direction="top"
-                      class="tooltip info mg-left-sm"
-                    >
-                      <template slot="trigger">
-                        <Information20 />
-                      </template>
-                      <template slot="content">
-                        {{ $t("collections.tainted_tooltip") }}
-                      </template>
-                    </cv-interactive-tooltip>
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     {{ row.description || "-" }}
@@ -154,13 +141,11 @@ import {
 import to from "await-to-js";
 import ConfirmToggleCollectionModal from "@/components/ConfirmToggleCollectionModal.vue";
 import Launch20 from "@carbon/icons-vue/es/launch/20";
-import Information20 from "@carbon/icons-vue/es/information/20";
 
 export default {
   name: "Collections",
   components: {
     ConfirmToggleCollectionModal,
-    Information20,
   },
   mixins: [
     QueryParamService,
@@ -179,7 +164,6 @@ export default {
         page: "collections",
       },
       Launch20,
-      Information20,
       urlCheckInterval: null,
       tablePage: [],
       tableColumns: ["name", "status", "local_version", "description"],
