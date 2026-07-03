@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import agent
+import os
+
+# Set NETHVOICE_COLLECTION_ENABLED to False only if not already set
+if "NETHVOICE_COLLECTION_ENABLED" not in os.environ:
+    agent.set_env("NETHVOICE_COLLECTION_ENABLED", False)

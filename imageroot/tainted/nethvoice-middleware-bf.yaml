@@ -1,0 +1,17 @@
+type: leaky
+name: nethserver/nethvoice-middleware-bf
+description: "Detect brute force / token-guessing against nethcti-middleware API"
+filter: "evt.Meta.log_type == 'nethvoice_middleware_access-log' && evt.Meta.http_status in ['401', '403']"
+groupby: evt.Meta.source_ip
+capacity: 8
+leakspeed: "10m"
+blackhole: "15m"
+labels:
+  confidence: 2
+  spoofable: 0
+  classification:
+    - attack.T1110
+  behavior: "http:bruteforce"
+  label: "NethVoice middleware brute force"
+  service: nethvoice-middleware
+  remediation: true
