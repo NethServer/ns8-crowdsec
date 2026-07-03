@@ -90,8 +90,8 @@
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     <NsTag
-                      :label="row.status === 'enabled' ? $t('settings.enabled') : $t('settings.disabled')"
-                      :kind="row.status === 'enabled' ? 'green' : 'gray'"
+                      :label="isCollectionEnabled(row) ? $t('settings.enabled') : $t('settings.disabled')"
+                      :kind="isCollectionEnabled(row) ? 'green' : 'gray'"
                     />
                   </cv-data-table-cell>
                   <cv-data-table-cell>
@@ -104,9 +104,9 @@
                     <NsButton
                       kind="ghost"
                       size="small"
-                      @click="toggleCollectionMenu(row, row.status === 'enabled' ? 'remove' : 'install')"
+                      @click="toggleCollectionMenu(row, isCollectionEnabled(row) ? 'remove' : 'install')"
                       :data-test-id="row.name + '-toggle'"
-                      >{{ row.status === 'enabled' ? $t('collections.disable_collection') : $t('collections.enable_collection') }}
+                      >{{ isCollectionEnabled(row) ? $t('collections.disable_collection') : $t('collections.enable_collection') }}
                     </NsButton>
                   </cv-data-table-cell>
                 </cv-data-table-row>
@@ -207,6 +207,9 @@ export default {
     this.listCollections();
   },
   methods: {
+    isCollectionEnabled(row) {
+      return row.status.split(",").includes("enabled");
+    },
     openCrowdSecHub() {
       window.open("https://app.crowdsec.net/hub/collections", "_blank", "noopener,noreferrer");
     },
