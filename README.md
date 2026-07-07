@@ -125,7 +125,7 @@ Then restart the module for changes to take effect:
 
 To disable, remove the variable from `.env`, then restart:
 
-    runagent -m crowdsec1 bash -c 'sed -i "/NETHVOICE_COLLECTION_ENABLED/d" .env'
+    runagent -m crowdsec1 python3 -c 'import agent ; agent.set_env("NETHVOICE_COLLECTION_ENABLED", "False")'
     systemctl restart crowdsec1
 
 ## Instance enroll request
