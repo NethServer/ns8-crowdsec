@@ -1,0 +1,17 @@
+type: leaky
+name: nethserver/nethvoice-admin-login-bf
+description: "Detect brute force against the NethVoice admin API login endpoint"
+filter: "evt.Meta.service == 'http' && evt.Meta.http_path == '/freepbx/rest/login' && evt.Meta.http_status in ['401', '403']"
+groupby: evt.Meta.source_ip
+capacity: 8
+leakspeed: "10m"
+blackhole: "15m"
+labels:
+  confidence: 2
+  spoofable: 0
+  classification:
+    - attack.T1110
+  behavior: "http:bruteforce"
+  label: "NethVoice admin API brute force"
+  service: nethvoice-admin
+  remediation: true

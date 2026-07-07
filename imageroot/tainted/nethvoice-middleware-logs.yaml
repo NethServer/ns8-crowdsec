@@ -1,0 +1,22 @@
+name: nethserver/nethvoice-middleware-logs
+description: "Parse nethcti-middleware (Gin) access and auth logs"
+filter: "evt.Parsed.program startsWith 'nethvoice'"
+onsuccess: next_stage
+nodes:
+  - grok:
+      pattern: '\[GIN\] %{DATA:gin_date} - %{DATA:gin_time} \| %{INT:status} \|\s*%{DATA:latency}\s*\|\s*%{IPORHOST:client_ip}\s*\| %{WORD:verb}\s*"%{DATA:path}"'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: nethvoice_middleware_access-log
+        - meta: source_ip
+          expression: evt.Parsed.client_ip
+        - meta: http_status
+          expression: evt.Parsed.status
+        - meta: http_verb
+          expression: evt.Parsed.verb
+        - meta: http_path
+          expression: evt.Parsed.path
+statics:
+  - meta: service
+    value: nethvoice-middleware

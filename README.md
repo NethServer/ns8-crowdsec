@@ -104,7 +104,30 @@ Then run the tool as
 - inspect a collection: `cscli collections inspect crowdsecurity/sshd`
 - inspect a scenario: `cscli scenarios inspect crowdsecurity/ssh-bf`
 - inspect a parser: `cscli parsers inspect crowdsecurity/sshd-logs`
-  
+
+## NethVoice / Kamailio scenarios
+
+Besides the CrowdSec hub collections, ns8-crowdsec ships custom parsers/scenarios to detect:
+
+- HTTP brute-force and exploit-scan attacks against the NethVoice CTI middleware
+- Brute-force attacks against the NethVoice admin API login endpoint (`/freepbx/rest/login`)
+- Brute-force attacks against the NethVoice reports application login (`reports-api`)
+- SIP brute-force attacks against Kamailio authentication
+
+These protections are enabled by default for new installations.
+For existing installations, the protections are disabled by default and can be enabled by setting the `NETHVOICE_COLLECTION_ENABLED=True` variable in the module's `.env` file:
+
+    runagent -m crowdsec1 python3 -c 'import agent ; agent.set_env("NETHVOICE_COLLECTION_ENABLED", "True")'
+
+Then restart the module for changes to take effect:
+
+    systemctl restart crowdsec1
+
+To disable, remove the variable from `.env`, then restart:
+
+    runagent -m crowdsec1 python3 -c 'import agent ; agent.set_env("NETHVOICE_COLLECTION_ENABLED", "False")'
+    systemctl restart crowdsec1
+
 ## Instance enroll request
 
 You can see the metrics of crowdsec at https://app.crowdsec.net/, for this purpose you need to create a login for a single user or an organization in the website, then in the top right menu click in `enroll an instance` and retrieve the keys, then enroll your container and restart it.
