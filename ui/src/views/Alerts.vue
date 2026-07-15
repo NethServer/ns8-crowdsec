@@ -7,19 +7,7 @@
     <cv-grid fullWidth>
       <cv-row>
         <cv-column class="page-title">
-          <h2>
-            {{ $t("alerts.title") }}
-            <cv-interactive-tooltip
-              alignment="start"
-              direction="right"
-              class="tooltip info mg-left-sm"
-            >
-              <template slot="trigger"></template>
-              <template slot="content">
-                <div>{{ $t("alerts.tooltip") }}</div>
-              </template>
-            </cv-interactive-tooltip>
-          </h2>
+          <h2>{{ $t("alerts.title") }}</h2>
         </cv-column>
       </cv-row>
       <cv-row>
@@ -34,33 +22,33 @@
       </cv-row>
       <cv-row>
         <cv-column>
-          <p class="page-description">{{ $t('alerts.page_description') }}</p>
-        </cv-column>
-      </cv-row>
-      <cv-row class="toolbar mg-top-sm">
-        <cv-column>
-          <NsButton
-            kind="secondary"
-            :icon="Restart20"
-            @click="listAlerts"
-            :disabled="loading.listAlerts || loading.deleteAlerts"
-            >{{ $t("alerts.reload_alerts") }}
-          </NsButton>
-          <NsButton
-            kind="tertiary"
-            :icon="TrashCan20"
-            class="mg-left-sm"
-            @click="showConfirmDelete"
-            :disabled="loading.listAlerts || loading.deleteAlerts || !alerts.length"
-            >{{ $t("alerts.delete_alerts") }}
-          </NsButton>
+          <p class="page-description mg-bottom">{{ $t("alerts.page_description") }}</p>
         </cv-column>
       </cv-row>
       <cv-row>
         <cv-column>
           <cv-tile light>
+            <div class="toolbar">
+              <NsButton
+                kind="secondary"
+                :icon="Restart20"
+                @click="listAlerts"
+                :disabled="loading.listAlerts || loading.deleteAlerts"
+                >{{ $t("alerts.reload_alerts") }}
+              </NsButton>
+              <NsButton
+                kind="tertiary"
+                :icon="TrashCan20"
+                class="mg-left-sm"
+                @click="showConfirmDelete"
+                :disabled="
+                  loading.listAlerts || loading.deleteAlerts || !alerts.length
+                "
+                >{{ $t("alerts.delete_alerts") }}
+              </NsButton>
+            </div>
             <div class="data-table-filters">
-              <div style="flex: 2;">
+              <div style="flex: 2">
                 <cv-search
                   v-model="alertsSearchFilter"
                   :placeholder="$t('alerts.search_alerts')"
@@ -68,7 +56,7 @@
                   :clear-aria-label="core.$t('common.clear_search')"
                 ></cv-search>
               </div>
-              <div style="flex: 1; min-width: 220px;">
+              <div style="flex: 1; min-width: 220px">
                 <cv-select
                   v-model="alertsLimit"
                   :label="$t('alerts.history_label')"
@@ -77,7 +65,8 @@
                     v-for="opt in alertsLimitOptions"
                     :key="opt.value"
                     :value="opt.value"
-                  >{{ opt.label }}</cv-select-option>
+                    >{{ opt.label }}</cv-select-option
+                  >
                 </cv-select>
               </div>
             </div>
@@ -188,7 +177,7 @@ import {
   IconService,
   TaskService,
   DateTimeService,
-  PageTitleService
+  PageTitleService,
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
 import ConfirmDeleteAlertsModal from "@/components/ConfirmDeleteAlertsModal.vue";
@@ -208,7 +197,7 @@ export default {
     IconService,
     TaskService,
     DateTimeService,
-    PageTitleService
+    PageTitleService,
   ],
   pageTitle() {
     return this.$t("alerts.title") + " - " + this.appName;
@@ -224,7 +213,14 @@ export default {
       alertsLimit: "500",
       alertsSearchFilter: "",
       tablePage: [],
-      tableColumns: ["created_at", "scenario", "source_ip", "source_cn", "decision_types", "events_count"],
+      tableColumns: [
+        "created_at",
+        "scenario",
+        "source_ip",
+        "source_cn",
+        "decision_types",
+        "events_count",
+      ],
       alerts: [],
       isShownConfirmDelete: false,
       isShownInspectAlert: false,
@@ -261,12 +257,27 @@ export default {
     },
     alertsLimitOptions() {
       return [
-        { value: "500",  label: this.$t("alerts.history_option", { count: 500 }) },
-        { value: "1000", label: this.$t("alerts.history_option", { count: 1000 }) },
-        { value: "2000", label: this.$t("alerts.history_option", { count: 2000 }) },
-        { value: "3000", label: this.$t("alerts.history_option", { count: 3000 }) },
-        { value: "4000", label: this.$t("alerts.history_option", { count: 4000 }) },
-        { value: "all",  label: this.$t("alerts.history_all") },
+        {
+          value: "500",
+          label: this.$t("alerts.history_option", { count: 500 }),
+        },
+        {
+          value: "1000",
+          label: this.$t("alerts.history_option", { count: 1000 }),
+        },
+        {
+          value: "2000",
+          label: this.$t("alerts.history_option", { count: 2000 }),
+        },
+        {
+          value: "3000",
+          label: this.$t("alerts.history_option", { count: 3000 }),
+        },
+        {
+          value: "4000",
+          label: this.$t("alerts.history_option", { count: 4000 }),
+        },
+        { value: "all", label: this.$t("alerts.history_all") },
       ];
     },
   },
@@ -430,8 +441,9 @@ export default {
           created_at: alert.created_at,
           scenario: alert.scenario,
           source_ip: alert.source ? alert.source.ip : "",
-          source_cn: alert.source ? (alert.source.cn || "") : "",
-          decision_types: alert.decisions && alert.decisions.length > 0 ? "ban" : "",
+          source_cn: alert.source ? alert.source.cn || "" : "",
+          decision_types:
+            alert.decisions && alert.decisions.length > 0 ? "ban" : "",
           events_count: alert.events_count,
         });
       });
@@ -444,4 +456,12 @@ export default {
 <style scoped lang="scss">
 @import "../styles/carbon-utils";
 
+.toolbar {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-05;
+}
+.mg-bottom {
+  margin-bottom: $spacing-06;
+}
 </style>
