@@ -147,21 +147,6 @@
               <p class="bantime-description">
                 {{ $t("settings.dynamic_bantime_increment_description") }}
               </p>
-              <NsSlider
-                v-if="dyn_bantime === 'dynamic'"
-                :disabled="loading.getConfiguration || loading.configureModule"
-                :label="$t('settings.dynamic_bantime_duration')"
-                v-model="dynamicBantimeDuration"
-                min="1"
-                max="1440"
-                step="1"
-                stepMultiplier="10"
-                minLabel=""
-                maxLabel=""
-                :limitedLabel="$t('settings.specify_duration')"
-                :invalidMessage="error.bantime"
-                :unitLabel="$t('settings.minutes')"
-              />
               <cv-radio-button
                 :label="$t('settings.static_bantime_increment')"
                 value="static"
@@ -172,22 +157,33 @@
               <p class="bantime-description">
                 {{ $t("settings.static_bantime_increment_description") }}
               </p>
-              <NsSlider
-                v-if="dyn_bantime === 'static'"
-                :disabled="loading.getConfiguration || loading.configureModule"
-                :label="$t('settings.static_bantime_duration')"
-                v-model="bantime"
-                min="1"
-                max="1440"
-                step="1"
-                stepMultiplier="10"
-                minLabel=""
-                maxLabel=""
-                :limitedLabel="$t('settings.specify_duration')"
-                :invalidMessage="error.bantime"
-                :unitLabel="$t('settings.minutes')"
-              />
             </cv-radio-group>
+            <NsTextInput
+              v-if="dyn_bantime === 'dynamic'"
+              :disabled="loading.getConfiguration || loading.configureModule"
+              :label="$t('settings.dynamic_bantime_duration')"
+              :helper-text="$t('settings.dynamic_bantime_duration_helper')"
+              v-model="dynamicBantimeDuration"
+              class="mg-bottom maxwidth"
+              type="number"
+              min="1"
+              max="1440"
+              step="1"
+              :invalid-message="error.bantime"
+            />
+            <NsTextInput
+              v-if="dyn_bantime === 'static'"
+              :disabled="loading.getConfiguration || loading.configureModule"
+              :label="$t('settings.static_bantime_duration')"
+              :helper-text="$t('settings.static_bantime_duration_helper')"
+              v-model="bantime"
+              class="mg-bottom maxwidth"
+              type="number"
+              min="1"
+              max="1440"
+              step="1"
+              :invalid-message="error.bantime"
+            />
             <cv-row v-if="error.configureModule">
               <cv-column>
                 <NsInlineNotification
@@ -441,7 +437,7 @@ export default {
 .bantime-description {
   font-size: 0.75rem;
   color: $text-02;
-  margin-top: -0.5rem;
+  margin-top: 0.25rem;
   margin-bottom: 0.5rem;
 }
 
