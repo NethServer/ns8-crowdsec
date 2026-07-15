@@ -138,7 +138,7 @@
         "title": "Collections",
         "no_collections": "No collections",
         "reload_collections": "Refresh",
-        "search_collections": "Search collections...",
+        "search_collections": "Filter collections",
         "col_name": "Name",
         "col_status": "Status",
         "col_local_version": "Version",
@@ -147,12 +147,10 @@
         "disable_collection": "Disable",
         "confirm_enable_title": "Enable collection",
         "confirm_disable_title": "Disable collection",
-        "confirm_enable_message": "Enable collection {name}?",
-        "confirm_disable_message": "Disable collection {name}?",
-        "tooltip": "Collections are bundles of parsers and scenarios. Each collection adds detection support for a specific service (e.g. SSH, Nginx, WordPress). The corresponding service must be installed on the server. Enable a collection to start monitoring that service, disable it to stop.",
-        "hub_title": "CrowdSec Hub",
-        "hub_description": "Visit the Hub to see exactly what is included and what each collection detects.",
-        "hub_action": "Open CrowdSec Hub"
+        "confirm_enable_message": "CrowdSec will start detecting threats for {name}.",
+        "confirm_disable_message": "CrowdSec will stop detecting threats for {name}.",
+        "hub_description": "Collections add detection support for specific services, such as SSH, Nginx or WordPress. Enable only the collections that match services installed on this server. Visit the {hub} to see what each collection includes and detects.",
+        "hub_link": "CrowdSec Hub"
     },
     "capi": {
         "title": "Threat Intelligence",

@@ -7,19 +7,7 @@
     <cv-grid fullWidth>
       <cv-row>
         <cv-column class="page-title">
-          <h2>
-            {{ $t("collections.title") }}
-            <cv-interactive-tooltip
-              alignment="start"
-              direction="right"
-              class="tooltip info mg-left-sm"
-            >
-              <template slot="trigger"></template>
-              <template slot="content">
-                <div>{{ $t("collections.tooltip") }}</div>
-              </template>
-            </cv-interactive-tooltip>
-          </h2>
+          <h2>{{ $t("collections.title") }}</h2>
         </cv-column>
       </cv-row>
       <cv-row>
@@ -30,14 +18,20 @@
             :description="core.$t('common.use_landscape_mode_description')"
             class="landscape-warning"
           />
-          <p class="page-description">{{ $t('collections.hub_description') }}</p>
-        </cv-column>
-      </cv-row>
-      <cv-row class="toolbar mg-top-sm">
-        <cv-column>
-          <NsButton kind="ghost" :icon="Launch20" @click="openCrowdSecHub">
-            {{ $t('collections.hub_action') }}
-          </NsButton>
+          <i18n
+            path="collections.hub_description"
+            tag="p"
+            class="page-description mg-bottom"
+          >
+            <template #hub>
+              <cv-link
+                href="https://app.crowdsec.net/hub/collections"
+                target="_blank"
+                rel="noopener noreferrer"
+                >{{ $t("collections.hub_link") }}</cv-link
+              >
+            </template>
+          </i18n>
         </cv-column>
       </cv-row>
       <cv-row>
@@ -140,7 +134,6 @@ import {
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
 import ConfirmToggleCollectionModal from "@/components/ConfirmToggleCollectionModal.vue";
-import Launch20 from "@carbon/icons-vue/es/launch/20";
 
 export default {
   name: "Collections",
@@ -163,7 +156,6 @@ export default {
       q: {
         page: "collections",
       },
-      Launch20,
       urlCheckInterval: null,
       tablePage: [],
       tableColumns: ["name", "status", "local_version", "description"],
@@ -207,9 +199,6 @@ export default {
     this.listCollections();
   },
   methods: {
-    openCrowdSecHub() {
-      window.open("https://app.crowdsec.net/hub/collections", "_blank", "noopener,noreferrer");
-    },
     async listCollections() {
       this.collections = [];
       this.error.listCollections = "";
@@ -259,6 +248,14 @@ export default {
           this.collections.push(collection);
         });
       }
+      this.collections.sort((a, b) => {
+        const aEnabled = a.status.includes("enabled");
+        const bEnabled = b.status.includes("enabled");
+        if (aEnabled !== bEnabled) {
+          return aEnabled ? -1 : 1;
+        }
+        return a.name.localeCompare(b.name);
+      });
       this.check_collections = this.collections.length ? true : false;
       this.loading.listCollections = false;
     },
@@ -330,4 +327,8 @@ export default {
 
 <style scoped lang="scss">
 @import "../styles/carbon-utils";
+
+.mg-bottom {
+  margin-bottom: $spacing-06;
+}
 </style>
