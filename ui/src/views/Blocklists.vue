@@ -309,7 +309,7 @@
                         <NsInlineNotification
                           kind="warning"
                           :title="$t('capi.ip_found_title')"
-                          :description="$t('capi.ip_found', { ip: searchIp })"
+                          :description="$t('capi.ip_found', { ip: searchedIp })"
                           :showCloseButton="false"
                         />
                         <div
@@ -516,6 +516,7 @@ export default {
       capiCountUnknown: false,
       capiDisabled: false,
       searchIp: "",
+      searchedIp: "",
       searchDone: false,
       searchFound: false,
       searchDecisions: [],
@@ -850,6 +851,7 @@ export default {
     async searchCapiDecision() {
       const ip = this.searchIp.trim();
       if (!ip) return;
+      this.searchedIp = ip;
       this.searchFound = false;
       this.searchDecisions = [];
       this.searchDone = false;
@@ -898,14 +900,17 @@ export default {
       this.searchDone = true;
       this.loading.searchCapiDecision = false;
     },
-    // Space out a Go-style duration ("133h40m41s" -> "133h 40m 41s")
+    // Normalize a Go-style duration: drop fractional seconds and space the
+    // units ("133h40m41.123456s" -> "133h 40m 41s")
     formatDuration(duration) {
       if (!duration) return duration;
-      return duration.replace(/([hms])(?=\d)/g, "$1 ");
+      return duration
+        .replace(/\.\d+s$/, "s")
+        .replace(/([hms])(?=\d)/g, "$1 ");
     },
     openCti() {
       window.open(
-        "https://app.crowdsec.net/cti/" + this.searchIp.trim(),
+        "https://app.crowdsec.net/cti/" + this.searchedIp,
         "_blank",
         "noopener,noreferrer"
       );
