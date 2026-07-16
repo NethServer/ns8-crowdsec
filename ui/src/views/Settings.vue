@@ -435,20 +435,7 @@ export default {
 }
 
 .bantime-description {
-  font-size: 0.75rem;
-  color: $text-02;
   margin-top: 0.25rem;
   margin-bottom: 0.5rem;
-}
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  margin-bottom: $spacing-05;
-}
-
-.page-toolbar {
-  display: flex;
-  justify-content: flex-end;
 }
 </style>

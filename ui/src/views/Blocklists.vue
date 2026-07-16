@@ -7,19 +7,7 @@
     <cv-grid fullWidth>
       <cv-row>
         <cv-column class="page-title">
-          <h2>
-            {{ $t("blocklists.title") }}
-            <cv-interactive-tooltip
-              alignment="start"
-              direction="right"
-              class="tooltip info mg-left-sm"
-            >
-              <template slot="trigger"></template>
-              <template slot="content">
-                <div>{{ $t("blocklists.tooltip") }}</div>
-              </template>
-            </cv-interactive-tooltip>
-          </h2>
+          <h2>{{ $t("blocklists.title") }}</h2>
         </cv-column>
       </cv-row>
       <cv-row>
@@ -161,9 +149,7 @@
               </cv-row>
               <cv-row>
                 <cv-column>
-                  <p class="page-description">
-                    {{ $t("blocklists.community_description") }}
-                  </p>
+                  <p>{{ $t("blocklists.community_description") }}</p>
                   <cv-link
                     href="https://app.crowdsec.net/"
                     target="_blank"
@@ -288,12 +274,12 @@
                 <cv-column class="bx--col-lg-8">
                   <cv-tile light>
                     <h4>{{ $t("blocklists.community_search") }}</h4>
-                    <p class="search-desc">{{ $t("capi.search_hint") }}</p>
-                    <p v-if="loading.getCapiCount" class="ip-count">
+                    <p>{{ $t("capi.search_hint") }}</p>
+                    <p v-if="loading.getCapiCount">
                       <cv-skeleton-text :width="'160px'"></cv-skeleton-text>
                       {{ $t("capi.syncing") }}
                     </p>
-                    <p v-else-if="capiCount !== null" class="ip-count">
+                    <p v-else-if="capiCount !== null">
                       {{ $t("capi.ips_listed", { count: capiCount }) }}
                     </p>
                     <div class="search-row mg-top">
@@ -392,7 +378,7 @@
             <cv-tab :label="$t('blocklists.tab_allowlist')">
               <cv-row>
                 <cv-column>
-                  <p class="page-description mg-bottom">
+                  <p class="mg-bottom">
                     {{ $t("blocklists.allowlist_description") }}
                   </p>
                 </cv-column>
@@ -1114,10 +1100,6 @@ export default {
   width: auto;
 }
 
-.page-description {
-  color: $text-02;
-}
-
 .console-link {
   display: inline-flex;
   align-items: center;
@@ -1127,7 +1109,6 @@ export default {
 .console-link__icon {
   width: 1rem;
   height: 1rem;
-  fill: currentColor;
 }
 
 .capi-info {
@@ -1147,25 +1128,10 @@ export default {
   font-weight: 600;
 }
 
-.search-desc {
-  color: $text-02;
-}
-
-.ip-count {
-  font-size: 0.875rem;
-  color: $text-02;
-}
-
 .search-row {
   display: flex;
   align-items: flex-end;
   max-width: 36rem;
-}
-
-.decisions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
 }
 
 .cti-links {
