@@ -37,6 +37,11 @@
           <NsTabs>
             <!-- Local blocklist -->
             <cv-tab :label="$t('blocklists.tab_local')" selected>
+              <cv-row>
+                <cv-column>
+                  <p class="mg-bottom">{{ $t("unban.tab_description") }}</p>
+                </cv-column>
+              </cv-row>
               <cv-row class="toolbar">
                 <cv-column>
                   <NsButton
@@ -48,7 +53,7 @@
                   </NsButton>
                   <template v-if="bans.length">
                     <NsButton
-                      kind="secondary"
+                      kind="tertiary"
                       class="mg-left"
                       :icon="Unlocked20"
                       @click="toggleUnbanAll"
@@ -93,7 +98,10 @@
                       <template slot="empty-state">
                         <NsEmptyState :title="$t('unban.no_bans')">
                           <template #pictogram>
-                            <FaceSatisfiedPictogram />
+                            <CircleCheckPictogram />
+                          </template>
+                          <template #description>
+                            <div>{{ $t("unban.no_bans_description") }}</div>
                           </template>
                         </NsEmptyState>
                       </template>
@@ -123,21 +131,13 @@
                             {{ row.scenario }}
                           </cv-data-table-cell>
                           <cv-data-table-cell class="table-overflow-menu-cell">
-                            <cv-overflow-menu
-                              flip-menu
-                              class="table-overflow-menu"
-                              :data-test-id="row.value + '-menu'"
-                            >
-                              <cv-overflow-menu-item
-                                @click="toggleUnban(row)"
-                                :data-test-id="row.value + '-delete-ban'"
-                              >
-                                <NsMenuItem
-                                  :icon="Unlocked20"
-                                  :label="$t('unban.delete')"
-                                />
-                              </cv-overflow-menu-item>
-                            </cv-overflow-menu>
+                            <NsButton
+                              kind="ghost"
+                              size="small"
+                              @click="toggleUnban(row)"
+                              :data-test-id="row.value + '-delete-ban'"
+                              >{{ $t("unban.delete") }}
+                            </NsButton>
                           </cv-data-table-cell>
                         </cv-data-table-row>
                       </template>
@@ -159,62 +159,52 @@
                   />
                 </cv-column>
               </cv-row>
-              <cv-row class="toolbar">
+              <cv-row>
                 <cv-column>
-                  <NsButton
-                    kind="secondary"
-                    :icon="Restart20"
-                    @click="getCapiStatus"
-                    :disabled="loading.getCapiStatus || loading.searchCapiDecision"
-                    >{{ $t("capi.reload") }}
-                  </NsButton>
+                  <p class="page-description">
+                    {{ $t("blocklists.community_description") }}
+                  </p>
+                  <cv-link
+                    href="https://app.crowdsec.net/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="console-link mg-bottom"
+                  >
+                    {{ $t("settings.open_app_crowdsec") }}
+                    <component :is="Launch16" class="console-link__icon" />
+                  </cv-link>
                 </cv-column>
               </cv-row>
               <cv-row>
                 <cv-column class="bx--col-lg-8">
                   <cv-tile light>
                     <h4>{{ $t("blocklists.community_configuration") }}</h4>
-                    <NsInlineNotification
+                    <div
                       v-if="!loading.getCapiStatus && capiStatus"
-                      :kind="capiStatus.connected ? 'info' : 'error'"
-                      :title="
-                        capiStatus.connected
-                          ? $t('capi.status_connected')
-                          : $t('capi.status_disconnected')
-                      "
-                      :showCloseButton="false"
-                    />
-                    <div
-                      v-if="capiStatus && capiStatus.connected"
-                      class="capi-chips mg-top"
+                      class="capi-info mg-top"
                     >
-                      <NsTag
-                        v-if="capiStatus.subscription"
-                        kind="blue"
-                        :label="
-                          $t('capi.subscription') + ': ' + capiStatus.subscription
-                        "
-                      />
-                      <NsTag
-                        :kind="capiStatus.sharing ? 'green' : 'red'"
-                        :label="$t('capi.sharing_signals')"
-                      />
-                      <NsTag
-                        :kind="capiStatus.pull_community ? 'green' : 'red'"
-                        :label="$t('capi.pull_community')"
-                      />
-                    </div>
-                    <div
-                      v-if="capiStatus && capiStatus.connected"
-                      class="ip-count mg-top"
-                    >
-                      <span v-if="loading.getCapiCount">
-                        <cv-skeleton-text :width="'200px'"></cv-skeleton-text>
-                        {{ $t("capi.syncing") }}
-                      </span>
-                      <span v-else-if="capiCount !== null">
-                        {{ $t("capi.ip_count", { count: capiCount }) }}
-                      </span>
+                      <div class="info-row">
+                        <span class="info-label">{{
+                          $t("capi.central_api_status")
+                        }}</span>
+                        <NsTag
+                          :kind="capiStatus.connected ? 'green' : 'red'"
+                          :label="
+                            capiStatus.connected
+                              ? $t('capi.connected')
+                              : $t('capi.disconnected')
+                          "
+                        />
+                      </div>
+                      <div
+                        v-if="capiStatus.connected && capiStatus.subscription"
+                        class="info-row"
+                      >
+                        <span class="info-label">{{
+                          $t("capi.subscription_label")
+                        }}</span>
+                        <span>{{ capiStatus.subscription }}</span>
+                      </div>
                     </div>
                     <NsToggle
                       :label="$t('settings.enable_online_api')"
@@ -238,34 +228,17 @@
                       }}</template>
                     </NsToggle>
                     <template v-if="enable_online_api">
-                      <NsButton
-                        kind="tertiary"
-                        size="field"
-                        :icon="Launch20"
-                        :disabled="loading.getConfiguration"
-                        @click="goToAppCrowdsec"
-                        class="mg-bottom mg-top"
-                      >
-                        {{ $t("settings.open_app_crowdsec") }}
-                      </NsButton>
                       <NsTextInput
                         :label="$t('settings.enroll_instance')"
+                        :helper-text="$t('settings.enroll_instance_helper')"
                         v-model="enroll_instance"
-                        class="mg-bottom"
+                        class="mg-top mg-bottom"
                         :invalid-message="error.enroll_instance"
                         :disabled="
                           loading.getConfiguration || loading.saveCommunityConfig
                         "
                         ref="enroll_instance"
-                        tooltipAlignment="center"
-                        tooltipDirection="right"
-                      >
-                        <template slot="tooltip">
-                          <div>
-                            {{ $t("settings.enroll_instance_must_be_real_token") }}
-                          </div>
-                        </template>
-                      </NsTextInput>
+                      />
                       <NsToggle
                         :label="$t('settings.pull_community_blocklist')"
                         value="pull_community_blocklist"
@@ -315,6 +288,14 @@
                 <cv-column class="bx--col-lg-8">
                   <cv-tile light>
                     <h4>{{ $t("blocklists.community_search") }}</h4>
+                    <p class="search-desc">{{ $t("capi.search_hint") }}</p>
+                    <p v-if="loading.getCapiCount" class="ip-count">
+                      <cv-skeleton-text :width="'160px'"></cv-skeleton-text>
+                      {{ $t("capi.syncing") }}
+                    </p>
+                    <p v-else-if="capiCount !== null" class="ip-count">
+                      {{ $t("capi.ips_listed", { count: capiCount }) }}
+                    </p>
                     <div class="search-row mg-top">
                       <cv-text-input
                         v-model="searchIp"
@@ -341,19 +322,47 @@
                       <div v-if="searchFound">
                         <NsInlineNotification
                           kind="warning"
-                          :title="$t('capi.ip_found_desc')"
+                          :title="$t('capi.ip_found_title')"
+                          :description="$t('capi.ip_found', { ip: searchIp })"
                           :showCloseButton="false"
                         />
-                        <div class="decisions mg-top-sm">
-                          <NsTag
-                            v-for="(d, i) in searchDecisions"
-                            :key="i"
-                            kind="red"
-                            :label="d.scenario + ' · ' + d.type + ' · ' + d.duration"
-                          />
+                        <div
+                          v-for="(d, i) in searchDecisions"
+                          :key="i"
+                          class="capi-info mg-top"
+                        >
+                          <div class="info-row">
+                            <span class="info-label">{{
+                              $t("capi.col_reason")
+                            }}</span>
+                            <span>{{ d.scenario }}</span>
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">{{
+                              $t("capi.col_action")
+                            }}</span>
+                            <NsTag
+                              kind="red"
+                              :label="
+                                d.type === 'ban'
+                                  ? $t('capi.action_blocked')
+                                  : d.type
+                              "
+                            />
+                          </div>
+                          <div class="info-row">
+                            <span class="info-label">{{
+                              $t("capi.col_time_remaining")
+                            }}</span>
+                            <span>{{ formatDuration(d.duration) }}</span>
+                          </div>
                         </div>
-                        <div class="cti-links mg-top-sm">
-                          <NsButton kind="ghost" :icon="Launch20" @click="openCti">
+                        <div class="cti-links mg-top">
+                          <NsButton
+                            kind="tertiary"
+                            :icon="Launch20"
+                            @click="openCti"
+                          >
                             {{ $t("capi.view_cti") }}
                           </NsButton>
                           <NsButton
@@ -367,7 +376,10 @@
                       </div>
                       <NsEmptyState v-else :title="$t('capi.no_results')">
                         <template #pictogram>
-                          <FaceSatisfiedPictogram />
+                          <CircleCheckPictogram />
+                        </template>
+                        <template #description>
+                          <div>{{ $t("capi.no_results_desc") }}</div>
                         </template>
                       </NsEmptyState>
                     </div>
@@ -380,14 +392,14 @@
             <cv-tab :label="$t('blocklists.tab_allowlist')">
               <cv-row>
                 <cv-column>
+                  <p class="page-description mg-bottom">
+                    {{ $t("blocklists.allowlist_description") }}
+                  </p>
+                </cv-column>
+              </cv-row>
+              <cv-row>
+                <cv-column>
                   <cv-tile light>
-                    <NsInlineNotification
-                      kind="info"
-                      :title="$t('blocklists.allowlist_info_title')"
-                      :description="$t('blocklists.allowlist_info_description')"
-                      :showCloseButton="false"
-                      class="mg-bottom"
-                    />
                     <cv-text-area
                       :label="$t('settings.whitelists')"
                       v-model.trim="whitelists"
@@ -396,10 +408,18 @@
                       :value="whitelists"
                       class="maxwidth textarea"
                       ref="whitelists"
+                      :rows="6"
                       :placeholder="$t('settings.whitelist_placeholder')"
                       :disabled="loading.getConfiguration || loading.saveAllowlist"
                     >
                     </cv-text-area>
+                    <NsInlineNotification
+                      kind="info"
+                      :title="$t('blocklists.allowlist_info_title')"
+                      :description="$t('blocklists.allowlist_info_description')"
+                      :showCloseButton="false"
+                      class="mg-top"
+                    />
                     <cv-row v-if="error.saveAllowlist">
                       <cv-column>
                         <NsInlineNotification
@@ -458,6 +478,7 @@ import to from "await-to-js";
 import ConfirmUnbanIpModal from "@/components/ConfirmUnbanIpModal.vue";
 import ConfirmUnbanAllIpsModal from "@/components/ConfirmUnbanAllIpsModal.vue";
 import Unlocked20 from "@carbon/icons-vue/es/unlocked/20";
+import Launch16 from "@carbon/icons-vue/es/launch/16";
 
 export default {
   name: "Blocklists",
@@ -482,6 +503,7 @@ export default {
         page: "blocklists",
       },
       Unlocked20,
+      Launch16,
       urlCheckInterval: null,
       // local blocklist (unban)
       tablePage: [],
@@ -890,6 +912,11 @@ export default {
       this.searchDone = true;
       this.loading.searchCapiDecision = false;
     },
+    // Space out a Go-style duration ("133h40m41s" -> "133h 40m 41s")
+    formatDuration(duration) {
+      if (!duration) return duration;
+      return duration.replace(/([hms])(?=\d)/g, "$1 ");
+    },
     openCti() {
       window.open(
         "https://app.crowdsec.net/cti/" + this.searchIp.trim(),
@@ -903,10 +930,6 @@ export default {
         "_blank",
         "noopener,noreferrer"
       );
-    },
-    goToAppCrowdsec(e) {
-      window.open("https://app.crowdsec.net/", "_blank", "noopener,noreferrer");
-      e.preventDefault();
     },
     // ---- Shared configuration (community blocklist + allowlist) ----
     async getConfiguration() {
@@ -1084,10 +1107,48 @@ export default {
 <style scoped lang="scss">
 @import "../styles/carbon-utils";
 
-.capi-chips {
+// Prevent Carbon from truncating tab labels (e.g. "Community blocklist").
+// Carbon renders these tabs in scrollable mode with a fixed width: 10rem.
+::v-deep .bx--tabs__nav-link,
+::v-deep .bx--tabs--scrollable .bx--tabs--scrollable__nav-link {
+  width: auto;
+}
+
+.page-description {
+  color: $text-02;
+}
+
+.console-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.console-link__icon {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+}
+
+.capi-info {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.5rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.info-label {
+  width: 10rem;
+  font-weight: 600;
+}
+
+.search-desc {
+  color: $text-02;
 }
 
 .ip-count {
@@ -1109,6 +1170,7 @@ export default {
 
 .cti-links {
   display: flex;
+  align-items: center;
   gap: 1rem;
 }
 
