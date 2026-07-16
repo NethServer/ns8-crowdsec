@@ -39,11 +39,11 @@ Take screenshots
     Wait For Elements State    iframe >>> h2 >> text="Blocklists"    visible    timeout=10s
     Sleep    5s
     Take Screenshot    filename=${OUTPUT DIR}/browser/screenshot/5._Blocklists_Local.png
-    Click    iframe >>> text="Community blocklist"
+    Click    iframe >>> role=tab[name="Community blocklist"]
     Wait For Elements State    iframe >>> h4 >> text="Configuration"    visible    timeout=10s
     Sleep    3s
     Take Screenshot    filename=${OUTPUT DIR}/browser/screenshot/6._Blocklists_Community.png
-    Click    iframe >>> text="Allowlist"
+    Click    iframe >>> role=tab[name="Allowlist"]
     Wait For Elements State    iframe >>> text="Allowlist entries"    visible    timeout=10s
     Sleep    3s
     Take Screenshot    filename=${OUTPUT DIR}/browser/screenshot/7._Blocklists_Allowlist.png
@@ -105,8 +105,22 @@ Check if crowdsec can list decisions
     Should Be Equal As Integers    ${rc}    0
     Should Contain    ${output}    Ip:10.10.10.10
 
+Check if 10.10.10.10 is listed in ruleset (20 attempts with 5 sec)
+    ${os_release}=    Execute Command    cat /etc/os-release
+    IF    'ID=debian' in $os_release
+        Skip    Skipping ruleset check: nft not available on Debian
+    ELSE
+        Wait Until Keyword Succeeds    20x    5s    Check IP In Ruleset    10.10.10.10
+    END
+
+Check if crowdsec can unban 10.10.10.10
+    ${output}    ${rc}=    Execute Command    runagent -m ${module_id} cscli decisions delete -i 10.10.10.10    return_rc=True
+    Should Be Equal As Integers    ${rc}    0
+
 List alerts and inspect the manual alert
-    # the manual ban above creates an alert; list-alerts must return it
+    # the manual ban above created an alert; deleting its decision leaves the
+    # alert, so list-alerts still returns it here (run after the ruleset check
+    # because flushing alerts cascades to their decisions)
     ${output}    ${rc}=    Run Module Action    list-alerts
     Should Be Equal As Integers    ${rc}    0
     ${id}=    Execute Command    echo '${output}' | jq -r '.[0].id'
@@ -124,22 +138,15 @@ Flush alerts
 Unban an IP through the module action
     ${rc}=    Execute Command    runagent -m ${module_id} cscli decisions add -i 1.2.3.4    return_rc=True    return_stdout=False
     Should Be Equal As Integers    ${rc}    0
+    ${os_release}=    Execute Command    cat /etc/os-release
+    # confirm the ban reached nft before unbanning (nft not available on Debian)
+    IF    'ID=debian' not in $os_release
+        Wait Until Keyword Succeeds    20x    5s    Check IP In Ruleset    1.2.3.4
+    END
     ${out}    ${rc}=    Run Module Action    unban-ip    {"action": "unban", "ip": "1.2.3.4"}
     Should Be Equal As Integers    ${rc}    0
     ${output}=    Execute Command    runagent -m ${module_id} cscli decisions list
     Should Not Contain    ${output}    Ip:1.2.3.4
-
-Check if 10.10.10.10 is listed in ruleset (20 attempts with 5 sec)
-    ${os_release}=    Execute Command    cat /etc/os-release
-    IF    'ID=debian' in $os_release
-        Skip    Skipping ruleset check: nft not available on Debian
-    ELSE
-        Wait Until Keyword Succeeds    20x    5s    Check IP In Ruleset    10.10.10.10
-    END
-
-Check if crowdsec can unban 10.10.10.10
-    ${output}    ${rc}=    Execute Command    runagent -m ${module_id} cscli decisions delete -i 10.10.10.10    return_rc=True
-    Should Be Equal As Integers    ${rc}    0
 
 Configure and verify the allowlist
     # runs after the ban/ruleset flow: configure-module restarts the firewall
