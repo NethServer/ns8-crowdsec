@@ -52,6 +52,7 @@
               :value="receiver_emails"
               class="maxwidth textarea"
               ref="receiver_emails"
+              :rows="6"
               :disabled="
                 loading.getConfiguration ||
                 loading.configureModule ||
@@ -434,8 +435,18 @@ export default {
   margin-top: $spacing-05;
 }
 
+// Let the description drive the spacing so each option is spaced evenly
+::v-deep .bx--radio-button-group--vertical .bx--radio-button-wrapper {
+  margin-bottom: 0;
+}
+
+// Radio option description: grey, aligned under the label text (past the radio)
 .bantime-description {
-  margin-top: 0.25rem;
-  margin-bottom: 0.5rem;
+  margin: 0.25rem 0 0 1.75rem;
+  color: $text-02;
+}
+
+.bantime-description:not(:last-child) {
+  margin-bottom: $spacing-05;
 }
 </style>
