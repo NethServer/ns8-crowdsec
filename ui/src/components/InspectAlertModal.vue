@@ -4,7 +4,7 @@
 -->
 <template>
   <NsModal
-    size="lg"
+    size="small"
     :visible="isShown"
     @modal-hidden="onModalHidden"
     @primary-click="onModalHidden"
@@ -70,6 +70,7 @@
             :allRows="alert.events"
             :columns="eventsI18nColumns"
             :rawColumns="eventsColumns"
+            rowSize="compact"
             :pageSizes="[5, 10, 25]"
             :itemsPerPageLabel="core.$t('pagination.items_per_page')"
             :rangeOfTotalItemsLabel="core.$t('pagination.range_of_total_items')"
@@ -181,5 +182,11 @@ export default {
 
 h5.mg-top-md {
   margin-bottom: 0.5rem;
+}
+
+// Figma shows a grey pagination bar, not the default white
+::v-deep .bx--pagination,
+::v-deep .bx--pagination .bx--select-input {
+  background-color: $ui-01;
 }
 </style>
