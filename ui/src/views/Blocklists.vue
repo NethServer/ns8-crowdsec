@@ -144,12 +144,15 @@
                     :title="$t('capi.capi_disabled_title')"
                     :description="$t('capi.capi_disabled')"
                     :showCloseButton="false"
+                    class="mg-bottom"
                   />
                 </cv-column>
               </cv-row>
               <cv-row>
                 <cv-column>
-                  <p>{{ $t("blocklists.community_description") }}</p>
+                  <p class="mg-bottom">
+                    {{ $t("blocklists.community_description") }}
+                  </p>
                   <cv-link
                     href="https://app.crowdsec.net/"
                     target="_blank"
@@ -161,7 +164,7 @@
                   </cv-link>
                 </cv-column>
               </cv-row>
-              <cv-row>
+              <cv-row class="equal-height-row">
                 <cv-column class="bx--col-lg-8">
                   <cv-tile light>
                     <h4>{{ $t("blocklists.community_configuration") }}</h4>
@@ -197,7 +200,7 @@
                       value="enable_online_api"
                       :form-item="true"
                       v-model="enable_online_api"
-                      class="mg-top"
+                      class="mg-top mg-bottom"
                       :disabled="
                         loading.getConfiguration || loading.saveCommunityConfig
                       "
@@ -213,12 +216,12 @@
                         $t("settings.enabled")
                       }}</template>
                     </NsToggle>
-                    <template v-if="enable_online_api">
+                    <div v-if="enable_online_api" class="dependent-fields">
                       <NsTextInput
                         :label="$t('settings.enroll_instance')"
                         :helper-text="$t('settings.enroll_instance_helper')"
                         v-model="enroll_instance"
-                        class="mg-top mg-bottom"
+                        class="mg-bottom"
                         :invalid-message="error.enroll_instance"
                         :disabled="
                           loading.getConfiguration || loading.saveCommunityConfig
@@ -227,6 +230,7 @@
                       />
                       <NsToggle
                         :label="$t('settings.pull_community_blocklist')"
+                        class="mg-bottom"
                         value="pull_community_blocklist"
                         :form-item="true"
                         v-model="pull_community_blocklist"
@@ -247,7 +251,7 @@
                           $t("settings.enabled")
                         }}</template>
                       </NsToggle>
-                    </template>
+                    </div>
                     <cv-row v-if="error.saveCommunityConfig">
                       <cv-column>
                         <NsInlineNotification
@@ -255,6 +259,7 @@
                           :title="$t('action.configure-module')"
                           :description="error.saveCommunityConfig"
                           :showCloseButton="false"
+                          class="mg-bottom"
                         />
                       </cv-column>
                     </cv-row>
@@ -273,8 +278,10 @@
                 </cv-column>
                 <cv-column class="bx--col-lg-8">
                   <cv-tile light>
-                    <h4>{{ $t("blocklists.community_search") }}</h4>
-                    <p>{{ $t("capi.search_hint") }}</p>
+                    <h4 class="mg-bottom">
+                      {{ $t("blocklists.community_search") }}
+                    </h4>
+                    <p class="mg-bottom">{{ $t("capi.search_hint") }}</p>
                     <p v-if="loading.getCapiCount">
                       <cv-skeleton-text :width="'160px'"></cv-skeleton-text>
                       {{ $t("capi.syncing") }}
@@ -404,7 +411,7 @@
                       :title="$t('blocklists.allowlist_info_title')"
                       :description="$t('blocklists.allowlist_info_description')"
                       :showCloseButton="false"
-                      class="mg-top"
+                      class="mg-top mg-bottom maxwidth"
                     />
                     <cv-row v-if="error.saveAllowlist">
                       <cv-column>
@@ -413,6 +420,7 @@
                           :title="$t('action.configure-module')"
                           :description="error.saveAllowlist"
                           :showCloseButton="false"
+                          class="mg-bottom"
                         />
                       </cv-column>
                     </cv-row>
@@ -1139,6 +1147,15 @@ export default {
   max-width: 36rem;
 }
 
+// Match the input height to the Search button
+.search-row ::v-deep .bx--form-item {
+  flex: 1;
+}
+
+.search-row ::v-deep .bx--text-input {
+  height: 3rem;
+}
+
 .cti-links {
   display: flex;
   align-items: center;
@@ -1159,5 +1176,24 @@ export default {
 
 .mg-left {
   margin-left: 1rem;
+}
+
+// Fields depending on the Central API toggle
+.dependent-fields {
+  margin-left: 1.5rem;
+}
+
+// Equal height for the config and search tiles
+.equal-height-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.equal-height-row > [class*="bx--col"] {
+  display: flex;
+}
+
+.equal-height-row ::v-deep .bx--tile {
+  width: 100%;
 }
 </style>
