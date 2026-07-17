@@ -17,9 +17,16 @@
         "created": "Created",
         "mount": "Mount",
         "no_services": "No services",
-        "all_services_ok": "All services are running",
         "no_images": "No images",
-        "no_volumes": "No volumes"
+        "no_volumes": "No volumes",
+        "application": "Application",
+        "restart_application": "Restart application",
+        "restart_module_warning": "Are you sure you want to restart {name}? The service will be briefly unavailable during the restart.",
+        "go_to_node_details": "Go to node details",
+        "failed_services": "Failed services",
+        "all_services_running": "All services are running",
+        "search_images": "Search images",
+        "search_volumes": "Search volumes"
     },
     "settings": {
         "title": "Settings",
@@ -201,6 +208,7 @@
     },
     "action": {
         "get-status": "Get status",
+        "restart-module": "Restart application",
         "get-configuration": "Get configuration",
         "configure-module": "Configure module",
         "get-module-info": "Get module info",
