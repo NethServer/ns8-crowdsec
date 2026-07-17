@@ -65,8 +65,8 @@
           <span class="value">{{ alert.message }}</span>
         </div>
         <h5 class="mg-top-md">{{ $t("alerts.inspect_events_list") }}</h5>
-        <cv-tile v-if="alert.events && alert.events.length" light>
           <NsDataTable
+            v-if="alert.events && alert.events.length"
             :allRows="alert.events"
             :columns="eventsI18nColumns"
             :rawColumns="eventsColumns"
@@ -91,7 +91,6 @@
               </cv-data-table-row>
             </template>
           </NsDataTable>
-        </cv-tile>
         <div v-else>
           {{ $t("alerts.no_events") }}
         </div>
