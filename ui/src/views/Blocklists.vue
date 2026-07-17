@@ -913,6 +913,7 @@ export default {
     formatDuration(duration) {
       if (!duration) return duration;
       return duration
+        .replace(/^-/, "")
         .replace(/\.\d+s$/, "s")
         .replace(/([hms])(?=\d)/g, "$1 ");
     },
