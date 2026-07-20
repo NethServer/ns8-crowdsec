@@ -29,7 +29,7 @@ tar -C "${bouncer_tmp_dir}" -x -v -z -f crowdsec-firewall-bouncer-linux-amd64.tg
 
 # Create a new empty container image for crowdsec-firewall-bouncer
 reponame="crowdsec-firewall-bouncer"
-container=$(buildah from docker.io/alpine:3.23.4)
+container=$(buildah from docker.io/alpine:3.23.5)
 
 # add to the container the crowdsec-firewall-bouncer
 buildah add --chmod 750 ${container} ${bouncer_tmp_dir}/crowdsec-firewall-bouncer-v*/crowdsec-firewall-bouncer /usr/local/bin/crowdsec-firewall-bouncer
@@ -66,7 +66,7 @@ if ! buildah containers --format "{{.ContainerName}}" | grep -q nodebuilder-crow
 fi
 
 echo "Build static UI files with node..."
-buildah run --env="NODE_OPTIONS=--openssl-legacy-provider" nodebuilder-crowdsec sh -c "cd /usr/src/ui && yarn install && yarn build"
+buildah run --env="NODE_OPTIONS=--openssl-legacy-provider" nodebuilder-crowdsec sh -c "cd /usr/src/ui && corepack enable && yarn install && yarn build"
 
 # Add imageroot directory to the container image
 buildah add "${container}" imageroot /imageroot
