@@ -125,6 +125,31 @@ To uninstall the instance:
 
     remove-module --no-preserve crowdsec1
 
+## Inspect active bans (nftables)
+
+Since version 1.0.6 the firewall bouncer runs in a privileged container with
+`--network=host` and writes host **nftables** sets — one set per decision
+origin, split by IP family (table `crowdsec` for IPv4, `crowdsec6` for IPv6).
+Run these on the host as root:
+
+    # list every crowdsec set (names + element counts)
+    nft list sets table ip crowdsec
+    nft list sets table ip6 crowdsec6
+
+    # dump the community (CAPI) blocklist contents
+    nft list set ip crowdsec crowdsec-blacklists-CAPI
+    nft list set ip6 crowdsec6 crowdsec6-blacklists-CAPI
+
+Sets follow the pattern `crowdsec-blacklists-<ORIGIN>` / `crowdsec6-blacklists-<ORIGIN>`
+(e.g. `CAPI` for the community blocklist, `cscli` for manual bans, `crowdsec`
+for local scenario decisions). Each element carries a `timeout`/`expires` value
+matching the decision duration.
+
+Disabling the Central API or the community blocklist purges the CAPI decisions
+(`cscli decisions delete --all --origin CAPI`) and flushes the matching
+`*-blacklists-CAPI` sets immediately, so bans clear without waiting for the
+bouncer to resync.
+
 ## Uninstall the old crowdsec binary bouncer
 
 Previous to the version 1.0.6 the bouncer was installed on the host following a repository method, after this version the bouncer is shipped in a full container.
