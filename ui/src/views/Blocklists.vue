@@ -62,6 +62,7 @@
                       :pageSizes="[10, 25, 50, 100]"
                       :overflow-menu="true"
                       :isSearchable="check_bans"
+                      :filterRowsCallback="filterBans"
                       :searchPlaceholder="$t('unban.search_bans')"
                       :searchClearLabel="core.$t('common.clear_search')"
                       :noSearchResultsLabel="core.$t('common.no_search_results')"
@@ -113,7 +114,7 @@
                             {{ row.value }}
                           </cv-data-table-cell>
                           <cv-data-table-cell>
-                            {{ row.duration }}
+                            {{ formatDuration(row.duration) }}
                           </cv-data-table-cell>
                           <cv-data-table-cell>
                             {{ row.scenario }}
@@ -501,13 +502,7 @@ export default {
       urlCheckInterval: null,
       // local blocklist (unban)
       tablePage: [],
-      tableColumns: [
-        "col_created_at",
-        "col_value",
-        "col_duration",
-        "col_scenario",
-        "",
-      ],
+      tableColumns: ["created_at", "value", "duration", "scenario", ""],
       bans: [],
       check_bans: false,
       isShownConfirmUnbanIp: false,
@@ -563,7 +558,7 @@ export default {
   computed: {
     ...mapState(["instanceName", "core", "appName"]),
     i18nTableColumns() {
-      return this.tableColumns.map((c) => (c ? this.$t("unban." + c) : ""));
+      return this.tableColumns.map((c) => (c ? this.$t("unban.col_" + c) : ""));
     },
     isValidIp() {
       const ip = this.searchIp.trim();
@@ -908,13 +903,32 @@ export default {
       this.searchDone = true;
       this.loading.searchCapiDecision = false;
     },
-    // Normalize a Go-style duration: drop fractional seconds and space the
-    // units ("133h40m41.123456s" -> "133h 40m 41s")
+    // Search over the values as displayed (local-time date, spaced duration)
+    // so hours and the "Time remaining" column match what the user sees.
+    banSearchText(b) {
+      return [
+        this.formatDate(new Date(b.created_at), "yyyy-MM-dd HH.mm"),
+        b.value,
+        this.formatDuration(b.duration),
+        b.scenario,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+    },
+    filterBans(query) {
+      const q = (query || "").trim().toLowerCase();
+      if (!q) return this.bans;
+      return this.bans.filter((b) => this.banSearchText(b).includes(q));
+    },
+    // Normalize a Go-style duration: drop fractional seconds and space every
+    // unit ("133h40m41.123456s" -> "133 h 40 m 41 s")
     formatDuration(duration) {
       if (!duration) return duration;
       return duration
         .replace(/^-/, "")
         .replace(/\.\d+s$/, "s")
+        .replace(/(\d)([hms])/g, "$1 $2")
         .replace(/([hms])(?=\d)/g, "$1 ");
     },
     openCti() {
@@ -1173,6 +1187,10 @@ export default {
 
 .mg-top-lg {
   margin-top: 4rem;
+}
+
+::v-deep .empty-state {
+  background-color: $ui-01;
 }
 
 .mg-bottom {
