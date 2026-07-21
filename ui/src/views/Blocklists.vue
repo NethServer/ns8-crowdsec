@@ -351,7 +351,7 @@
                             <span>{{ formatDuration(d.duration) }}</span>
                           </div>
                         </div>
-                        <div class="cti-links mg-top">
+                        <div class="cti-links mg-top-lg">
                           <NsButton
                             kind="tertiary"
                             :icon="Launch20"
