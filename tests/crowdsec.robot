@@ -27,7 +27,7 @@ Take screenshots
     Wait For Elements State    iframe >>> h2 >> text="Settings"    visible    timeout=10s
     Sleep    5s
     Take Screenshot    filename=${OUTPUT DIR}/browser/screenshot/2._Settings.png
-    Go To    https://${NODE_ADDR}/cluster-admin/#/apps/${module_id}?page=alerts
+    Go To    https://${NODE_ADDR}/cluster-admin/#/apps/${module_id}?page=detections
     Wait For Elements State    iframe >>> h2 >> text="Detections"    visible    timeout=10s
     Sleep    5s
     Take Screenshot    filename=${OUTPUT DIR}/browser/screenshot/3._Detections.png
@@ -119,20 +119,20 @@ Check if crowdsec can unban 10.10.10.10
 
 List alerts and inspect the manual alert
     # the manual ban above created an alert; deleting its decision leaves the
-    # alert, so list-alerts still returns it here (run after the ruleset check
+    # alert, so list-detections still returns it here (run after the ruleset check
     # because flushing alerts cascades to their decisions)
-    ${output}    ${rc}=    Run Module Action    list-alerts
+    ${output}    ${rc}=    Run Module Action    list-detections
     Should Be Equal As Integers    ${rc}    0
     ${id}=    Execute Command    echo '${output}' | jq -r '.[0].id'
     Should Not Be Empty    ${id}
     Should Not Be Equal    ${id}    null
-    ${out}    ${rc}=    Run Module Action    inspect-alert    {"id": ${id}}
+    ${out}    ${rc}=    Run Module Action    inspect-detection    {"id": ${id}}
     Should Be Equal As Integers    ${rc}    0
     ${has_scenario}=    Execute Command    echo '${out}' | jq 'has("scenario")'
     Should Be Equal    ${has_scenario}    true
 
 Flush alerts
-    ${out}    ${rc}=    Run Module Action    delete-alerts
+    ${out}    ${rc}=    Run Module Action    delete-detections
     Should Be Equal As Integers    ${rc}    0
 
 Unban an IP through the module action
