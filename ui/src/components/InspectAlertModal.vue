@@ -19,7 +19,7 @@
         <div class="key-value-setting">
           <span class="label">{{ $t("alerts.inspect_country") }}</span>
           <span class="value">{{
-            alert.source && alert.source.cn ? alert.source.cn : "-"
+            formatCountry(alert.source && alert.source.cn)
           }}</span>
         </div>
         <div class="key-value-setting">
@@ -113,6 +113,7 @@ import {
   IconService,
   DateTimeService,
 } from "@nethserver/ns8-ui-lib";
+import { formatCountry } from "../lib/country";
 export default {
   name: "InspectAlertModal",
   mixins: [UtilService, IconService, DateTimeService],
@@ -135,6 +136,9 @@ export default {
     },
   },
   methods: {
+    formatCountry(cn) {
+      return formatCountry(cn, this.$i18n.locale);
+    },
     onModalHidden() {
       this.$emit("hide");
       this.$emit("after-hide");

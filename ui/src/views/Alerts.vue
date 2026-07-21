@@ -187,6 +187,7 @@ import {
 import to from "await-to-js";
 import ConfirmDeleteAlertsModal from "@/components/ConfirmDeleteAlertsModal.vue";
 import InspectAlertModal from "@/components/InspectAlertModal.vue";
+import { formatCountry } from "@/lib/country";
 import Restart20 from "@carbon/icons-vue/es/restart/20";
 import TrashCan20 from "@carbon/icons-vue/es/trash-can/20";
 
@@ -448,7 +449,10 @@ export default {
           created_at: alert.created_at,
           scenario: alert.scenario,
           source_ip: alert.source ? alert.source.ip : "",
-          source_cn: alert.source ? alert.source.cn || "" : "",
+          source_cn: formatCountry(
+            alert.source ? alert.source.cn : "",
+            this.$i18n.locale
+          ),
           decision_types: decision ? "ban" : "",
           decision_expired: decision
             ? (decision.duration || "").split(".")[0].startsWith("-")
