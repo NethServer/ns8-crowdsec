@@ -22,11 +22,11 @@
         <span>{{ $t("status.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
-        @click="goToAppPage(instanceName, 'alerts')"
-        :class="{ 'current-page': isLinkActive('alerts') }"
+        @click="goToAppPage(instanceName, 'detections')"
+        :class="{ 'current-page': isLinkActive('detections') }"
       >
         <template v-slot:nav-icon><Report20 /></template>
-        <span>{{ $t("alerts.title") }}</span>
+        <span>{{ $t("detections.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
         @click="goToAppPage(instanceName, 'collections')"

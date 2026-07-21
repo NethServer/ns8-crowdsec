@@ -22,10 +22,10 @@ const routes = [
     component: Settings,
   },
   {
-    path: "/alerts",
-    name: "Alerts",
+    path: "/detections",
+    name: "Detections",
     component: () =>
-      import(/* webpackChunkName: "alerts" */ "../views/Alerts.vue"),
+      import(/* webpackChunkName: "detections" */ "../views/Detections.vue"),
   },
   {
     path: "/collections",

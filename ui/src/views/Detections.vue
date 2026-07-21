@@ -7,7 +7,7 @@
     <cv-grid fullWidth>
       <cv-row>
         <cv-column class="page-title">
-          <h2>{{ $t("alerts.title") }}</h2>
+          <h2>{{ $t("detections.title") }}</h2>
         </cv-column>
       </cv-row>
       <cv-row>
@@ -22,7 +22,7 @@
       </cv-row>
       <cv-row>
         <cv-column>
-          <p class="page-description mg-bottom">{{ $t("alerts.page_description") }}</p>
+          <p class="page-description mg-bottom">{{ $t("detections.page_description") }}</p>
         </cv-column>
       </cv-row>
       <cv-row>
@@ -34,7 +34,7 @@
                 :icon="Restart20"
                 @click="listAlerts"
                 :disabled="loading.listAlerts || loading.deleteAlerts"
-                >{{ $t("alerts.reload_alerts") }}
+                >{{ $t("detections.reload_alerts") }}
               </NsButton>
               <NsButton
                 kind="tertiary"
@@ -44,22 +44,22 @@
                 :disabled="
                   loading.listAlerts || loading.deleteAlerts || !alerts.length
                 "
-                >{{ $t("alerts.delete_alerts") }}
+                >{{ $t("detections.delete_alerts") }}
               </NsButton>
             </div>
             <div class="data-table-filters">
               <div style="flex: 2">
                 <cv-search
                   v-model="alertsSearchFilter"
-                  :placeholder="$t('alerts.search_alerts')"
-                  :label="$t('alerts.search_alerts')"
+                  :placeholder="$t('detections.search_alerts')"
+                  :label="$t('detections.search_alerts')"
                   :clear-aria-label="core.$t('common.clear_search')"
                 ></cv-search>
               </div>
               <div style="flex: 1; min-width: 220px">
                 <cv-select
                   v-model="alertsLimit"
-                  :label="$t('alerts.history_label')"
+                  :label="$t('detections.history_label')"
                 >
                   <cv-select-option
                     v-for="opt in alertsLimitOptions"
@@ -85,7 +85,7 @@
               :isLoading="loading.listAlerts"
               :skeletonRows="5"
               :isErrorShown="!!error.listAlerts"
-              :errorTitle="$t('action.list-alerts')"
+              :errorTitle="$t('action.list-detections')"
               :errorDescription="error.listAlerts"
               :itemsPerPageLabel="core.$t('pagination.items_per_page')"
               :rangeOfTotalItemsLabel="
@@ -100,21 +100,21 @@
               <template slot="empty-state">
                 <NsEmptyState
                   v-if="alertsSearchFilter.trim()"
-                  :title="$t('alerts.no_alerts_filtered')"
+                  :title="$t('detections.no_alerts_filtered')"
                   :animationData="GhostLottie"
                   animationTitle="ghost"
                   :loop="1"
                 >
                   <template #description>
-                    <div>{{ $t("alerts.no_alerts_filtered_description") }}</div>
+                    <div>{{ $t("detections.no_alerts_filtered_description") }}</div>
                   </template>
                 </NsEmptyState>
-                <NsEmptyState v-else :title="$t('alerts.no_alerts')">
+                <NsEmptyState v-else :title="$t('detections.no_alerts')">
                   <template #pictogram>
                     <CircleCheckPictogram />
                   </template>
                   <template #description>
-                    <div>{{ $t("alerts.no_alerts_description") }}</div>
+                    <div>{{ $t("detections.no_alerts_description") }}</div>
                   </template>
                 </NsEmptyState>
               </template>
@@ -144,12 +144,12 @@
                     <NsTag
                       v-if="row.decision_types && !row.decision_expired"
                       kind="red"
-                      :label="$t('alerts.decision_ban')"
+                      :label="$t('detections.decision_ban')"
                     />
                     <NsTag
                       v-if="row.decision_expired"
                       kind="blue"
-                      :label="$t('alerts.inspect_block_expired')"
+                      :label="$t('detections.inspect_block_expired')"
                     />
                     <span v-if="!row.decision_types">-</span>
                   </cv-data-table-cell>
@@ -162,7 +162,7 @@
                       size="small"
                       @click="inspectAlert(row)"
                       :data-test-id="row.id + '-inspect'"
-                      >{{ $t("alerts.inspect_details") }}
+                      >{{ $t("detections.inspect_details") }}
                     </NsButton>
                   </cv-data-table-cell>
                 </cv-data-table-row>
@@ -172,13 +172,13 @@
         </cv-column>
       </cv-row>
     </cv-grid>
-    <ConfirmDeleteAlertsModal
+    <ConfirmDeleteDetectionsModal
       :isShown="isShownConfirmDelete"
       :core="core"
       @hide="hideConfirmDelete"
       @confirm="setDeleteAlerts"
     />
-    <InspectAlertModal
+    <InspectDetectionModal
       :isShown="isShownInspectAlert"
       :alert="currentAlertDetail"
       :core="core"
@@ -200,17 +200,17 @@ import {
   LottieService,
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
-import ConfirmDeleteAlertsModal from "@/components/ConfirmDeleteAlertsModal.vue";
-import InspectAlertModal from "@/components/InspectAlertModal.vue";
+import ConfirmDeleteDetectionsModal from "@/components/ConfirmDeleteDetectionsModal.vue";
+import InspectDetectionModal from "@/components/InspectDetectionModal.vue";
 import { formatCountry } from "@/lib/country";
 import Restart20 from "@carbon/icons-vue/es/restart/20";
 import TrashCan20 from "@carbon/icons-vue/es/trash-can/20";
 
 export default {
-  name: "Alerts",
+  name: "Detections",
   components: {
-    ConfirmDeleteAlertsModal,
-    InspectAlertModal,
+    ConfirmDeleteDetectionsModal,
+    InspectDetectionModal,
   },
   mixins: [
     QueryParamService,
@@ -222,12 +222,12 @@ export default {
     LottieService,
   ],
   pageTitle() {
-    return this.$t("alerts.title") + " - " + this.appName;
+    return this.$t("detections.title") + " - " + this.appName;
   },
   data() {
     return {
       q: {
-        page: "alerts",
+        page: "detections",
       },
       Restart20,
       TrashCan20,
@@ -263,7 +263,7 @@ export default {
     ...mapState(["instanceName", "core", "appName"]),
     i18nTableColumns() {
       return this.tableColumns.map((column) => {
-        return this.$t("alerts.col_" + column);
+        return this.$t("detections.col_" + column);
       });
     },
     filteredAlerts() {
@@ -275,25 +275,25 @@ export default {
       return [
         {
           value: "500",
-          label: this.$t("alerts.history_option", { count: 500 }),
+          label: this.$t("detections.history_option", { count: 500 }),
         },
         {
           value: "1000",
-          label: this.$t("alerts.history_option", { count: 1000 }),
+          label: this.$t("detections.history_option", { count: 1000 }),
         },
         {
           value: "2000",
-          label: this.$t("alerts.history_option", { count: 2000 }),
+          label: this.$t("detections.history_option", { count: 2000 }),
         },
         {
           value: "3000",
-          label: this.$t("alerts.history_option", { count: 3000 }),
+          label: this.$t("detections.history_option", { count: 3000 }),
         },
         {
           value: "4000",
-          label: this.$t("alerts.history_option", { count: 4000 }),
+          label: this.$t("detections.history_option", { count: 4000 }),
         },
-        { value: "all", label: this.$t("alerts.history_all") },
+        { value: "all", label: this.$t("detections.history_all") },
       ];
     },
   },
@@ -327,16 +327,16 @@ export default {
         a.events_count,
       ];
       if (a.decision_expired) {
-        parts.push(this.$t("alerts.inspect_block_expired"));
+        parts.push(this.$t("detections.inspect_block_expired"));
       } else if (a.decision_types) {
-        parts.push(this.$t("alerts.decision_ban"));
+        parts.push(this.$t("detections.decision_ban"));
       }
       return parts.filter(Boolean).join(" ").toLowerCase();
     },
     async listAlerts() {
       this.alerts = [];
       this.error.listAlerts = "";
-      const taskAction = "list-alerts";
+      const taskAction = "list-detections";
       const eventId = this.getUuid();
       this.loading.listAlerts = true;
       this.core.$root.$once(
@@ -382,7 +382,7 @@ export default {
       this.hideConfirmDelete();
       this.loading.deleteAlerts = true;
       this.error.deleteAlerts = "";
-      const taskAction = "delete-alerts";
+      const taskAction = "delete-detections";
       const eventId = this.getUuid();
       this.core.$root.$once(
         `${taskAction}-aborted-${eventId}`,
@@ -421,7 +421,7 @@ export default {
     async inspectAlert(row) {
       this.loading.inspectAlert = true;
       this.error.inspectAlert = "";
-      const taskAction = "inspect-alert";
+      const taskAction = "inspect-detection";
       const eventId = this.getUuid();
       this.core.$root.$once(
         `${taskAction}-aborted-${eventId}`,

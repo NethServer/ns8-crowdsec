@@ -102,7 +102,7 @@
         "release_all_ip": "Unblock all IP addresses",
         "delete_bans": "Unblock all"
     },
-    "alerts": {
+    "detections": {
         "title": "Detections",
         "no_alerts": "No detection events",
         "no_alerts_description": "No suspicious activity has been detected yet.",
@@ -223,11 +223,11 @@
         "unban_ip_status": "List banned IP addresses",
         "unban-ip": "Unban IP address",
         "list-banned-ip": "List banned IP",
-        "list-alerts": "List detections",
+        "list-detections": "List detections",
         "list-collections": "List collections",
         "toggle-collection": "Toggle collection",
-        "inspect-alert": "Inspect detection",
-        "delete-alerts": "Delete detections",
+        "inspect-detection": "Inspect detection",
+        "delete-detections": "Delete detections",
         "get-capi-status": "Get CAPI status",
         "get-capi-count": "Get CAPI count",
         "search-capi-decision": "Search CAPI decision"

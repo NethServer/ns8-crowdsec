@@ -9,27 +9,27 @@
     @modal-hidden="onModalHidden"
     @primary-click="onModalHidden"
   >
-    <template slot="title">{{ $t("alerts.inspect_title") }}</template>
+    <template slot="title">{{ $t("detections.inspect_title") }}</template>
     <template slot="content">
       <div v-if="alert">
         <div class="key-value-setting">
-          <span class="label">{{ $t("alerts.inspect_source_ip") }}</span>
+          <span class="label">{{ $t("detections.inspect_source_ip") }}</span>
           <span class="value">{{ alert.source ? alert.source.ip : "-" }}</span>
         </div>
         <div class="key-value-setting">
-          <span class="label">{{ $t("alerts.inspect_country") }}</span>
+          <span class="label">{{ $t("detections.inspect_country") }}</span>
           <span class="value">{{
             formatCountry(alert.source && alert.source.cn)
           }}</span>
         </div>
         <div class="key-value-setting">
-          <span class="label">{{ $t("alerts.inspect_scenario") }}</span>
+          <span class="label">{{ $t("detections.inspect_scenario") }}</span>
           <span class="value"
             >{{ alert.scenario }} (v{{ alert.scenario_version }})</span
           >
         </div>
         <div class="key-value-setting">
-          <span class="label">{{ $t("alerts.inspect_attack_window") }}</span>
+          <span class="label">{{ $t("detections.inspect_attack_window") }}</span>
           <span class="value">
             {{ formatDate(new Date(alert.start_at), "yyyy-MM-dd HH:mm:ss") }}
             →
@@ -37,51 +37,51 @@
           </span>
         </div>
         <div class="key-value-setting">
-          <span class="label">{{ $t("alerts.inspect_action_applied") }}</span>
+          <span class="label">{{ $t("detections.inspect_action_applied") }}</span>
           <span class="value">
             <template v-if="alert.decisions && alert.decisions.length">
               <NsTag
                 v-if="isBanExpired(alert.decisions[0].duration)"
                 kind="blue"
-                :label="$t('alerts.inspect_block_expired')"
+                :label="$t('detections.inspect_block_expired')"
               />
               <template v-else>
-                <NsTag kind="red" :label="$t('alerts.decision_ban')" />
+                <NsTag kind="red" :label="$t('detections.decision_ban')" />
                 {{ formatBanDuration(alert.decisions[0].duration) }}
               </template>
             </template>
-            <template v-else>{{ $t("alerts.inspect_no_action") }}</template>
+            <template v-else>{{ $t("detections.inspect_no_action") }}</template>
           </span>
         </div>
         <div class="key-value-setting">
-          <span class="label">{{ $t("alerts.inspect_events_detail") }}</span>
+          <span class="label">{{ $t("detections.inspect_events_detail") }}</span>
           <span class="value">
-            {{ alert.events_count }} ({{ $t("alerts.inspect_threshold") }}
+            {{ alert.events_count }} ({{ $t("detections.inspect_threshold") }}
             {{ alert.capacity
             }}<template v-if="alert.leakspeed"
-              >, {{ $t("alerts.inspect_leak") }} {{ alert.leakspeed }}</template
+              >, {{ $t("detections.inspect_leak") }} {{ alert.leakspeed }}</template
             >)
           </span>
         </div>
         <div class="key-value-setting">
-          <span class="label">{{ $t("alerts.inspect_simulated") }}</span>
+          <span class="label">{{ $t("detections.inspect_simulated") }}</span>
           <span class="value">{{
-            alert.simulated ? $t("alerts.yes") : $t("alerts.no")
+            alert.simulated ? $t("detections.yes") : $t("detections.no")
           }}</span>
         </div>
         <div class="key-value-setting raw-message mg-top-md">
-          <span class="label">{{ $t("alerts.inspect_message") }}</span>
+          <span class="label">{{ $t("detections.inspect_message") }}</span>
           <span class="value">{{ alert.message }}</span>
         </div>
         <h5 class="mg-top-md events-log-heading">
-          {{ $t("alerts.inspect_events_list") }}
+          {{ $t("detections.inspect_events_list") }}
           <cv-interactive-tooltip
             alignment="center"
             direction="bottom"
             class="info"
           >
             <template slot="content">
-              {{ $t("alerts.inspect_events_list_hint") }}
+              {{ $t("detections.inspect_events_list_hint") }}
             </template>
           </cv-interactive-tooltip>
         </h5>
@@ -112,7 +112,7 @@
             </template>
           </NsDataTable>
         <div v-else>
-          {{ $t("alerts.no_events") }}
+          {{ $t("detections.no_events") }}
         </div>
       </div>
     </template>
@@ -128,7 +128,7 @@ import {
 } from "@nethserver/ns8-ui-lib";
 import { formatCountry } from "../lib/country";
 export default {
-  name: "InspectAlertModal",
+  name: "InspectDetectionModal",
   mixins: [UtilService, IconService, DateTimeService],
   props: {
     isShown: Boolean,
@@ -144,7 +144,7 @@ export default {
   computed: {
     eventsI18nColumns() {
       return this.eventsColumns.map((column) =>
-        this.$t("alerts.inspect_" + column)
+        this.$t("detections.inspect_" + column)
       );
     },
   },
@@ -177,7 +177,7 @@ export default {
     formatBanDuration(rawDuration) {
       const duration = (rawDuration || "").split(".")[0];
       const spaced = duration.replace(/([hms])(?=.)/g, "$1 ");
-      return `${spaced} ${this.$t("alerts.inspect_remaining")}`;
+      return `${spaced} ${this.$t("detections.inspect_remaining")}`;
     },
   },
 };
