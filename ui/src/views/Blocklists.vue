@@ -200,7 +200,7 @@
                       value="enable_online_api"
                       :form-item="true"
                       v-model="enable_online_api"
-                      class="mg-top mg-bottom"
+                      class="mg-top-lg mg-bottom"
                       :disabled="
                         loading.getConfiguration || loading.saveCommunityConfig
                       "
@@ -230,7 +230,7 @@
                       />
                       <NsToggle
                         :label="$t('settings.pull_community_blocklist')"
-                        class="mg-bottom"
+                        class="mg-top-lg mg-bottom"
                         value="pull_community_blocklist"
                         :form-item="true"
                         v-model="pull_community_blocklist"
@@ -1169,6 +1169,10 @@ export default {
 
 .mg-top {
   margin-top: 1rem;
+}
+
+.mg-top-lg {
+  margin-top: 4rem;
 }
 
 .mg-bottom {
