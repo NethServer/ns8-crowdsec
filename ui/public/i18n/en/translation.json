@@ -133,6 +133,7 @@
         "inspect_remaining": "remaining",
         "inspect_block_expired": "Block expired",
         "inspect_events_list": "Event log",
+        "inspect_events_list_hint": "CrowdSec stores only a sample of the events that triggered this alert, so this log can contain fewer entries than the total number of events detected.",
         "inspect_simulated": "Simulation only",
         "inspect_timestamp": "Timestamp",
         "inspect_service": "Service",

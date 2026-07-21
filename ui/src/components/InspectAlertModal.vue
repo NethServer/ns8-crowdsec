@@ -73,7 +73,18 @@
           <span class="label">{{ $t("alerts.inspect_message") }}</span>
           <span class="value">{{ alert.message }}</span>
         </div>
-        <h5 class="mg-top-md">{{ $t("alerts.inspect_events_list") }}</h5>
+        <h5 class="mg-top-md events-log-heading">
+          {{ $t("alerts.inspect_events_list") }}
+          <cv-interactive-tooltip
+            alignment="center"
+            direction="bottom"
+            class="info"
+          >
+            <template slot="content">
+              {{ $t("alerts.inspect_events_list_hint") }}
+            </template>
+          </cv-interactive-tooltip>
+        </h5>
           <NsDataTable
             v-if="alert.events && alert.events.length"
             :allRows="alert.events"
@@ -195,6 +206,12 @@ export default {
 
 h5.mg-top-md {
   margin-bottom: 0.5rem;
+}
+
+.events-log-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 // Figma shows a grey pagination bar, not the default white
