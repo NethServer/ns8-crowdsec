@@ -105,6 +105,9 @@
     "alerts": {
         "title": "Detections",
         "no_alerts": "No detection events",
+        "no_alerts_description": "No suspicious activity has been detected yet.",
+        "no_alerts_filtered": "No matching detections",
+        "no_alerts_filtered_description": "No detections match your search.",
         "reload_alerts": "Refresh",
         "search_alerts": "Filter detections",
         "col_created_at": "Detected at",

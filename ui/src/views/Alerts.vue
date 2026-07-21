@@ -98,9 +98,23 @@
               @updatePage="tablePage = $event"
             >
               <template slot="empty-state">
-                <NsEmptyState :title="$t('alerts.no_alerts')">
+                <NsEmptyState
+                  v-if="alertsSearchFilter.trim()"
+                  :title="$t('alerts.no_alerts_filtered')"
+                  :animationData="GhostLottie"
+                  animationTitle="ghost"
+                  :loop="1"
+                >
+                  <template #description>
+                    <div>{{ $t("alerts.no_alerts_filtered_description") }}</div>
+                  </template>
+                </NsEmptyState>
+                <NsEmptyState v-else :title="$t('alerts.no_alerts')">
                   <template #pictogram>
-                    <FaceSatisfiedPictogram />
+                    <CircleCheckPictogram />
+                  </template>
+                  <template #description>
+                    <div>{{ $t("alerts.no_alerts_description") }}</div>
                   </template>
                 </NsEmptyState>
               </template>
@@ -183,6 +197,7 @@ import {
   TaskService,
   DateTimeService,
   PageTitleService,
+  LottieService,
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
 import ConfirmDeleteAlertsModal from "@/components/ConfirmDeleteAlertsModal.vue";
@@ -204,6 +219,7 @@ export default {
     TaskService,
     DateTimeService,
     PageTitleService,
+    LottieService,
   ],
   pageTitle() {
     return this.$t("alerts.title") + " - " + this.appName;
@@ -253,13 +269,7 @@ export default {
     filteredAlerts() {
       const q = this.alertsSearchFilter.trim().toLowerCase();
       if (!q) return this.alerts;
-      return this.alerts.filter(
-        (a) =>
-          (a.source_ip || "").toLowerCase().includes(q) ||
-          (a.scenario || "").toLowerCase().includes(q) ||
-          (a.source_cn || "").toLowerCase().includes(q) ||
-          (a.decision_types || "").toLowerCase().includes(q)
-      );
+      return this.alerts.filter((a) => this.alertSearchText(a).includes(q));
     },
     alertsLimitOptions() {
       return [
@@ -306,6 +316,23 @@ export default {
     this.listAlerts();
   },
   methods: {
+    // Build a lowercase haystack from every displayed column so the filter
+    // matches on date, scenario, IP, country, action label and events count.
+    alertSearchText(a) {
+      const parts = [
+        this.formatDate(new Date(a.created_at), "yyyy-MM-dd HH:mm"),
+        a.scenario,
+        a.source_ip,
+        a.source_cn,
+        a.events_count,
+      ];
+      if (a.decision_expired) {
+        parts.push(this.$t("alerts.inspect_block_expired"));
+      } else if (a.decision_types) {
+        parts.push(this.$t("alerts.decision_ban"));
+      }
+      return parts.filter(Boolean).join(" ").toLowerCase();
+    },
     async listAlerts() {
       this.alerts = [];
       this.error.listAlerts = "";
