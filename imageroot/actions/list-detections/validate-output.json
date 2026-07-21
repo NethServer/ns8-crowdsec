@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "list-alerts output",
-    "$id": "http://schema.nethserver.org/crowdsec/list-alerts-output.json",
+    "title": "list-detections output",
+    "$id": "http://schema.nethserver.org/crowdsec/list-detections-output.json",
     "description": "List of CrowdSec detection alerts",
     "examples": [
         [

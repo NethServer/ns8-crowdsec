@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "inspect-alert input",
-    "$id": "http://schema.nethserver.org/crowdsec/inspect-alert-input.json",
+    "title": "inspect-detection input",
+    "$id": "http://schema.nethserver.org/crowdsec/inspect-detection-input.json",
     "description": "Inspect a specific CrowdSec alert by ID",
     "examples": [
         {
