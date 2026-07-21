@@ -12,7 +12,10 @@ set -e
 input=$(cat)
 ip=$(echo "$input" | jq -r '.ip')
 
-list=$(podman exec "$MODULE_ID" cscli decisions list --origin CAPI --output json)
+# Filter by IP server-side: `cscli decisions list` caps at 100 rows by default,
+# so scanning the whole CAPI community list (tens of thousands of IPs) client-side
+# would miss any IP past the first 100. `--ip` returns only the matching decisions.
+list=$(podman exec "$MODULE_ID" cscli decisions list --ip "$ip" --origin CAPI --output json)
 
 if [[ $list == 'null' || $list == '[]' || -z $list ]]; then
     jq -n '{found: false, decisions: []}'
