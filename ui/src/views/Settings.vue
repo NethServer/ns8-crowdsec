@@ -30,85 +30,9 @@
             width="80%"
           ></cv-skeleton-text>
           <cv-form v-else @submit.prevent="configureModule">
-            <template v-if="!mail_configured">
-              <NsInlineNotification
-                kind="info"
-                :title="$t('settings.smarthost_is_disabled')"
-                :description="
-                  $t('settings.smarthosts_is_needed_to_send_notifications')
-                "
-                :actionLabel="
-                  $t('settings.enable_smarthosts_for_notifications')
-                "
-                @action="goToSmarthost()"
-                :showCloseButton="false"
-              />
-            </template>
-            <cv-text-area
-              :label="$t('settings.receiver_emails')"
-              v-model.trim="receiver_emails"
-              :invalid-message="error.receiver_emails"
-              :helper-text="$t('settings.receiver_emails_list')"
-              :value="receiver_emails"
-              class="maxwidth textarea"
-              ref="receiver_emails"
-              :rows="6"
-              :disabled="
-                loading.getConfiguration ||
-                loading.configureModule ||
-                !mail_configured
-              "
-            >
-            </cv-text-area>
-            <NsTextInput
-              :label="$t('settings.group_threshold_label')"
-              :placeholder="$t('settings.group_threshold_placeholder')"
-              v-model="group_threshold"
-              class="mg-bottom maxwidth"
-              type="number"
-              min="1"
-              max="10000"
-              step="1"
-              :invalid-message="error.group_threshold"
-              :disabled="
-                loading.getConfiguration ||
-                loading.configureModule ||
-                !mail_configured
-              "
-              ref="group_threshold"
-              tooltipAlignment="center"
-              tooltipDirection="right"
-            >
-              <template slot="tooltip">
-                <div>
-                  {{ $t("settings.group_threshold_tooltips") }}
-                </div>
-              </template>
-            </NsTextInput>
-            <NsTextInput
-              :label="$t('settings.helo_host')"
-              :placeholder="$t('settings.helo_host_placeholder')"
-              v-model="helo_host"
-              class="mg-bottom maxwidth"
-              :invalid-message="error.helo_host"
-              :disabled="
-                loading.getConfiguration ||
-                loading.configureModule ||
-                !mail_configured
-              "
-              ref="helo_host"
-              tooltipAlignment="center"
-              tooltipDirection="right"
-            >
-              <template slot="tooltip">
-                <div>
-                  {{ $t("settings.helo_host_must_be_relevant_for_smtp") }}
-                </div>
-              </template>
-            </NsTextInput>
             <NsToggle
               :label="$t('settings.ban_local_network')"
-              class="mg-top-md maxwidth"
+              class="maxwidth"
               value="ban_local_network"
               :form-item="true"
               v-model="ban_local_network"
@@ -185,6 +109,83 @@
               step="1"
               :invalid-message="error.bantime"
             />
+            <template v-if="!mail_configured">
+              <NsInlineNotification
+                kind="info"
+                :title="$t('settings.smarthost_is_disabled')"
+                :description="
+                  $t('settings.smarthosts_is_needed_to_send_notifications')
+                "
+                :actionLabel="
+                  $t('settings.enable_smarthosts_for_notifications')
+                "
+                @action="goToSmarthost()"
+                :showCloseButton="false"
+                class="mg-top-md"
+              />
+            </template>
+            <cv-text-area
+              :label="$t('settings.receiver_emails')"
+              v-model.trim="receiver_emails"
+              :invalid-message="error.receiver_emails"
+              :helper-text="$t('settings.receiver_emails_list')"
+              :value="receiver_emails"
+              class="mg-top-md maxwidth textarea"
+              ref="receiver_emails"
+              :rows="6"
+              :disabled="
+                loading.getConfiguration ||
+                loading.configureModule ||
+                !mail_configured
+              "
+            >
+            </cv-text-area>
+            <NsTextInput
+              :label="$t('settings.group_threshold_label')"
+              :placeholder="$t('settings.group_threshold_placeholder')"
+              v-model="group_threshold"
+              class="mg-bottom maxwidth"
+              type="number"
+              min="1"
+              max="10000"
+              step="1"
+              :invalid-message="error.group_threshold"
+              :disabled="
+                loading.getConfiguration ||
+                loading.configureModule ||
+                !mail_configured
+              "
+              ref="group_threshold"
+              tooltipAlignment="center"
+              tooltipDirection="right"
+            >
+              <template slot="tooltip">
+                <div>
+                  {{ $t("settings.group_threshold_tooltips") }}
+                </div>
+              </template>
+            </NsTextInput>
+            <NsTextInput
+              :label="$t('settings.helo_host')"
+              :placeholder="$t('settings.helo_host_placeholder')"
+              v-model="helo_host"
+              class="mg-bottom maxwidth"
+              :invalid-message="error.helo_host"
+              :disabled="
+                loading.getConfiguration ||
+                loading.configureModule ||
+                !mail_configured
+              "
+              ref="helo_host"
+              tooltipAlignment="center"
+              tooltipDirection="right"
+            >
+              <template slot="tooltip">
+                <div>
+                  {{ $t("settings.helo_host_must_be_relevant_for_smtp") }}
+                </div>
+              </template>
+            </NsTextInput>
             <cv-row v-if="error.configureModule">
               <cv-column>
                 <NsInlineNotification
@@ -333,7 +334,7 @@ export default {
       this.bantime = String(config.bantime);
       this.dyn_bantime = config.dyn_bantime ? "dynamic" : "static";
       this.loading.getConfiguration = false;
-      this.focusElement("receiver_emails");
+      this.focusElement("ban_local_network");
       this.ban_local_network = config.ban_local_network;
       this.mail_configured = config.mail_configured;
       this.group_threshold = String(config.group_threshold);
