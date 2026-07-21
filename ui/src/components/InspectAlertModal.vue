@@ -40,8 +40,15 @@
           <span class="label">{{ $t("alerts.inspect_action_applied") }}</span>
           <span class="value">
             <template v-if="alert.decisions && alert.decisions.length">
-              <NsTag kind="red" :label="$t('alerts.decision_ban')" />
-              {{ formatBanDuration(alert.decisions[0].duration) }}
+              <NsTag
+                v-if="isBanExpired(alert.decisions[0].duration)"
+                kind="blue"
+                :label="$t('alerts.inspect_block_expired')"
+              />
+              <template v-else>
+                <NsTag kind="red" :label="$t('alerts.decision_ban')" />
+                {{ formatBanDuration(alert.decisions[0].duration) }}
+              </template>
             </template>
             <template v-else>{{ $t("alerts.inspect_no_action") }}</template>
           </span>
@@ -146,11 +153,12 @@ export default {
         return ts;
       }
     },
+    isBanExpired(rawDuration) {
+      const duration = (rawDuration || "").split(".")[0];
+      return duration.startsWith("-");
+    },
     formatBanDuration(rawDuration) {
       const duration = (rawDuration || "").split(".")[0];
-      if (duration.startsWith("-")) {
-        return this.$t("alerts.inspect_expired");
-      }
       const spaced = duration.replace(/([hms])(?=.)/g, "$1 ");
       return `${spaced} ${this.$t("alerts.inspect_remaining")}`;
     },

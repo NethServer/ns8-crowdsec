@@ -128,11 +128,16 @@
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     <NsTag
-                      v-if="row.decision_types"
+                      v-if="row.decision_types && !row.decision_expired"
                       kind="red"
                       :label="$t('alerts.decision_ban')"
                     />
-                    <span v-else>-</span>
+                    <NsTag
+                      v-if="row.decision_expired"
+                      kind="blue"
+                      :label="$t('alerts.inspect_block_expired')"
+                    />
+                    <span v-if="!row.decision_types">-</span>
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     {{ row.events_count }}
@@ -436,14 +441,18 @@ export default {
       const listAlerts = taskResult.output;
       listAlerts.forEach((alert) => {
         if (alert.scenario && alert.scenario.startsWith("update :")) return;
+        const decision =
+          alert.decisions && alert.decisions.length ? alert.decisions[0] : null;
         this.alerts.push({
           id: alert.id,
           created_at: alert.created_at,
           scenario: alert.scenario,
           source_ip: alert.source ? alert.source.ip : "",
           source_cn: alert.source ? alert.source.cn || "" : "",
-          decision_types:
-            alert.decisions && alert.decisions.length > 0 ? "ban" : "",
+          decision_types: decision ? "ban" : "",
+          decision_expired: decision
+            ? (decision.duration || "").split(".")[0].startsWith("-")
+            : false,
           events_count: alert.events_count,
         });
       });

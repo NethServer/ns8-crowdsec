@@ -128,7 +128,7 @@
         "inspect_detection_window": "Detection window",
         "inspect_threshold": "Threshold",
         "inspect_remaining": "remaining",
-        "inspect_expired": "expired",
+        "inspect_block_expired": "Block expired",
         "inspect_events_list": "Event log",
         "inspect_simulated": "Simulation only",
         "inspect_timestamp": "Timestamp",
