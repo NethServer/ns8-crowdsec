@@ -56,9 +56,11 @@
         <div class="key-value-setting">
           <span class="label">{{ $t("alerts.inspect_events_detail") }}</span>
           <span class="value">
-            {{ alert.events_count }}
-            ({{ $t("alerts.inspect_detection_window") }} {{ alert.leakspeed }},
-            {{ $t("alerts.inspect_threshold") }} {{ alert.capacity }})
+            {{ alert.events_count }} ({{ $t("alerts.inspect_threshold") }}
+            {{ alert.capacity
+            }}<template v-if="alert.leakspeed"
+              >, {{ $t("alerts.inspect_leak") }} {{ alert.leakspeed }}</template
+            >)
           </span>
         </div>
         <div class="key-value-setting">
