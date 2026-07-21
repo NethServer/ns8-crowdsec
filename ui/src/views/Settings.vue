@@ -121,7 +121,7 @@
                 "
                 @action="goToSmarthost()"
                 :showCloseButton="false"
-                class="mg-top-md"
+                class="mg-top-md smarthost-notification"
               />
             </template>
             <cv-text-area
@@ -449,5 +449,9 @@ export default {
 
 .bantime-description:not(:last-child) {
   margin-bottom: $spacing-05;
+}
+
+.smarthost-notification {
+  max-width: 38rem;
 }
 </style>
