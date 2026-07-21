@@ -1158,13 +1158,19 @@ export default {
 
 .search-row {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   max-width: 36rem;
 }
 
 // Match the input height to the Search button
 .search-row ::v-deep .bx--form-item {
   flex: 1;
+}
+
+// Empty label still reserves vertical space and pushes the input field down,
+// misaligning it with the Search button. Collapse it.
+.search-row ::v-deep .bx--label {
+  display: none;
 }
 
 .search-row ::v-deep .bx--text-input {
