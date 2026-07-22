@@ -11,7 +11,10 @@ input=$(cat)
 limit=$(echo "$input" | jq -r '.limit // "500"')
 
 if [[ "$limit" == "all" ]]; then
-    list=$(podman exec "$MODULE_ID" cscli alerts list --all --output json)
+    # --limit 0 removes the default 50-row cap so "all" returns every alert.
+    # We do NOT use --all: that only pulls in CAPI-origin alerts, it does not
+    # lift the row limit, and community alerts do not belong in local detections.
+    list=$(podman exec "$MODULE_ID" cscli alerts list --limit 0 --output json)
 else
     list=$(podman exec "$MODULE_ID" cscli alerts list --limit "$limit" --output json)
 fi

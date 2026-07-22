@@ -9,7 +9,9 @@
 
 set -e
 
-list=$(podman exec "$MODULE_ID" cscli decisions list --origin CAPI --output json)
+# --limit 0 removes the default 100-row cap; the CAPI community blocklist
+# routinely holds thousands of decisions, so the count would be wrong otherwise.
+list=$(podman exec "$MODULE_ID" cscli decisions list --origin CAPI --limit 0 --output json)
 
 if [[ $list == 'null' || $list == '[]' || -z $list ]]; then
     jq -n '{count: 0}'
