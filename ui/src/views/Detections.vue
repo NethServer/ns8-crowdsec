@@ -22,7 +22,9 @@
       </cv-row>
       <cv-row>
         <cv-column>
-          <p class="page-description mg-bottom">{{ $t("detections.page_description") }}</p>
+          <p class="page-description mg-bottom">
+            {{ $t("detections.page_description") }}
+          </p>
         </cv-column>
       </cv-row>
       <cv-row>
@@ -106,7 +108,9 @@
                   :loop="1"
                 >
                   <template #description>
-                    <div>{{ $t("detections.no_alerts_filtered_description") }}</div>
+                    <div>
+                      {{ $t("detections.no_alerts_filtered_description") }}
+                    </div>
                   </template>
                 </NsEmptyState>
                 <NsEmptyState v-else :title="$t('detections.no_alerts')">
@@ -126,9 +130,7 @@
                 >
                   <cv-data-table-cell>
                     <div>
-                      {{
-                        formatDate(new Date(row.created_at), "yyyy-MM-dd HH:mm")
-                      }}
+                      {{ formatDateTime(row.created_at) }}
                     </div>
                   </cv-data-table-cell>
                   <cv-data-table-cell>
@@ -316,11 +318,15 @@ export default {
     this.listAlerts();
   },
   methods: {
+    // Format a date in the user's locale so it matches their regional settings.
+    formatDateTime(value) {
+      return new Date(value).toLocaleString(this.$i18n.locale);
+    },
     // Build a lowercase haystack from every displayed column so the filter
     // matches on date, scenario, IP, country, action label and events count.
     alertSearchText(a) {
       const parts = [
-        this.formatDate(new Date(a.created_at), "yyyy-MM-dd HH:mm"),
+        this.formatDateTime(a.created_at),
         a.scenario,
         a.source_ip,
         a.source_cn,

@@ -29,15 +29,19 @@
           >
         </div>
         <div class="key-value-setting">
-          <span class="label">{{ $t("detections.inspect_attack_window") }}</span>
+          <span class="label">{{
+            $t("detections.inspect_attack_window")
+          }}</span>
           <span class="value">
-            {{ formatDate(new Date(alert.start_at), "yyyy-MM-dd HH:mm:ss") }}
+            {{ formatDateTime(alert.start_at) }}
             →
-            {{ formatDate(new Date(alert.stop_at), "yyyy-MM-dd HH:mm:ss") }}
+            {{ formatDateTime(alert.stop_at) }}
           </span>
         </div>
         <div class="key-value-setting">
-          <span class="label">{{ $t("detections.inspect_action_applied") }}</span>
+          <span class="label">{{
+            $t("detections.inspect_action_applied")
+          }}</span>
           <span class="value">
             <template v-if="alert.decisions && alert.decisions.length">
               <NsTag
@@ -54,12 +58,15 @@
           </span>
         </div>
         <div class="key-value-setting">
-          <span class="label">{{ $t("detections.inspect_events_detail") }}</span>
+          <span class="label">{{
+            $t("detections.inspect_events_detail")
+          }}</span>
           <span class="value">
             {{ alert.events_count }} ({{ $t("detections.inspect_threshold") }}
             {{ alert.capacity
             }}<template v-if="alert.leakspeed"
-              >, {{ $t("detections.inspect_leak") }} {{ alert.leakspeed }}</template
+              >, {{ $t("detections.inspect_leak") }}
+              {{ alert.leakspeed }}</template
             >)
           </span>
         </div>
@@ -85,32 +92,32 @@
             </template>
           </cv-interactive-tooltip>
         </h5>
-          <NsDataTable
-            v-if="alert.events && alert.events.length"
-            :allRows="alert.events"
-            :columns="eventsI18nColumns"
-            :rawColumns="eventsColumns"
-            rowSize="compact"
-            :pageSizes="[5, 10, 25]"
-            :itemsPerPageLabel="core.$t('pagination.items_per_page')"
-            :rangeOfTotalItemsLabel="core.$t('pagination.range_of_total_items')"
-            :ofTotalPagesLabel="core.$t('pagination.of_total_pages')"
-            :backwardText="core.$t('pagination.previous_page')"
-            :forwardText="core.$t('pagination.next_page')"
-            :pageNumberLabel="core.$t('pagination.page_number')"
-            @updatePage="eventsPage = $event"
-          >
-            <template slot="data">
-              <cv-data-table-row v-for="(event, i) in eventsPage" :key="i">
-                <cv-data-table-cell>{{
-                  formatEventTimestamp(event)
-                }}</cv-data-table-cell>
-                <cv-data-table-cell>{{
-                  getMetaValue(event, "service")
-                }}</cv-data-table-cell>
-              </cv-data-table-row>
-            </template>
-          </NsDataTable>
+        <NsDataTable
+          v-if="alert.events && alert.events.length"
+          :allRows="alert.events"
+          :columns="eventsI18nColumns"
+          :rawColumns="eventsColumns"
+          rowSize="compact"
+          :pageSizes="[5, 10, 25]"
+          :itemsPerPageLabel="core.$t('pagination.items_per_page')"
+          :rangeOfTotalItemsLabel="core.$t('pagination.range_of_total_items')"
+          :ofTotalPagesLabel="core.$t('pagination.of_total_pages')"
+          :backwardText="core.$t('pagination.previous_page')"
+          :forwardText="core.$t('pagination.next_page')"
+          :pageNumberLabel="core.$t('pagination.page_number')"
+          @updatePage="eventsPage = $event"
+        >
+          <template slot="data">
+            <cv-data-table-row v-for="(event, i) in eventsPage" :key="i">
+              <cv-data-table-cell>{{
+                formatEventTimestamp(event)
+              }}</cv-data-table-cell>
+              <cv-data-table-cell>{{
+                getMetaValue(event, "service")
+              }}</cv-data-table-cell>
+            </cv-data-table-row>
+          </template>
+        </NsDataTable>
         <div v-else>
           {{ $t("detections.no_events") }}
         </div>
@@ -152,6 +159,10 @@ export default {
     formatCountry(cn) {
       return formatCountry(cn, this.$i18n.locale);
     },
+    // Format a date in the user's locale so it matches their regional settings.
+    formatDateTime(value) {
+      return new Date(value).toLocaleString(this.$i18n.locale);
+    },
     onModalHidden() {
       this.$emit("hide");
       this.$emit("after-hide");
@@ -165,7 +176,7 @@ export default {
       const ts = this.getMetaValue(event, "timestamp");
       if (ts === "-") return "-";
       try {
-        return this.formatDate(new Date(ts), "yyyy-MM-dd HH:mm:ss");
+        return this.formatDateTime(ts);
       } catch (e) {
         return ts;
       }

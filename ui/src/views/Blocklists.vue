@@ -65,7 +65,9 @@
                       :filterRowsCallback="filterBans"
                       :searchPlaceholder="$t('unban.search_bans')"
                       :searchClearLabel="core.$t('common.clear_search')"
-                      :noSearchResultsLabel="core.$t('common.no_search_results')"
+                      :noSearchResultsLabel="
+                        core.$t('common.no_search_results')
+                      "
                       :noSearchResultsDescription="
                         core.$t('common.no_search_results_description')
                       "
@@ -102,12 +104,7 @@
                         >
                           <cv-data-table-cell>
                             <div>
-                              {{
-                                formatDate(
-                                  new Date(row.created_at),
-                                  "yyyy-MM-dd HH.mm"
-                                )
-                              }}
+                              {{ formatDateTime(row.created_at) }}
                             </div>
                           </cv-data-table-cell>
                           <cv-data-table-cell>
@@ -208,7 +205,9 @@
                       ref="enable_online_api"
                     >
                       <template slot="tooltip">
-                        <span>{{ $t("settings.disable_online_api_tips") }}</span>
+                        <span>{{
+                          $t("settings.disable_online_api_tips")
+                        }}</span>
                       </template>
                       <template slot="text-left">{{
                         $t("settings.disabled")
@@ -225,7 +224,8 @@
                         class="mg-bottom"
                         :invalid-message="error.enroll_instance"
                         :disabled="
-                          loading.getConfiguration || loading.saveCommunityConfig
+                          loading.getConfiguration ||
+                          loading.saveCommunityConfig
                         "
                         ref="enroll_instance"
                       />
@@ -236,7 +236,8 @@
                         :form-item="true"
                         v-model="pull_community_blocklist"
                         :disabled="
-                          loading.getConfiguration || loading.saveCommunityConfig
+                          loading.getConfiguration ||
+                          loading.saveCommunityConfig
                         "
                         ref="pull_community_blocklist"
                       >
@@ -296,7 +297,9 @@
                         :placeholder="$t('capi.search_placeholder')"
                         :label="''"
                         :invalid-message="
-                          searchIp.trim() && !isValidIp ? $t('capi.invalid_ip') : ''
+                          searchIp.trim() && !isValidIp
+                            ? $t('capi.invalid_ip')
+                            : ''
                         "
                         @keyup.enter.native="searchCapiDecision"
                       ></cv-text-input>
@@ -404,7 +407,9 @@
                       ref="whitelists"
                       :rows="6"
                       :placeholder="$t('settings.whitelist_placeholder')"
-                      :disabled="loading.getConfiguration || loading.saveAllowlist"
+                      :disabled="
+                        loading.getConfiguration || loading.saveAllowlist
+                      "
                     >
                     </cv-text-area>
                     <NsInlineNotification
@@ -430,7 +435,9 @@
                       :icon="Save20"
                       class="mg-top"
                       :loading="loading.saveAllowlist"
-                      :disabled="loading.getConfiguration || loading.saveAllowlist"
+                      :disabled="
+                        loading.getConfiguration || loading.saveAllowlist
+                      "
                       @click="saveAllowlist"
                       >{{ $t("settings.save") }}</NsButton
                     >
@@ -563,7 +570,8 @@ export default {
     isValidIp() {
       const ip = this.searchIp.trim();
       if (!ip) return false;
-      const ipv4 = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)){3}$/;
+      const ipv4 =
+        /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)){3}$/;
       const ipv6 = /^[0-9a-fA-F]{0,4}(:[0-9a-fA-F]{0,4}){2,7}$/;
       return ipv4.test(ip) || ipv6.test(ip);
     },
@@ -585,6 +593,10 @@ export default {
     this.getConfiguration();
   },
   methods: {
+    // Format a date in the user's locale so it matches their regional settings.
+    formatDateTime(value) {
+      return new Date(value).toLocaleString(this.$i18n.locale);
+    },
     // ---- Local blocklist ----
     async listBans() {
       this.bans = [];
@@ -907,7 +919,7 @@ export default {
     // so hours and the "Time remaining" column match what the user sees.
     banSearchText(b) {
       return [
-        this.formatDate(new Date(b.created_at), "yyyy-MM-dd HH.mm"),
+        this.formatDateTime(b.created_at),
         b.value,
         this.formatDuration(b.duration),
         b.scenario,
