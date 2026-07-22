@@ -142,12 +142,17 @@
             </cv-text-area>
             <NsTextInput
               :label="$t('settings.group_threshold_label')"
-              :placeholder="$t('settings.group_threshold_placeholder')"
+              :placeholder="
+                $t('settings.group_threshold_placeholder', {
+                  min: thresholdMin,
+                  max: thresholdMax,
+                })
+              "
               v-model="group_threshold"
               class="mg-bottom maxwidth"
               type="number"
-              min="1"
-              max="10000"
+              :min="thresholdMin"
+              :max="thresholdMax"
               step="1"
               :invalid-message="error.group_threshold"
               :disabled="
@@ -247,6 +252,8 @@ export default {
       bantime: "1m",
       dyn_bantime: true,
       group_threshold: "100",
+      thresholdMin: 1,
+      thresholdMax: 10000,
       config: {},
       loading: {
         getConfiguration: false,

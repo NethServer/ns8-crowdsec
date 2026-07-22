@@ -78,7 +78,7 @@
         "receiver_emails_format": "Invalid email address: {value}",
         "group_threshold_tooltips": "Email are sent each 24h or when the number of new alerts reaches this threshold",
         "group_threshold_label": "Notification threshold",
-        "group_threshold_placeholder": "Between 1 and 10000",
+        "group_threshold_placeholder": "Between {min} and {max}",
         "pull_community_blocklist": "Community blocklist",
         "pull_community_blocklist_tips": "When enabled, CrowdSec can block IP addresses received from the community blocklist."
     },
