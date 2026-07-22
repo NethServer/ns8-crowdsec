@@ -4,7 +4,7 @@
 -->
 <template>
   <NsModal
-    size="small"
+    size="default"
     :visible="isShown"
     @modal-hidden="onModalHidden"
     @primary-click="onModalHidden"
