@@ -1,0 +1,20 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "search-capi-decision input",
+    "$id": "http://schema.nethserver.org/crowdsec/search-capi-decision-input.json",
+    "description": "Search for a specific IP address in the CrowdSec community blocklist",
+    "examples": [
+        {
+            "ip": "185.220.101.0"
+        }
+    ],
+    "type": "object",
+    "required": ["ip"],
+    "properties": {
+        "ip": {
+            "type": "string",
+            "title": "ip",
+            "description": "IP address to look up in the CAPI community decisions"
+        }
+    }
+}

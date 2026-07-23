@@ -30,6 +30,85 @@
             width="80%"
           ></cv-skeleton-text>
           <cv-form v-else @submit.prevent="configureModule">
+            <NsToggle
+              :label="$t('settings.ban_local_network')"
+              class="maxwidth"
+              value="ban_local_network"
+              :form-item="true"
+              v-model="ban_local_network"
+              :disabled="loading.getConfiguration || loading.configureModule"
+              ref="ban_local_network"
+            >
+              <template slot="tooltip">
+                <span>{{ $t("settings.ban_local_network_tips") }}</span>
+              </template>
+              <template slot="text-left">{{
+                $t("settings.disabled")
+              }}</template>
+              <template slot="text-right">{{
+                $t("settings.enabled")
+              }}</template>
+            </NsToggle>
+            <label class="bx--label">
+              {{ $t("settings.bantime") }}
+              <cv-interactive-tooltip
+                alignment="center"
+                direction="bottom"
+                class="info"
+              >
+                <template slot="content">
+                  {{ $t("settings.bantime_tips") }}
+                </template>
+              </cv-interactive-tooltip>
+            </label>
+            <cv-radio-group vertical class="mg-bottom maxwidth">
+              <cv-radio-button
+                :label="$t('settings.dynamic_bantime_increment')"
+                value="dynamic"
+                ref="dynamicBanTimeEnabled"
+                v-model="dyn_bantime"
+                :disabled="loading.getConfiguration || loading.configureModule"
+              />
+              <p class="bantime-description">
+                {{ $t("settings.dynamic_bantime_increment_description") }}
+              </p>
+              <cv-radio-button
+                :label="$t('settings.static_bantime_increment')"
+                value="static"
+                ref="dynamicBanTimeDisabled"
+                v-model="dyn_bantime"
+                :disabled="loading.getConfiguration || loading.configureModule"
+              />
+              <p class="bantime-description">
+                {{ $t("settings.static_bantime_increment_description") }}
+              </p>
+            </cv-radio-group>
+            <NsTextInput
+              v-if="dyn_bantime === 'dynamic'"
+              :disabled="loading.getConfiguration || loading.configureModule"
+              :label="$t('settings.dynamic_bantime_duration')"
+              :helper-text="$t('settings.dynamic_bantime_duration_helper')"
+              v-model="dynamicBantimeDuration"
+              class="mg-bottom maxwidth"
+              type="number"
+              min="1"
+              max="1440"
+              step="1"
+              :invalid-message="error.bantime"
+            />
+            <NsTextInput
+              v-if="dyn_bantime === 'static'"
+              :disabled="loading.getConfiguration || loading.configureModule"
+              :label="$t('settings.static_bantime_duration')"
+              :helper-text="$t('settings.static_bantime_duration_helper')"
+              v-model="bantime"
+              class="mg-bottom maxwidth"
+              type="number"
+              min="1"
+              max="1440"
+              step="1"
+              :invalid-message="error.bantime"
+            />
             <template v-if="!mail_configured">
               <NsInlineNotification
                 kind="info"
@@ -42,6 +121,7 @@
                 "
                 @action="goToSmarthost()"
                 :showCloseButton="false"
+                class="mg-top-md smarthost-notification"
               />
             </template>
             <cv-text-area
@@ -50,8 +130,9 @@
               :invalid-message="error.receiver_emails"
               :helper-text="$t('settings.receiver_emails_list')"
               :value="receiver_emails"
-              class="maxwidth textarea"
+              class="mg-top-md maxwidth textarea"
               ref="receiver_emails"
+              :rows="6"
               :disabled="
                 loading.getConfiguration ||
                 loading.configureModule ||
@@ -59,214 +140,57 @@
               "
             >
             </cv-text-area>
-            <cv-text-area
-              :label="$t('settings.whitelists')"
-              v-model.trim="whitelists"
-              :invalid-message="error.whitelists"
-              :helper-text="$t('settings.whitelists_tips')"
-              :value="whitelists"
-              class="maxwidth textarea"
-              ref="receiver_emails"
-              :placeholder="$t('settings.whitelist_placeholder')"
-              :disabled="loading.getConfiguration || loading.configureModule"
+            <NsTextInput
+              :label="$t('settings.group_threshold_label')"
+              :placeholder="
+                $t('settings.group_threshold_placeholder', {
+                  min: thresholdMin,
+                  max: thresholdMax,
+                })
+              "
+              v-model="group_threshold"
+              class="mg-bottom maxwidth"
+              type="number"
+              :min="thresholdMin"
+              :max="thresholdMax"
+              step="1"
+              :invalid-message="error.group_threshold"
+              :disabled="
+                loading.getConfiguration ||
+                loading.configureModule ||
+                !mail_configured
+              "
+              ref="group_threshold"
+              tooltipAlignment="center"
+              tooltipDirection="right"
             >
-            </cv-text-area>
-
-            <!-- advanced options -->
-            <cv-accordion ref="accordion" class="maxwidth mg-bottom">
-              <cv-accordion-item :open="toggleAccordion[0]">
-                <template slot="title">{{ $t("settings.advanced") }}</template>
-                <template slot="content">
-                  <NsToggle
-                    :label="$t('settings.ban_local_network')"
-                    class="mg-top-md"
-                    value="ban_local_network"
-                    :form-item="true"
-                    v-model="ban_local_network"
-                    :disabled="
-                      loading.getConfiguration || loading.configureModule
-                    "
-                    ref="ban_local_network"
-                  >
-                    <template slot="tooltip">
-                      <span>{{ $t("settings.ban_local_network_tips") }}</span>
-                    </template>
-                    <template slot="text-left">{{
-                      $t("settings.disabled")
-                    }}</template>
-                    <template slot="text-right">{{
-                      $t("settings.enabled")
-                    }}</template>
-                  </NsToggle>
-                  <label class="bx--label">
-                    {{ $t("settings.bantime") }}
-                    <cv-interactive-tooltip
-                      alignment="center"
-                      direction="bottom"
-                      class="info"
-                    >
-                      <template slot="content">
-                        {{ $t("settings.bantime_tips") }}
-                      </template>
-                    </cv-interactive-tooltip>
-                  </label>
-                  <cv-radio-group vertical class="mg-bottom">
-                    <cv-radio-button
-                      :label="$t('settings.static_bantime_increment')"
-                      value="static"
-                      ref="dynamicBanTimeDisabled
-                      "
-                      v-model="dyn_bantime"
-                      :disabled="
-                        loading.getConfiguration || loading.configureModule
-                      "
-                    />
-                    <NsSlider
-                      v-if="dyn_bantime === 'static'"
-                      :disabled="
-                        loading.getConfiguration || loading.configureModule
-                      "
-                      :label="$t('settings.static_bantime_duration')"
-                      v-model="bantime"
-                      min="1"
-                      max="1440"
-                      step="1"
-                      stepMultiplier="10"
-                      minLabel=""
-                      maxLabel=""
-                      :limitedLabel="$t('settings.specify_duration')"
-                      :invalidMessage="error.bantime"
-                      :unitLabel="$t('settings.minutes')"
-                    />
-                    <cv-radio-button
-                      :label="$t('settings.dynamic_bantime_increment')"
-                      value="dynamic"
-                      ref="dynamicBanTimeEnabled"
-                      v-model="dyn_bantime"
-                      :disabled="
-                        loading.getConfiguration || loading.configureModule
-                      "
-                    >
-                    </cv-radio-button>
-                    <NsSlider
-                      v-if="dyn_bantime === 'dynamic'"
-                      :disabled="
-                        loading.getConfiguration || loading.configureModule
-                      "
-                      :label="$t('settings.dynamic_bantime_duration')"
-                      v-model="dynamicBantimeDuration"
-                      min="1"
-                      max="1440"
-                      step="1"
-                      stepMultiplier="10"
-                      minLabel=""
-                      maxLabel=""
-                      :limitedLabel="$t('settings.specify_duration')"
-                      :invalidMessage="error.bantime"
-                      :unitLabel="$t('settings.minutes')"
-                    />
-                  </cv-radio-group>
-                  <NsToggle
-                    :label="$t('settings.enable_online_api')"
-                    value="enable_online_api"
-                    :form-item="true"
-                    v-model="enable_online_api"
-                    :disabled="
-                      loading.getConfiguration || loading.configureModule
-                    "
-                    ref="enable_online_api"
-                  >
-                    <template slot="tooltip">
-                      <span>{{ $t("settings.disable_online_api_tips") }}</span>
-                    </template>
-                    <template slot="text-left">{{
-                      $t("settings.disabled")
-                    }}</template>
-                    <template slot="text-right">{{
-                      $t("settings.enabled")
-                    }}</template>
-                  </NsToggle>
-                  <template v-if="enable_online_api">
-                    <NsButton
-                      kind="tertiary"
-                      size="field"
-                      :icon="Launch20"
-                      :disabled="loading.getConfiguration"
-                      @click="goToAppCrowdsec"
-                      class="mg-bottom"
-                    >
-                      {{ $t("settings.open_app_crowdsec") }}
-                    </NsButton>
-                    <NsTextInput
-                      :label="$t('settings.enroll_instance')"
-                      v-model="enroll_instance"
-                      class="mg-bottom"
-                      :invalid-message="error.enroll_instance"
-                      :disabled="
-                        loading.getConfiguration || loading.configureModule
-                      "
-                      ref="enroll_instance"
-                      tooltipAlignment="center"
-                      tooltipDirection="right"
-                    >
-                      <template slot="tooltip">
-                        <div>
-                          {{
-                            $t("settings.enroll_instance_must_be_real_token")
-                          }}
-                        </div>
-                      </template>
-                    </NsTextInput>
-                  </template>
-                  <NsTextInput
-                    :label="$t('settings.group_threshold_label')"
-                    :placeholder="$t('settings.group_threshold_placeholder')"
-                    v-model="group_threshold"
-                    class="mg-bottom"
-                    type="number"
-                    min="1"
-                    max="10000"
-                    step="1"
-                    :invalid-message="error.group_threshold"
-                    :disabled="
-                      loading.getConfiguration ||
-                      loading.configureModule ||
-                      !mail_configured
-                    "
-                    ref="group_threshold"
-                    tooltipAlignment="center"
-                    tooltipDirection="right"
-                  >
-                    <template slot="tooltip">
-                      <div>
-                        {{ $t("settings.group_threshold_tooltips") }}
-                      </div>
-                    </template>
-                  </NsTextInput>
-                  <NsTextInput
-                    :label="$t('settings.helo_host')"
-                    :placeholder="$t('settings.helo_host_placeholder')"
-                    v-model="helo_host"
-                    class="mg-bottom"
-                    :invalid-message="error.helo_host"
-                    :disabled="
-                      loading.getConfiguration ||
-                      loading.configureModule ||
-                      !mail_configured
-                    "
-                    ref="helo_host"
-                    tooltipAlignment="center"
-                    tooltipDirection="right"
-                  >
-                    <template slot="tooltip">
-                      <div>
-                        {{ $t("settings.helo_host_must_be_relevant_for_smtp") }}
-                      </div>
-                    </template>
-                  </NsTextInput>
-                </template>
-              </cv-accordion-item>
-            </cv-accordion>
+              <template slot="tooltip">
+                <div>
+                  {{ $t("settings.group_threshold_tooltips") }}
+                </div>
+              </template>
+            </NsTextInput>
+            <NsTextInput
+              :label="$t('settings.helo_host')"
+              :placeholder="$t('settings.helo_host_placeholder')"
+              v-model="helo_host"
+              class="mg-bottom maxwidth"
+              :invalid-message="error.helo_host"
+              :disabled="
+                loading.getConfiguration ||
+                loading.configureModule ||
+                !mail_configured
+              "
+              ref="helo_host"
+              tooltipAlignment="center"
+              tooltipDirection="right"
+            >
+              <template slot="tooltip">
+                <div>
+                  {{ $t("settings.helo_host_must_be_relevant_for_smtp") }}
+                </div>
+              </template>
+            </NsTextInput>
             <cv-row v-if="error.configureModule">
               <cv-column>
                 <NsInlineNotification
@@ -321,16 +245,16 @@ export default {
       },
       dynamicBantimeDuration: "4",
       urlCheckInterval: null,
-      enroll_instance: "",
       mail_configured: false,
       ban_local_network: false,
       helo_host: "",
       receiver_emails: [],
       bantime: "1m",
       dyn_bantime: true,
-      whitelists: [],
-      enable_online_api: true,
       group_threshold: "100",
+      thresholdMin: 1,
+      thresholdMax: 10000,
+      config: {},
       loading: {
         getConfiguration: false,
         configureModule: false,
@@ -338,14 +262,11 @@ export default {
       error: {
         getConfiguration: "",
         configureModule: "",
-        enroll_instance: "",
         ban_local_network: "",
         helo_host: "",
         receiver_emails: "",
         bantime: "",
         dyn_bantime: "",
-        whitelists: "",
-        enable_online_api: "",
         group_threshold: "",
       },
     };
@@ -369,10 +290,6 @@ export default {
   methods: {
     goToSmarthost() {
       this.core.$router.push("/settings/smarthost");
-    },
-    goToAppCrowdsec(e) {
-      window.open("https://app.crowdsec.net/", "_blank");
-      e.preventDefault();
     },
     async getConfiguration() {
       this.loading.getConfiguration = true;
@@ -418,16 +335,14 @@ export default {
     },
     getConfigurationCompleted(taskContext, taskResult) {
       const config = taskResult.output;
+      this.config = config;
       this.helo_host = config.helo_host;
       this.receiver_emails = config.receiver_emails.join("\n");
       this.bantime = String(config.bantime);
       this.dyn_bantime = config.dyn_bantime ? "dynamic" : "static";
-      this.whitelists = config.whitelists.join("\n");
-      this.enable_online_api = config.enable_online_api;
       this.loading.getConfiguration = false;
-      this.focusElement("receiver_emails");
+      this.focusElement("ban_local_network");
       this.ban_local_network = config.ban_local_network;
-      this.enroll_instance = config.enroll_instance;
       this.mail_configured = config.mail_configured;
       this.group_threshold = String(config.group_threshold);
       this.dynamicBantimeDuration = String(config.dynamic_bantime_duration);
@@ -471,14 +386,12 @@ export default {
         this.createModuleTaskForApp(this.instanceName, {
           action: taskAction,
           data: {
+            ...this.config,
             helo_host: this.helo_host,
             receiver_emails: this.receiver_emails.toLowerCase().split("\n"),
             bantime: String(this.bantime),
             dyn_bantime: this.dyn_bantime === "dynamic",
-            whitelists: this.whitelists.toLowerCase().split("\n"),
-            enable_online_api: this.enable_online_api,
             ban_local_network: this.ban_local_network,
-            enroll_instance: this.enroll_instance,
             group_threshold: parseInt(this.group_threshold),
             dynamic_bantime_duration: this.dynamicBantimeDuration,
           },
@@ -526,14 +439,26 @@ export default {
   margin-bottom: $spacing-06;
 }
 
-.toolbar {
-  display: flex;
-  align-items: center;
+.mg-top-md {
+  margin-top: $spacing-05;
+}
+
+// Let the description drive the spacing so each option is spaced evenly
+::v-deep .bx--radio-button-group--vertical .bx--radio-button-wrapper {
+  margin-bottom: 0;
+}
+
+// Radio option description: grey, aligned under the label text (past the radio)
+.bantime-description {
+  margin: 0.25rem 0 0 1.75rem;
+  color: $text-02;
+}
+
+.bantime-description:not(:last-child) {
   margin-bottom: $spacing-05;
 }
 
-.page-toolbar {
-  display: flex;
-  justify-content: flex-end;
+.smarthost-notification {
+  max-width: 38rem;
 }
 </style>

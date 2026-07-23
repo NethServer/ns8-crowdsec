@@ -39,8 +39,16 @@ api:
     trusted_ips: # IP ranges, or IPs which can have admin API access
       - 127.0.0.1
       - ::1
+{% if enable_online_api %}
     online_client: # Central API credentials (to push signals and receive bad IPs)
-      credentials_path: /etc/crowdsec//online_api_credentials.yaml
+      credentials_path: /etc/crowdsec/online_api_credentials.yaml
+{% if not pull_community_blocklist %}
+      pull:
+        community: false
+{% endif %}
+{% else %}
+    # online_client disabled — Central API is off
+{% endif %}
 prometheus:
   enabled: true
   level: full

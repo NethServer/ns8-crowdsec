@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Search for a specific IP in CAPI decisions — server-side filtering, fast
+
+set -e
+
+input=$(cat)
+ip=$(echo "$input" | jq -r '.ip')
+
+# List every CAPI decision and match the IP client-side.
+# - `--limit 0` removes the default 100-row cap, so IPs past the first 100 of the
+#   large community list are still found.
+# - We deliberately do NOT use `--ip`: for IPv4 it triggers a range-containment
+#   lookup that hangs on the huge community dataset (IPv6 is fine). A plain dump
+#   plus an exact jq match avoids that.
+list=$(podman exec "$MODULE_ID" cscli decisions list --origin CAPI --limit 0 --output json)
+
+if [[ $list == 'null' || $list == '[]' || -z $list ]]; then
+    jq -n '{found: false, decisions: []}'
+    exit 0
+fi
+
+decisions=$(echo "$list" | jq --arg ip "$ip" '
+  if (.[0] | has("decisions")) then
+    [.[].decisions // [] | .[] | select(.value == $ip)]
+  else
+    [.[] | select(.value == $ip)]
+  end
+')
+if [[ $(echo "$decisions" | jq 'length') -gt 0 ]]; then
+    jq -n --argjson d "$decisions" '{found: true, decisions: $d}'
+else
+    jq -n '{found: false, decisions: []}'
+fi

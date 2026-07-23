@@ -22,10 +22,22 @@ const routes = [
     component: Settings,
   },
   {
-    path: "/unban",
-    name: "Unban",
+    path: "/detections",
+    name: "Detections",
     component: () =>
-      import(/* webpackChunkName: "about" */ "../views/Unban.vue"),
+      import(/* webpackChunkName: "detections" */ "../views/Detections.vue"),
+  },
+  {
+    path: "/collections",
+    name: "Collections",
+    component: () =>
+      import(/* webpackChunkName: "collections" */ "../views/Collections.vue"),
+  },
+  {
+    path: "/blocklists",
+    name: "Blocklists",
+    component: () =>
+      import(/* webpackChunkName: "blocklists" */ "../views/Blocklists.vue"),
   },
   {
     path: "/about",
