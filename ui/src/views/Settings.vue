@@ -359,7 +359,36 @@ export default {
         });
       }
     },
+    validateInput() {
+      this.error.bantime = "";
+      this.error.group_threshold = "";
+      let isValid = true;
+      const positiveInteger = /^[1-9][0-9]*$/;
+
+      // validate only the duration shown for the selected ban mode
+      const duration =
+        this.dyn_bantime === "dynamic"
+          ? String(this.dynamicBantimeDuration).trim()
+          : String(this.bantime).trim();
+      if (!positiveInteger.test(duration) || Number(duration) > 1440) {
+        this.error.bantime = this.$t("settings.invalid_bantime_duration");
+        isValid = false;
+      }
+
+      const threshold = String(this.group_threshold).trim();
+      if (!positiveInteger.test(threshold) || Number(threshold) > 10000) {
+        this.error.group_threshold = this.$t(
+          "settings.invalid_group_threshold"
+        );
+        isValid = false;
+      }
+
+      return isValid;
+    },
     async configureModule() {
+      if (!this.validateInput()) {
+        return;
+      }
       this.loading.configureModule = true;
       const taskAction = "configure-module";
       const eventId = this.getUuid();
@@ -393,7 +422,10 @@ export default {
             dyn_bantime: this.dyn_bantime === "dynamic",
             ban_local_network: this.ban_local_network,
             group_threshold: parseInt(this.group_threshold),
-            dynamic_bantime_duration: this.dynamicBantimeDuration,
+            dynamic_bantime_duration:
+              this.dyn_bantime === "dynamic"
+                ? this.dynamicBantimeDuration
+                : this.config.dynamic_bantime_duration,
           },
           extra: {
             title: this.$t("settings.configure_instance", {
