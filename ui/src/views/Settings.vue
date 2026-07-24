@@ -205,7 +205,11 @@
               kind="primary"
               :icon="Save20"
               :loading="loading.configureModule"
-              :disabled="loading.getConfiguration || loading.configureModule"
+              :disabled="
+                loading.getConfiguration ||
+                loading.configureModule ||
+                !isFormValid
+              "
               >{{ $t("settings.save") }}</NsButton
             >
           </cv-form>
@@ -295,6 +299,24 @@ export default {
         ? ""
         : this.$t("settings.invalid_group_threshold");
     },
+    isFormValid() {
+      const durationMessage =
+        this.dyn_bantime === "dynamic"
+          ? this.dynamicBantimeInvalidMessage
+          : this.staticBantimeInvalidMessage;
+      const duration =
+        this.dyn_bantime === "dynamic"
+          ? String(this.dynamicBantimeDuration).trim()
+          : String(this.bantime).trim();
+      const threshold = String(this.group_threshold).trim();
+
+      return (
+        !!duration &&
+        !durationMessage &&
+        !!threshold &&
+        !this.groupThresholdInvalidMessage
+      );
+    },
   },
   beforeRouteEnter(to, from, next) {
     next((vm) => {
@@ -381,28 +403,8 @@ export default {
         });
       }
     },
-    validateInput() {
-      // the inline messages come from the computed properties; here we just
-      // gate the save on the active ban duration and the threshold
-      const durationMessage =
-        this.dyn_bantime === "dynamic"
-          ? this.dynamicBantimeInvalidMessage
-          : this.staticBantimeInvalidMessage;
-      const duration =
-        this.dyn_bantime === "dynamic"
-          ? String(this.dynamicBantimeDuration).trim()
-          : String(this.bantime).trim();
-      const threshold = String(this.group_threshold).trim();
-
-      return (
-        !!duration &&
-        !durationMessage &&
-        !!threshold &&
-        !this.groupThresholdInvalidMessage
-      );
-    },
     async configureModule() {
-      if (!this.validateInput()) {
+      if (!this.isFormValid) {
         return;
       }
       this.loading.configureModule = true;
