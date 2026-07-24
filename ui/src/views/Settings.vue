@@ -94,7 +94,7 @@
               min="1"
               max="1440"
               step="1"
-              :invalid-message="error.bantime"
+              :invalid-message="dynamicBantimeInvalidMessage"
             />
             <NsTextInput
               v-if="dyn_bantime === 'static'"
@@ -107,7 +107,7 @@
               min="1"
               max="1440"
               step="1"
-              :invalid-message="error.bantime"
+              :invalid-message="staticBantimeInvalidMessage"
             />
             <template v-if="!mail_configured">
               <NsInlineNotification
@@ -154,7 +154,7 @@
               :min="thresholdMin"
               :max="thresholdMax"
               step="1"
-              :invalid-message="error.group_threshold"
+              :invalid-message="groupThresholdInvalidMessage"
               :disabled="
                 loading.getConfiguration ||
                 loading.configureModule ||
@@ -273,6 +273,28 @@ export default {
   },
   computed: {
     ...mapState(["instanceName", "core", "appName"]),
+    // live validation: show the error while typing, before saving
+    dynamicBantimeInvalidMessage() {
+      const value = String(this.dynamicBantimeDuration).trim();
+      if (!value) return "";
+      return /^[1-9][0-9]*$/.test(value) && Number(value) <= 1440
+        ? ""
+        : this.$t("settings.invalid_bantime_duration");
+    },
+    staticBantimeInvalidMessage() {
+      const value = String(this.bantime).trim();
+      if (!value) return "";
+      return /^[1-9][0-9]*$/.test(value) && Number(value) <= 1440
+        ? ""
+        : this.$t("settings.invalid_bantime_duration");
+    },
+    groupThresholdInvalidMessage() {
+      const value = String(this.group_threshold).trim();
+      if (!value) return "";
+      return /^[1-9][0-9]*$/.test(value) && Number(value) <= 10000
+        ? ""
+        : this.$t("settings.invalid_group_threshold");
+    },
   },
   beforeRouteEnter(to, from, next) {
     next((vm) => {
@@ -360,30 +382,24 @@ export default {
       }
     },
     validateInput() {
-      this.error.bantime = "";
-      this.error.group_threshold = "";
-      let isValid = true;
-      const positiveInteger = /^[1-9][0-9]*$/;
-
-      // validate only the duration shown for the selected ban mode
+      // the inline messages come from the computed properties; here we just
+      // gate the save on the active ban duration and the threshold
+      const durationMessage =
+        this.dyn_bantime === "dynamic"
+          ? this.dynamicBantimeInvalidMessage
+          : this.staticBantimeInvalidMessage;
       const duration =
         this.dyn_bantime === "dynamic"
           ? String(this.dynamicBantimeDuration).trim()
           : String(this.bantime).trim();
-      if (!positiveInteger.test(duration) || Number(duration) > 1440) {
-        this.error.bantime = this.$t("settings.invalid_bantime_duration");
-        isValid = false;
-      }
-
       const threshold = String(this.group_threshold).trim();
-      if (!positiveInteger.test(threshold) || Number(threshold) > 10000) {
-        this.error.group_threshold = this.$t(
-          "settings.invalid_group_threshold"
-        );
-        isValid = false;
-      }
 
-      return isValid;
+      return (
+        !!duration &&
+        !durationMessage &&
+        !!threshold &&
+        !this.groupThresholdInvalidMessage
+      );
     },
     async configureModule() {
       if (!this.validateInput()) {
