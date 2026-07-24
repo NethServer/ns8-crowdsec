@@ -94,7 +94,7 @@
               min="1"
               max="1440"
               step="1"
-              :invalid-message="error.bantime"
+              :invalid-message="dynamicBantimeInvalidMessage"
             />
             <NsTextInput
               v-if="dyn_bantime === 'static'"
@@ -107,7 +107,7 @@
               min="1"
               max="1440"
               step="1"
-              :invalid-message="error.bantime"
+              :invalid-message="staticBantimeInvalidMessage"
             />
             <template v-if="!mail_configured">
               <NsInlineNotification
@@ -154,7 +154,7 @@
               :min="thresholdMin"
               :max="thresholdMax"
               step="1"
-              :invalid-message="error.group_threshold"
+              :invalid-message="groupThresholdInvalidMessage"
               :disabled="
                 loading.getConfiguration ||
                 loading.configureModule ||
@@ -205,7 +205,11 @@
               kind="primary"
               :icon="Save20"
               :loading="loading.configureModule"
-              :disabled="loading.getConfiguration || loading.configureModule"
+              :disabled="
+                loading.getConfiguration ||
+                loading.configureModule ||
+                !isFormValid
+              "
               >{{ $t("settings.save") }}</NsButton
             >
           </cv-form>
@@ -273,6 +277,46 @@ export default {
   },
   computed: {
     ...mapState(["instanceName", "core", "appName"]),
+    // live validation: show the error while typing, before saving
+    dynamicBantimeInvalidMessage() {
+      const value = String(this.dynamicBantimeDuration).trim();
+      if (!value) return "";
+      return /^[1-9][0-9]*$/.test(value) && Number(value) <= 1440
+        ? ""
+        : this.$t("settings.invalid_bantime_duration");
+    },
+    staticBantimeInvalidMessage() {
+      const value = String(this.bantime).trim();
+      if (!value) return "";
+      return /^[1-9][0-9]*$/.test(value) && Number(value) <= 1440
+        ? ""
+        : this.$t("settings.invalid_bantime_duration");
+    },
+    groupThresholdInvalidMessage() {
+      const value = String(this.group_threshold).trim();
+      if (!value) return "";
+      return /^[1-9][0-9]*$/.test(value) && Number(value) <= 10000
+        ? ""
+        : this.$t("settings.invalid_group_threshold");
+    },
+    isFormValid() {
+      const durationMessage =
+        this.dyn_bantime === "dynamic"
+          ? this.dynamicBantimeInvalidMessage
+          : this.staticBantimeInvalidMessage;
+      const duration =
+        this.dyn_bantime === "dynamic"
+          ? String(this.dynamicBantimeDuration).trim()
+          : String(this.bantime).trim();
+      const threshold = String(this.group_threshold).trim();
+
+      return (
+        !!duration &&
+        !durationMessage &&
+        !!threshold &&
+        !this.groupThresholdInvalidMessage
+      );
+    },
   },
   beforeRouteEnter(to, from, next) {
     next((vm) => {
@@ -360,6 +404,9 @@ export default {
       }
     },
     async configureModule() {
+      if (!this.isFormValid) {
+        return;
+      }
       this.loading.configureModule = true;
       const taskAction = "configure-module";
       const eventId = this.getUuid();
@@ -393,7 +440,10 @@ export default {
             dyn_bantime: this.dyn_bantime === "dynamic",
             ban_local_network: this.ban_local_network,
             group_threshold: parseInt(this.group_threshold),
-            dynamic_bantime_duration: this.dynamicBantimeDuration,
+            dynamic_bantime_duration:
+              this.dyn_bantime === "dynamic"
+                ? this.dynamicBantimeDuration
+                : this.config.dynamic_bantime_duration,
           },
           extra: {
             title: this.$t("settings.configure_instance", {

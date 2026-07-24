@@ -864,8 +864,9 @@ export default {
       this.loading.getCapiCount = false;
     },
     async searchCapiDecision() {
+      // block search (incl. Enter key) when the IP is empty or invalid
+      if (!this.isValidIp) return;
       const ip = this.searchIp.trim();
-      if (!ip) return;
       this.searchedIp = ip;
       this.searchFound = false;
       this.searchDecisions = [];
