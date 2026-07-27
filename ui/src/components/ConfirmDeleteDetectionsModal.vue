@@ -9,12 +9,16 @@
     @modal-hidden="$emit('hide')"
     @primary-click="$emit('confirm')"
   >
-    <template slot="title">{{ $t("detections.confirm_delete_title") }}</template>
+    <template slot="title">{{
+      $t("detections.confirm_delete_title")
+    }}</template>
     <template slot="content">
       <div>{{ $t("detections.confirm_delete_message") }}</div>
     </template>
     <template slot="secondary-button">{{ core.$t("common.cancel") }}</template>
-    <template slot="primary-button">{{ $t("detections.delete_alerts") }}</template>
+    <template slot="primary-button">{{
+      $t("detections.delete_alerts")
+    }}</template>
   </NsModal>
 </template>
 

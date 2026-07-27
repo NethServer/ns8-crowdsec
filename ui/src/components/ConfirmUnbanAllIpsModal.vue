@@ -31,8 +31,7 @@ export default {
     core: { type: Object },
   },
 };
-
 </script>
-<style scoped lang="scss">	
+<style scoped lang="scss">
 @import "../styles/carbon-utils";
 </style>

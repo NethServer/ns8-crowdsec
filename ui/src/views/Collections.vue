@@ -84,7 +84,11 @@
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     <NsTag
-                      :label="row.status.includes('enabled') ? $t('settings.enabled') : $t('settings.disabled')"
+                      :label="
+                        row.status.includes('enabled')
+                          ? $t('settings.enabled')
+                          : $t('settings.disabled')
+                      "
                       :kind="row.status.includes('enabled') ? 'green' : 'gray'"
                     />
                   </cv-data-table-cell>
@@ -98,9 +102,18 @@
                     <NsButton
                       kind="ghost"
                       size="small"
-                      @click="toggleCollectionMenu(row, row.status.includes('enabled') ? 'remove' : 'install')"
+                      @click="
+                        toggleCollectionMenu(
+                          row,
+                          row.status.includes('enabled') ? 'remove' : 'install'
+                        )
+                      "
                       :data-test-id="row.name + '-toggle'"
-                      >{{ row.status.includes('enabled') ? $t('collections.disable_collection') : $t('collections.enable_collection') }}
+                      >{{
+                        row.status.includes("enabled")
+                          ? $t("collections.disable_collection")
+                          : $t("collections.enable_collection")
+                      }}
                     </NsButton>
                   </cv-data-table-cell>
                 </cv-data-table-row>
@@ -130,7 +143,7 @@ import {
   IconService,
   TaskService,
   DateTimeService,
-  PageTitleService
+  PageTitleService,
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
 import ConfirmToggleCollectionModal from "@/components/ConfirmToggleCollectionModal.vue";
@@ -146,7 +159,7 @@ export default {
     IconService,
     TaskService,
     DateTimeService,
-    PageTitleService
+    PageTitleService,
   ],
   pageTitle() {
     return this.$t("collections.title") + " - " + this.appName;
@@ -243,7 +256,7 @@ export default {
         listCollections.forEach((collection) => {
           this.collections.push(collection);
         });
-      } else if (listCollections && typeof listCollections === 'object') {
+      } else if (listCollections && typeof listCollections === "object") {
         Object.values(listCollections).forEach((collection) => {
           this.collections.push(collection);
         });
