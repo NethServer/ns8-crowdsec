@@ -21,8 +21,12 @@
       <div>
         {{
           action === "install"
-            ? $t("collections.confirm_enable_message", { name: collection.name })
-            : $t("collections.confirm_disable_message", { name: collection.name })
+            ? $t("collections.confirm_enable_message", {
+                name: collection.name,
+              })
+            : $t("collections.confirm_disable_message", {
+                name: collection.name,
+              })
         }}
       </div>
     </template>
