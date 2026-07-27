@@ -1,7 +1,6 @@
 *** Settings ***
 Library    SSHLibrary
 Library    BuiltIn
-Library    Browser
 
 *** Variables ***
 ${ADMIN_USER}    admin
@@ -16,6 +15,7 @@ Check if crowdsec is installed correctly
 
 Take screenshots
     [Tags]    ui
+    Import Library    Browser
     New Browser    chromium    headless=True
     New Context    ignoreHTTPSErrors=True
     Login to cluster-admin
