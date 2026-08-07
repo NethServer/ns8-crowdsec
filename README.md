@@ -62,11 +62,64 @@ You can also modify settings with the configure-module action
 - `enable_online_api`: enable/disable to  push signals and receive bad IPs from crowdsec hub (true/false default is true)
 - `ban_local_network`: enable/disable to ban on private IP address range
 
+## Push blocked-IP evidence to nethesis-insights
+
+Every ban decision can be pushed in near-real-time to
+[`nethesis-insights`](https://github.com/nethesis/nethesis-insights), so a
+central service can aggregate them into a fleet-wide blacklist. Delivery uses
+CrowdSec's own `notification-http` plugin, driven by `profiles.yaml`: no
+polling, no cursor, no extra timer. Decisions fired within the same 30s window
+are batched into a single `POST /v1/blocklist-evidence`.
+
+    api-cli run module/crowdsec1/set-insights --data '{
+      "active": true,
+      "base_url": "https://insights.example.com",
+      "verify_tls": true
+    }'
+
+| Parameter | Env var | Required | Default |
+|---|---|---|---|
+| `active` | — | yes | `false` |
+| `base_url` | `INSIGHTS_SERVER_URL` | when `active` | unset |
+| `verify_tls` | `INSIGHTS_VERIFY_TLS` | no | `true` |
+
+Disable it again with:
+
+    api-cli run module/crowdsec1/set-insights --data '{"active": false}'
+
+No API key is required or accepted. Identity is not configurable: the
+`notifications/http.yaml` render reads `system_id` and `auth_token` from the
+`cluster/subscription` Redis hash and sends
+`Authorization: Basic base64(system_id:auth_token)`. The credential is never
+stored in the module environment, so a configured webhook cannot be pointed at
+another tenant by editing module state, and a subscription registered later
+starts working on the next reload with no reconfiguration. When the
+subscription is terminated the webhook configuration is cleared.
+
+`verify_tls: false` exists for self-signed test servers only.
+
+Delivery is best effort: a decision made while `crowdsec1` is mid-restart, or
+lost to a plugin subprocess crash, is not retried.
+
 ## get-configuration
 
 Display the configuration
 
     api-cli run get-configuration --agent module/crowdsec1 | jq
+
+The `insights` block reports the webhook state:
+
+```json
+"insights": {
+  "status": "active",
+  "base_url": "https://insights.example.com",
+  "verify_tls": true,
+  "subscription_configured": true
+}
+```
+
+`subscription_configured` is what tells the UI why an active webhook is
+shipping nothing.
 
 ## Disable whitelist
 

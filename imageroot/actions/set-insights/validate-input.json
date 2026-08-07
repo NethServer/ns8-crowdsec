@@ -1,0 +1,40 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "http://schema.nethserver.org/crowdsec/set-insights.json",
+    "title": "Configure the insights blocklist-evidence webhook",
+    "description": "Configure the CrowdSec notification plugin that pushes every ban decision to the nethesis-insights service.",
+    "type": "object",
+    "properties": {
+        "active": {
+            "type": "boolean",
+            "description": "Enable or disable the insights webhook."
+        },
+        "base_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Base URL of the nethesis-insights server that receives the decisions."
+        },
+        "verify_tls": {
+            "type": "boolean",
+            "default": true,
+            "description": "Verify the server TLS certificate. Disable only when pointing at a self-signed test server."
+        }
+    },
+    "oneOf": [
+        {
+            "properties": {
+                "active": {"enum": [true]}
+            },
+            "required": [
+                "active",
+                "base_url"
+            ]
+        },
+        {
+            "properties": {
+                "active": {"enum": [false]}
+            },
+            "required": ["active"]
+        }
+    ]
+}
