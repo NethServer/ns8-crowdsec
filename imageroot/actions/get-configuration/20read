@@ -29,4 +29,16 @@ config["group_threshold"] = int(os.getenv("GROUP_THRESHOLD", 100))
 config['dynamic_bantime_duration'] = os.getenv("DYNAMIC_BANTIME_DURATION", "4")
 config['pull_community_blocklist'] = os.getenv("PULL_COMMUNITY_BLOCKLIST", "True") == "True"
 
+# There is no timer here: the webhook is active as soon as the URL is set and
+# the crowdsec notification plugin is wired up by expand-configuration.
+# subscription_configured is what tells the UI why an active webhook is
+# shipping nothing: identity comes from cluster/subscription, not from the
+# module configuration.
+config["insights"] = {
+    "status": "active" if os.getenv("INSIGHTS_SERVER_URL") else "inactive",
+    "base_url": os.getenv("INSIGHTS_SERVER_URL", ""),
+    "verify_tls": os.getenv("INSIGHTS_VERIFY_TLS", "1") != "0",
+    "subscription_configured": bool(agent.redis_connect().hgetall("cluster/subscription")),
+}
+
 json.dump(config, fp=sys.stdout)

@@ -5,6 +5,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
+import base64
+import json
 import os
 import agent
 import re
@@ -88,6 +90,48 @@ if True:
     with open("crowdsec_config/local_api_credentials.yaml.local","w") as f:
         f.write(output)
 
+# expand notifications/http.yaml, the nethesis-insights blocklist-evidence
+# webhook. The identity is never stored in the module environment: it is
+# re-read from cluster/subscription at every render, so a subscription
+# registered later starts working with no reconfiguration.
+insights_url = os.environ.get("INSIGHTS_SERVER_URL", "").rstrip("/")
+
+files = ["crowdsec_config/notifications/http.yaml"]
+for f in files:
+    try:
+        os.remove(f)
+    except FileNotFoundError:
+        pass
+
+http_notification = False
+if insights_url:
+    subscription = agent.redis_connect().hgetall('cluster/subscription')
+    system_id = subscription.get('system_id')
+    auth_token = subscription.get('auth_token')
+    if not system_id or not auth_token:
+        # Log the field names only: a value here would be the credential
+        # itself, and this output lands in the journal.
+        print(agent.SD_WARNING + "cluster/subscription is missing required fields, "
+              f"the insights webhook is not configured; present: {sorted(subscription.keys())}",
+              file=sys.stderr)
+    else:
+        properties = {
+            "insights_url": insights_url,
+            # Built in Python: Jinja has no base64 filter, and a filter chain
+            # is one templating bug away from leaking the token into an error
+            # message.
+            "basic_token": base64.b64encode(f"{system_id}:{auth_token}".encode()).decode(),
+            "system_id_json": json.dumps(system_id),
+            "insights_verify_tls": os.environ.get("INSIGHTS_VERIFY_TLS", "1") != "0",
+        }
+        os.makedirs("crowdsec_config/notifications", exist_ok=True)
+        template = jenv.get_template('http.yaml')
+        output = template.render(properties)
+        with open("crowdsec_config/notifications/http.yaml", "w") as f:
+            f.write(output)
+        os.chmod("crowdsec_config/notifications/http.yaml", 0o600)
+        http_notification = True
+
 # expand profiles.yaml.local
 smtp = agent.get_smarthost_settings(agent.redis_connect())
 receiver_emails = os.environ.get("RECEIVER_EMAILS", "")
@@ -101,6 +145,7 @@ for f in files:
 
 properties = {
     "email": True if smtp['enabled'] and receiver_emails else False,
+    "http": http_notification,
     "bantime": os.environ.get('BANTIME','1')+'m',
     "dyn_bantime": os.environ.get('DYN_BANTIME',"True") == "True",
     "dynamic_bantime_duration": os.environ.get('DYNAMIC_BANTIME_DURATION','4'),

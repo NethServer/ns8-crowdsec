@@ -1,0 +1,41 @@
+type: http           # Don't change
+name: http_default   # Must match the registered plugin in the profile
+
+# One of "trace", "debug", "info", "warn", "error", "off"
+log_level: info
+
+# Batch the decisions fired within the same window into a single POST, so a
+# burst (a distributed scan tripping the same scenario repeatedly) does not
+# turn into one HTTP call per decision.
+group_wait: 30s
+timeout: 20s
+
+#-------------------------
+# plugin-specific options
+
+# The following template receives a list of models.Alert objects and builds the
+# nethesis-insights blocklist-evidence body. Fields are emitted through toJson
+# so that the *string members of models.Decision are dereferenced and escaped
+# by encoding/json instead of being printed as pointers.
+{% raw %}
+format: |
+  {{- $sep := "" -}}
+  {"schema_version":1,"system_id":{% endraw %}{{ system_id_json }}{% raw %},"decisions":[
+  {{- range . -}}
+  {{- $created := .CreatedAt -}}
+  {{- range .Decisions -}}
+  {{ $sep }}{"id":{{ .ID }},"value":{{ .Value | toJson }},"scope":{{ .Scope | toJson }},"type":{{ .Type | toJson }},"scenario":{{ .Scenario | toJson }},"origin":{{ .Origin | toJson }},"duration":{{ .Duration | toJson }},"created_at":{{ $created | toJson }}}
+  {{- $sep = "," -}}
+  {{- end -}}
+  {{- end -}}
+  ]}
+{% endraw %}
+
+url: {{ insights_url }}/v1/blocklist-evidence
+method: POST
+
+headers:
+  Content-Type: application/json
+  Authorization: "Basic {{ basic_token }}"
+
+skip_tls_verification: {{ "false" if insights_verify_tls else "true" }}
