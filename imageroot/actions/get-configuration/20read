@@ -29,4 +29,21 @@ config["group_threshold"] = int(os.getenv("GROUP_THRESHOLD", 100))
 config['dynamic_bantime_duration'] = os.getenv("DYNAMIC_BANTIME_DURATION", "4")
 config['pull_community_blocklist'] = os.getenv("PULL_COMMUNITY_BLOCKLIST", "True") == "True"
 
+# A node with no subscription can never ship decisions, so enabled folds in
+# identity presence rather than just the configured URL.
+subscription = agent.redis_connect().hgetall("cluster/subscription")
+has_identity = bool(subscription.get("system_id")) and bool(subscription.get("auth_token"))
+config["insights"] = {
+    "enabled": bool(os.getenv("INSIGHTS_SERVER_URL")) and has_identity,
+    "base_url": os.getenv("INSIGHTS_SERVER_URL", ""),
+    "verify_tls": os.getenv("INSIGHTS_VERIFY_TLS", "1") != "0",
+}
+
+# Absent until crowdsec1-import.timer has actually run once.
+try:
+    with open("insights_last_import.json") as f:
+        config["insights"]["last_import"] = json.load(f)
+except FileNotFoundError:
+    pass
+
 json.dump(config, fp=sys.stdout)

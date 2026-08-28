@@ -206,6 +206,31 @@
         "allowlist_info_title": "Avoid blocking trusted sources",
         "allowlist_info_description": "Entries in the allowlist are excluded from CrowdSec blocks. Use this list for trusted devices, networks or domains."
     },
+    "insights": {
+        "title": "Nethesis Insights",
+        "tooltip": "Share ban decisions with the Nethesis Insights fleet-wide blocklist, and request allowlist exceptions",
+        "connection_title": "Connection",
+        "enable_insights": "Send and receive threat intelligence with Nethesis Insights",
+        "enable_insights_tips": "When enabled, every ban decision is shared with Nethesis Insights, and the fleet-wide consensus blocklist it computes is imported into this node's own decisions every 15 minutes.",
+        "base_url": "Server URL",
+        "base_url_helper": "Leave empty to use the default Nethesis Insights service",
+        "verify_tls": "Verify server certificate",
+        "verify_tls_tips": "Disable only when pointing at a self-signed test server",
+        "allowlist_title": "Request an allowlist exception",
+        "allowlist_description": "If the imported blocklist contains a false positive, ask for it to be removed from the fleet-wide feed.",
+        "cidr": "IP address or CIDR",
+        "reason": "Reason",
+        "reason_helper": "Explain why this address should be allowlisted",
+        "request": "Request",
+        "request_success": "{count} system(s) in the fleet have requested this address be allowlisted",
+        "last_import_title": "Last blocklist pull",
+        "last_import_timestamp": "Last attempt",
+        "last_import_result": "Result",
+        "last_import_success": "Success",
+        "last_import_failure": "Failed",
+        "last_import_entries": "Entries imported",
+        "no_import_yet": "No blocklist pull has run yet"
+    },
     "about": {
         "title": "About"
     },
@@ -232,7 +257,9 @@
         "delete-detections": "Delete detections",
         "get-capi-status": "Get CAPI status",
         "get-capi-count": "Get CAPI count",
-        "search-capi-decision": "Search CAPI decision"
+        "search-capi-decision": "Search CAPI decision",
+        "set-insights": "Configure Nethesis Insights",
+        "request-allowlist": "Request allowlist exception"
     },
     "error": {
         "error": "Error",

@@ -62,11 +62,87 @@ You can also modify settings with the configure-module action
 - `enable_online_api`: enable/disable to  push signals and receive bad IPs from crowdsec hub (true/false default is true)
 - `ban_local_network`: enable/disable to ban on private IP address range
 
+## Push blocked-IP evidence to nethesis-insights
+
+Every ban decision can be pushed in near-real-time to
+[`nethesis-insights`](https://github.com/nethesis/nethesis-insights), so a
+central service can aggregate them into a fleet-wide blacklist. Delivery uses
+CrowdSec's own `notification-http` plugin, driven by `profiles.yaml`: no
+polling, no cursor, no extra timer. Decisions fired within the same 30s window
+are batched into a single `POST /v1/threat-events`. Simulated alerts (`cscli
+simulation`) are never sent.
+
+    api-cli run module/crowdsec1/set-insights --data '{
+      "enabled": true,
+      "base_url": "https://insights.example.com",
+      "verify_tls": true
+    }'
+
+| Parameter | Env var | Required | Default |
+|---|---|---|---|
+| `enabled` | — | yes | `false` |
+| `base_url` | `INSIGHTS_SERVER_URL` | no | `https://insights.nethesis.it` |
+| `verify_tls` | `INSIGHTS_VERIFY_TLS` | no | `true` |
+
+Disable it again with:
+
+    api-cli run module/crowdsec1/set-insights --data '{"enabled": false}'
+
+No API key is required or accepted. Identity is not configurable: the
+`notifications/nethesis-insights.yaml` render reads `system_id` and `auth_token` from the
+`cluster/subscription` Redis hash and sends
+`Authorization: Basic base64(system_id:auth_token)`. The credential is never
+stored in the module environment, so a configured webhook cannot be pointed at
+another tenant by editing module state, and a subscription registered later
+starts working on the next reload with no reconfiguration. When the
+subscription is terminated the notification simply stops being wired into the
+active profile on the next reload — there is no separate credential to clear.
+
+`verify_tls: false` exists for self-signed test servers only.
+
+Delivery is best effort: a decision made while `crowdsec1` is mid-restart, or
+lost to a plugin subprocess crash, is not retried.
+
+The same `set-insights` configuration also drives a periodic pull in the
+other direction: every 15 minutes, `${MODULE_ID}-import.timer` fetches the
+fleet-wide consensus blocklist from `{base_url}/v1/blocklist` and imports it
+into this node's own decisions, tagged `origin: cscli-import`, `scenario:
+nethesis-insights` in `cscli decisions list` — distinct from any other
+origin, so each cycle's flush-and-reimport never touches CAPI, hub, or
+manually-added decisions.
+
+If the imported blocklist contains a false positive, request its removal
+from the fleet-wide feed:
+
+    api-cli run module/crowdsec1/request-allowlist --data '{
+      "cidr": "203.0.113.7",
+      "reason": "This is our office egress IP"
+    }'
+
+Returns `{"accepted": true, "requests": N}`, `N` being how many systems in
+the fleet have asked for that CIDR so far — repeating the same request is a
+no-op. Requires insights to be enabled; the server does the actual CIDR/reason
+validation.
+
 ## get-configuration
 
 Display the configuration
 
     api-cli run get-configuration --agent module/crowdsec1 | jq
+
+The `insights` block reports the webhook state:
+
+```json
+"insights": {
+  "enabled": true,
+  "base_url": "https://insights.example.com",
+  "verify_tls": true
+}
+```
+
+`enabled` is `false` whenever the node has no subscription, even if the
+webhook was configured enabled: without a subscription there is no identity to
+authenticate with, so nothing can ship.
 
 ## Disable whitelist
 

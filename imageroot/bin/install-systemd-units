@@ -17,5 +17,11 @@ envsubst <"${AGENT_INSTALL_DIR}/crowdsec-upgrade-hub.service" >"/etc/systemd/sys
 # create the timer to update the crowdsec hub for collections
 envsubst <"${AGENT_INSTALL_DIR}/crowdsec-upgrade-hub.timer" >"/etc/systemd/system/${MODULE_ID}-upgrade-hub.timer"
 
+# create the service to import the nethesis-insights consensus blocklist
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-import.service" >"/etc/systemd/system/${MODULE_ID}-import.service"
+
+# create the timer to import the nethesis-insights consensus blocklist
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-import.timer" >"/etc/systemd/system/${MODULE_ID}-import.timer"
+
 # reload and start service
 systemctl daemon-reload

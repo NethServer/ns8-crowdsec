@@ -1,0 +1,44 @@
+type: http
+name: nethesis_insights
+log_level: info
+
+# Batch instead of one request per ban. group_threshold stays well under the
+# server's 500-decision cap, which truncates rather than rejects.
+group_wait: 30s
+group_threshold: 100
+timeout: 10s
+
+url: {{ insights_url }}/v1/threat-events
+method: POST
+
+headers:
+  Content-Type: application/json
+  # base64(system_id:auth_token), rendered locally from cluster/subscription.
+  Authorization: Basic {{ insights_basic_auth }}
+
+skip_tls_verification: {{ "false" if insights_verify_tls else "true" }}
+
+# Emits ONLY the fields the server's envelope defines. Everything else in the
+# alert -- events, their meta, source geo/ASN, message, machine name -- is
+# deliberately never rendered, so it never leaves this node.
+{% raw %}
+format: |
+  {{- $first := true -}}
+  {"schema_version":1,"decisions":[
+  {{- range . -}}
+    {{- /* Alert.Simulated is a *bool: `if .Simulated` would be true whenever
+           the pointer is set, whatever the value. Compare the JSON instead. */ -}}
+    {{- if eq (.Simulated | toJson) "false" -}}
+      {{- $ts := .StopAt -}}
+      {{- if not $ts }}{{ $ts = .CreatedAt }}{{ end -}}
+      {{- range .Decisions -}}
+        {{- if $first }}{{ $first = false }}{{ else }},{{ end -}}
+        {"value":{{ .Value | toJson }},"scope":{{ .Scope | toJson }},
+         "type":{{ .Type | toJson }},"scenario":{{ .Scenario | toJson }},
+         "origin":{{ .Origin | toJson }},"duration":{{ .Duration | toJson }},
+         "created_at":{{ $ts | toJson }}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  ]}
+{% endraw %}
