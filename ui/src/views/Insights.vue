@@ -53,33 +53,35 @@
             <cv-accordion v-if="enabled" class="dependent-fields">
               <cv-accordion-item>
                 <template slot="title">{{ $t("insights.advanced") }}</template>
-                <NsTextInput
-                  :label="$t('insights.base_url')"
-                  :helper-text="$t('insights.base_url_helper')"
-                  v-model="base_url"
-                  class="mg-bottom maxwidth"
-                  :disabled="loading.getConfiguration || loading.setInsights"
-                  ref="base_url"
-                />
-                <NsToggle
-                  :label="$t('insights.verify_tls')"
-                  class="mg-bottom maxwidth"
-                  value="verify_tls"
-                  :form-item="true"
-                  v-model="verify_tls"
-                  :disabled="loading.getConfiguration || loading.setInsights"
-                  ref="verify_tls"
-                >
-                  <template slot="tooltip">
-                    <span>{{ $t("insights.verify_tls_tips") }}</span>
-                  </template>
-                  <template slot="text-left">{{
-                    $t("settings.disabled")
-                  }}</template>
-                  <template slot="text-right">{{
-                    $t("settings.enabled")
-                  }}</template>
-                </NsToggle>
+                <template slot="content">
+                  <NsTextInput
+                    :label="$t('insights.base_url')"
+                    :helper-text="$t('insights.base_url_helper')"
+                    v-model="base_url"
+                    class="mg-bottom maxwidth"
+                    :disabled="loading.getConfiguration || loading.setInsights"
+                    ref="base_url"
+                  />
+                  <NsToggle
+                    :label="$t('insights.verify_tls')"
+                    class="maxwidth"
+                    value="verify_tls"
+                    :form-item="true"
+                    v-model="verify_tls"
+                    :disabled="loading.getConfiguration || loading.setInsights"
+                    ref="verify_tls"
+                  >
+                    <template slot="tooltip">
+                      <span>{{ $t("insights.verify_tls_tips") }}</span>
+                    </template>
+                    <template slot="text-left">{{
+                      $t("settings.disabled")
+                    }}</template>
+                    <template slot="text-right">{{
+                      $t("settings.enabled")
+                    }}</template>
+                  </NsToggle>
+                </template>
               </cv-accordion-item>
             </cv-accordion>
             <cv-row v-if="error.setInsights">
@@ -486,6 +488,7 @@ export default {
 
 .dependent-fields {
   margin-top: $spacing-05;
+  margin-bottom: $spacing-07;
 }
 
 .last-import-header {
