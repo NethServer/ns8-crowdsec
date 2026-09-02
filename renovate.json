@@ -3,14 +3,18 @@
   "extends": [
     "local>NethServer/.github:ns8-automerge"
   ],
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": ["build-images.sh"],
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)build-images?\\.sh$/"
+      ],
       "matchStrings": [
-        "crowdsec-firewall-bouncer/releases/download/v(?<currentValue>[0-9.]+)/crowdsec-firewall-bouncer-linux-amd64.tgz"
+        "cs-firewall-bouncer/releases/download/v(?<currentValue>[0-9.]+)/crowdsec-firewall-bouncer-linux-amd64\\.tgz"
       ],
       "datasourceTemplate": "github-releases",
-      "depNameTemplate": "crowdsecurity/cs-firewall-bouncer"
+      "depNameTemplate": "crowdsecurity/cs-firewall-bouncer",
+      "extractVersionTemplate": "^v(?<version>.+)$"
     }
   ]
 }
