@@ -19,7 +19,7 @@ repobase="${REPOBASE:-ghcr.io/nethserver}"
 
 # The crowdsec-firewall-bouncer versions can be found : https://github.com/crowdsecurity/cs-firewall-bouncer/releases
 curl --netrc --fail -L -o crowdsec-firewall-bouncer-linux-amd64.tgz \
-    https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.34/crowdsec-firewall-bouncer-linux-amd64.tgz
+    https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.36/crowdsec-firewall-bouncer-linux-amd64.tgz
 
 # After updates add the new value to CHECKSUM file: sha256sum crowdsec-firewall-bouncer-linux-amd64.tgz > CHECKSUM
 sha256sum -c CHECKSUM
@@ -76,7 +76,7 @@ buildah config --entrypoint=/ \
     --label="org.nethserver.max-per-node=1" \
     --label="org.nethserver.authorizations=" \
     --label="org.nethserver.rootfull=1" \
-    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.7.8-debian ${repobase}/crowdsec-firewall-bouncer:${IMAGETAG:-latest}" \
+    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.8.0-debian ${repobase}/crowdsec-firewall-bouncer:${IMAGETAG:-latest}" \
     --label="org.nethserver.tcp-ports-demand=2" \
     "${container}"
 # Commit the image
