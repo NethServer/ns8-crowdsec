@@ -6,3 +6,6 @@
 #
 
 install-systemd-units
+
+# enable the timer on instances updating from a version that didn't have it
+systemctl enable --now "${MODULE_ID}-import.timer"

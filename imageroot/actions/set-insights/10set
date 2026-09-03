@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import json
+import os
+import subprocess
+import sys
+
+import agent
+
+# The production nethesis-insights service, used whenever base_url is
+# omitted. A test/dev deployment overrides it explicitly.
+DEFAULT_INSIGHTS_URL = 'https://insights.nethesis.it'
+
+request = json.load(sys.stdin)
+
+if request['enabled']:
+    # A missing subscription does not abort the action: expand-configuration
+    # re-reads cluster/subscription at every render, so a subscription
+    # registered later starts working with no reconfiguration here.
+    subscription = agent.redis_connect().hgetall('cluster/subscription')
+    if not subscription:
+        print(agent.SD_WARNING + "No subscription found: decisions will not ship until the node has a subscription",
+              file=sys.stderr)
+
+    base_url = request.get('base_url') or DEFAULT_INSIGHTS_URL
+    agent.set_env('INSIGHTS_SERVER_URL', base_url.rstrip('/'))
+    agent.set_env('INSIGHTS_VERIFY_TLS', '1' if request.get('verify_tls', True) else '0')
+else:
+    agent.munset_env(['INSIGHTS_SERVER_URL', 'INSIGHTS_VERIFY_TLS'])
+
+# Reload, not restart: the unit's ExecReload already re-renders the
+# configuration and sends SIGHUP to crowdsec, without dropping the container.
+subprocess.run(["systemctl", "reload", f"{os.environ['MODULE_ID']}.service"],
+               stdout=sys.stderr,
+               stderr=sys.stderr,
+               text=True,
+               check=True)

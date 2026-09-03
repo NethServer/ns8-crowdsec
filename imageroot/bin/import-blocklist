@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import base64
+import json
+import os
+import ssl
+import subprocess
+import sys
+from datetime import datetime, timezone
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+import agent
+
+# Distinct from cscli's own origins (cscli, crowdsec, console, CAPI, ...) so
+# a flush-and-reimport can never touch anything but our own prior import.
+REASON = "nethesis-insights"
+
+# A little over twice the server's own 15 min refresh window (Cache-Control:
+# max-age=900), so one missed cycle doesn't drop coverage but a stale entry
+# never meaningfully outlives the feed dropping it.
+DECISION_DURATION = "35m"
+
+STATUS_FILE = "insights_last_import.json"
+
+
+def write_status(success, entries=0, error=None):
+    with open(STATUS_FILE, "w") as f:
+        json.dump({
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "success": success,
+            "entries": entries,
+            "error": error,
+        }, f)
+
+
+insights_url = os.environ.get("INSIGHTS_SERVER_URL", "").rstrip("/")
+if not insights_url:
+    sys.exit(0)
+
+subscription = agent.redis_connect(use_replica=True).hgetall("cluster/subscription")
+system_id = subscription.get("system_id")
+auth_token = subscription.get("auth_token")
+if not system_id or not auth_token:
+    print(agent.SD_NOTICE + "cluster/subscription has no identity, "
+          "skipping blocklist import",
+          file=sys.stderr)
+    sys.exit(0)
+
+basic_auth = base64.b64encode(f"{system_id}:{auth_token}".encode()).decode()
+verify_tls = os.environ.get("INSIGHTS_VERIFY_TLS", "1") != "0"
+ctx = None if verify_tls else ssl._create_unverified_context()
+
+request = Request(
+    f"{insights_url}/v1/blocklist",
+    headers={"Authorization": f"Basic {basic_auth}"},
+)
+
+try:
+    with urlopen(request, timeout=20, context=ctx) as response:
+        body = response.read().decode()
+except HTTPError as err:
+    # 503 is the server's own dark-launch signal (feed not published yet);
+    # any other error is transient too -- the timer just retries next cycle.
+    print(agent.SD_WARNING + f"nethesis-insights blocklist fetch failed: HTTP {err.code}",
+          file=sys.stderr)
+    write_status(False, error=f"HTTP {err.code}")
+    sys.exit(0)
+except URLError as err:
+    print(agent.SD_WARNING + f"nethesis-insights blocklist fetch failed: {err.reason}",
+          file=sys.stderr)
+    write_status(False, error=str(err.reason))
+    sys.exit(0)
+
+values = [line for line in body.splitlines() if line and not line.startswith("#")]
+
+module_id = os.environ["MODULE_ID"]
+
+try:
+    subprocess.run(
+        ["podman", "exec", module_id, "cscli", "decisions", "delete",
+         "--origin", "cscli-import", "--scenario", REASON],
+        check=True, capture_output=True, text=True,
+    )
+
+    if values:
+        subprocess.run(
+            ["podman", "exec", "-i", module_id, "cscli", "decisions", "import",
+             "-i", "-", "--format", "values", "-d", DECISION_DURATION, "-R", REASON],
+            input="\n".join(values), text=True, check=True, capture_output=True,
+        )
+except subprocess.CalledProcessError as err:
+    print(agent.SD_WARNING + f"nethesis-insights blocklist import failed: {err.stderr}",
+          file=sys.stderr)
+    write_status(False, error=err.stderr.strip()[:500])
+    sys.exit(0)
+
+write_status(True, entries=len(values))
