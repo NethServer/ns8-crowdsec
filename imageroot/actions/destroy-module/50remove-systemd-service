@@ -18,6 +18,14 @@ systemctl disable --now "${MODULE_ID}-upgrade-hub.timer"
 rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.service
 rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.timer
 
+# remove the blocklist import timers
+systemctl disable --now "${MODULE_ID}-import.timer" || :
+rm -vf /etc/systemd/system/${MODULE_ID}-import.service
+rm -vf /etc/systemd/system/${MODULE_ID}-import.timer
+systemctl disable --now "${MODULE_ID}-threat-shield.timer" || :
+rm -vf /etc/systemd/system/${MODULE_ID}-threat-shield.service
+rm -vf /etc/systemd/system/${MODULE_ID}-threat-shield.timer
+
 # remove the bouncer service
 systemctl disable --now "${MODULE_ID}-firewall-bouncer.service"
 rm -vf "/etc/systemd/system/${MODULE_ID}-firewall-bouncer.service"

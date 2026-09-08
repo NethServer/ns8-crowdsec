@@ -40,6 +40,14 @@ const routes = [
       import(/* webpackChunkName: "blocklists" */ "../views/Blocklists.vue"),
   },
   {
+    path: "/threat-shield",
+    name: "ThreatShield",
+    component: () =>
+      import(
+        /* webpackChunkName: "threat-shield" */ "../views/ThreatShield.vue"
+      ),
+  },
+  {
     path: "/insights",
     name: "Insights",
     component: () =>

@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import json
+import os
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import agent
+import threat_shield
+
+request = json.load(sys.stdin)
+catalog = threat_shield.load_catalog()
+requested = request.get("feeds", [])
+
+unknown = [key for key in requested if key not in catalog]
+if unknown:
+    agent.set_status("validation-failed")
+    json.dump([{
+        "field": "feeds",
+        "parameter": "feeds",
+        "value": unknown[0],
+        "error": "unknown_feed",
+    }], fp=sys.stdout)
+    sys.exit(3)
+
+# Deduplicate and store in catalog order, so the environment value is stable
+# whatever order the UI sends.
+feeds = [key for key in catalog if key in requested]
+
+if feeds:
+    agent.set_env("THREAT_SHIELD_FEEDS", ",".join(feeds))
+else:
+    agent.unset_env("THREAT_SHIELD_FEEDS")
+
+# An admin who just bought the entitlement must not be told "no" for another
+# six hours.
+threat_shield.bust_probe_cache()
+
+# Run the import now instead of waiting for the next timer tick, so the
+# decision counts the UI reloads right after are the real ones.
+result = subprocess.run(
+    ["systemctl", "start", f"{os.environ['MODULE_ID']}-threat-shield.service"],
+    stdout=sys.stderr, stderr=sys.stderr, text=True,
+)
+if result.returncode != 0:
+    # The import records its own failures in threat_shield_last_import.json,
+    # which list-threat-shield surfaces: do not fail the whole action here.
+    print(agent.SD_WARNING + "the Threat Shield import unit did not start cleanly",
+          file=sys.stderr)

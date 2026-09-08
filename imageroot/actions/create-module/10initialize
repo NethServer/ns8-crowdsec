@@ -25,6 +25,7 @@ install-systemd-units
 systemctl enable --now "${MODULE_ID}.service"
 systemctl enable --now "${MODULE_ID}-upgrade-hub.timer"
 systemctl enable --now "${MODULE_ID}-import.timer"
+systemctl enable --now "${MODULE_ID}-threat-shield.timer"
 
 # Install default collections
 podman exec -i ${MODULE_ID} cscli collections install \

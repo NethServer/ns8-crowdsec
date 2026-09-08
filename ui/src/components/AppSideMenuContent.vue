@@ -43,6 +43,13 @@
         <span>{{ $t("blocklists.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
+        @click="goToAppPage(instanceName, 'threat-shield')"
+        :class="{ 'current-page': isLinkActive('threat-shield') }"
+      >
+        <template v-slot:nav-icon><Security20 /></template>
+        <span>{{ $t("threat_shield.title") }}</span>
+      </cv-side-nav-link>
+      <cv-side-nav-link
         @click="goToAppPage(instanceName, 'insights')"
         :class="{ 'current-page': isLinkActive('insights') }"
       >
@@ -75,6 +82,7 @@ import Catalog20 from "@carbon/icons-vue/es/catalog/20";
 import Report20 from "@carbon/icons-vue/es/report/20";
 import FirewallClassic20 from "@carbon/icons-vue/es/firewall--classic/20";
 import ConnectionTwoWay20 from "@carbon/icons-vue/es/connection--two-way/20";
+import Security20 from "@carbon/icons-vue/es/security/20";
 import { mapState } from "vuex";
 import { QueryParamService, UtilService } from "@nethserver/ns8-ui-lib";
 
@@ -88,6 +96,7 @@ export default {
     Report20,
     FirewallClassic20,
     ConnectionTwoWay20,
+    Security20,
   },
   mixins: [QueryParamService, UtilService],
   data() {

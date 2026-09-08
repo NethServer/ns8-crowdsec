@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer of the Nethesis Threat Shield blocklist import
+
+[Timer]
+OnActiveSec=2min
+OnUnitInactiveSec=6h
+
+[Install]
+WantedBy=timers.target

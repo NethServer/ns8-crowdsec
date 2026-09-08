@@ -1,0 +1,8 @@
+[Unit]
+Description=Import the Nethesis Threat Shield premium blocklists
+Requisite=${MODULE_ID}.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/runagent -m ${MODULE_ID} import-threat-shield
+SyslogIdentifier=%N

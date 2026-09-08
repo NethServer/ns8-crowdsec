@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import json
+import os
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import agent
+import threat_shield
+
+SCENARIO_PREFIX = "threat-shield/"
+
+
+def decision_counts():
+    """Active decisions per Threat Shield scenario.
+
+    One dump grouped client-side beats one cscli call per feed. --limit 0
+    removes the default 100-row cap, and --ip is deliberately never used --
+    see search-threat-shield-decision for why.
+    """
+    counts = {}
+    try:
+        result = subprocess.run(
+            ["podman", "exec", os.environ["MODULE_ID"], "cscli", "decisions", "list",
+             "--origin", "cscli-import", "--limit", "0", "--output", "json"],
+            check=True, capture_output=True, text=True,
+        )
+    except subprocess.CalledProcessError as err:
+        print(agent.SD_WARNING + f"cannot list Threat Shield decisions: {err.stderr}",
+              file=sys.stderr)
+        return counts
+
+    try:
+        listed = json.loads(result.stdout or "null") or []
+    except ValueError:
+        return counts
+
+    for row in listed:
+        # cscli groups decisions under an alert when the LAPI returns alerts,
+        # and returns them flat otherwise.
+        for decision in (row.get("decisions") or [row]):
+            scenario = decision.get("scenario", "")
+            if scenario.startswith(SCENARIO_PREFIX):
+                key = scenario[len(SCENARIO_PREFIX):]
+                counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
+catalog = threat_shield.load_catalog()
+enabled = set(threat_shield.enabled_feeds(catalog))
+counts = decision_counts()
+
+system_id, auth_token = threat_shield.identity()
+has_subscription = bool(system_id) and bool(auth_token)
+probe = threat_shield.probe_status() if has_subscription else {"entitled": False, "type": None}
+
+output = {
+    "subscription": has_subscription,
+    "entitled": bool(probe.get("entitled")),
+    "type": probe.get("type") or "",
+    "feeds": [
+        {
+            "key": key,
+            "description": entry.get("descr", key),
+            "enabled": key in enabled,
+            "count": counts.get(key, 0),
+        }
+        for key, entry in catalog.items()
+    ],
+}
+
+# Absent until the threat-shield timer has actually run once.
+try:
+    with open("threat_shield_last_import.json") as fp:
+        output["last_import"] = json.load(fp)
+except (FileNotFoundError, ValueError):
+    pass
+
+json.dump(output, fp=sys.stdout)

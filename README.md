@@ -124,6 +124,70 @@ the fleet have asked for that CIDR so far — repeating the same request is a
 no-op. Requires insights to be enabled; the server does the actual CIDR/reason
 validation.
 
+## Threat Shield premium blocklists
+
+The Nethesis **Threat Shield** IP blocklists — the same feeds NethSecurity
+ships in `ns-threat_shield` — can be imported as CrowdSec decisions and are
+then enforced by the existing firewall bouncer. Five feeds are available:
+
+| Key | Description |
+|---|---|
+| `yoroimallvl1` | Yoroi malware - Level 1 |
+| `yoroimallvl2` | Yoroi malware - Level 2 |
+| `yoroisusplvl1` | Yoroi suspicious - Level 1 |
+| `yoroisusplvl2` | Yoroi suspicious - Level 2 |
+| `nethesislvl3` | Nethesis suspicious - Level 3 |
+
+Select the enabled feeds from the **Threat Shield** page of the UI, or with:
+
+    api-cli run module/crowdsec1/set-threat-shield --data '{
+      "feeds": ["yoroimallvl1", "nethesislvl3"]
+    }'
+
+An empty array disables the feature and removes every Threat Shield decision:
+
+    api-cli run module/crowdsec1/set-threat-shield --data '{"feeds": []}'
+
+List the catalog, the decision count per feed and the last import outcome:
+
+    api-cli run module/crowdsec1/list-threat-shield
+
+Look an address up, matching enclosing networks too:
+
+    api-cli run module/crowdsec1/search-threat-shield-decision --data '{"ip": "185.220.101.5"}'
+
+The feeds require an **active subscription** that carries the **blocklist
+entitlement**. Identity (`system_id` / `auth_token`) is read fresh from the
+`cluster/subscription` Redis hash on every run and sent as
+`Authorization: Basic base64(system_id:auth_token)`; it is never stored in the
+module environment, so a subscription registered or terminated later takes
+effect on the next run. Whether the subscription carries the entitlement, and
+whether its feed URLs live under `enterprise` or `community`, is resolved by
+probing the first feed and cached for 6 hours in `threat_shield_entitlement.json`;
+`set-threat-shield` busts that cache, so a freshly bought entitlement is
+picked up at once.
+
+`${MODULE_ID}-threat-shield.timer` refreshes the feeds every 6 hours. Each run
+is a flush-and-reimport per feed: decisions carry `origin: cscli-import` and
+`scenario: threat-shield/<feed key>`, so a failing or disabled feed never
+touches another feed's decisions, nor anything from CAPI, the hub, manual bans,
+or the nethesis-insights import. Decisions last 7 hours — longer than the
+interval, so one failed cycle degrades coverage instead of dropping it. The
+outcome of the last run is written to `threat_shield_last_import.json` and
+surfaced by `list-threat-shield`.
+
+Every run also refreshes the Nethesis **global allowlist** into a dedicated
+`cscli allowlists` entry named `nethesis_threat_shield`, applied before the
+import so a newly allowlisted address cannot be re-banned by the same cycle.
+It has no UI representation, and is deliberately kept separate from
+`nethserver_whitelist` (which `whitelist_ips` recreates from `WHITELISTS` on
+every service start) so the two managers cannot clobber each other:
+
+    runagent -m crowdsec1 cscli allowlists inspect nethesis_threat_shield
+
+If the allowlist cannot be fetched on the very first run the import is skipped
+for that cycle — no coverage beats banning a protected address.
+
 ## get-configuration
 
 Display the configuration

@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+"""Import the enabled Nethesis Threat Shield feeds as CrowdSec decisions.
+
+Same flush-and-reimport shape as import-blocklist, but keyed on a per-feed
+scenario tag so a failing or disabled feed never touches another feed's rows,
+nor anything from CAPI, the hub, manual bans or the nethesis-insights import.
+"""
+
+import ipaddress
+import json
+import os
+import subprocess
+import sys
+from datetime import datetime, timezone
+from urllib.error import HTTPError, URLError
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import agent
+import threat_shield
+
+# cscli decisions import always tags origin cscli-import regardless of -R, so
+# the scenario is what separates these rows from the insights import's rows.
+SCENARIO_PREFIX = "threat-shield/"
+
+# Longer than the 6h timer interval, so one failed cycle degrades coverage
+# instead of dropping it; short enough that a value dropped upstream expires
+# within a cycle.
+DECISION_DURATION = "7h"
+
+# cscli splits the insert into transactions of this size: the premium feeds
+# run to tens of thousands of rows.
+IMPORT_BATCH = 5000
+
+ALLOWLIST = "nethesis_threat_shield"
+
+STATUS_FILE = "threat_shield_last_import.json"
+
+MODULE_ID = os.environ["MODULE_ID"]
+
+
+def cscli(*args, stdin=None):
+    return subprocess.run(
+        ["podman", "exec"] + (["-i"] if stdin is not None else []) + [MODULE_ID, "cscli"] + list(args),
+        input=stdin, text=True, check=True, capture_output=True,
+    )
+
+
+def write_status(feeds, error=None):
+    with open(STATUS_FILE, "w") as fp:
+        json.dump({
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "error": error,
+            "feeds": feeds,
+        }, fp)
+
+
+def parse_values(body):
+    """Keep only the lines that are a valid IP or CIDR.
+
+    Upstream filters the same feeds with an awk program; ipaddress is both
+    stricter and IPv6-aware, and the feeds are plain one-value-per-line text.
+    """
+    values = []
+    for line in body.splitlines():
+        line = line.strip().rstrip(",")
+        if not line or line.startswith("#"):
+            continue
+        try:
+            ipaddress.ip_network(line, strict=False)
+        except ValueError:
+            continue
+        values.append(line)
+    return values
+
+
+def delete_feed_decisions(key):
+    cscli("decisions", "delete", "--origin", "cscli-import",
+          "--scenario", SCENARIO_PREFIX + key)
+
+
+def cleanup(catalog, error=None):
+    """Drop every decision this feature owns, plus its allowlist."""
+    for key in catalog:
+        try:
+            delete_feed_decisions(key)
+        except subprocess.CalledProcessError as err:
+            print(agent.SD_WARNING + f"threat-shield cleanup of {key} failed: {err.stderr}",
+                  file=sys.stderr)
+    try:
+        cscli("allowlists", "delete", ALLOWLIST)
+    except subprocess.CalledProcessError:
+        pass  # not created yet, or already gone
+    write_status({}, error=error)
+
+
+def allowlist_exists():
+    # inspect exits non-zero when the allowlist is missing, which avoids
+    # depending on the shape of `cscli allowlists list -o json`.
+    try:
+        cscli("allowlists", "inspect", ALLOWLIST)
+    except subprocess.CalledProcessError:
+        return False
+    return True
+
+
+def apply_allowlist(values):
+    """Recreate the allowlist from scratch.
+
+    It is deliberately kept out of nethserver_whitelist, which whitelist_ips
+    deletes and recreates from WHITELISTS on every service start: sharing one
+    entry would let each manager clobber the other's addresses.
+    """
+    try:
+        cscli("allowlists", "delete", ALLOWLIST)
+    except subprocess.CalledProcessError:
+        pass  # first run
+    cscli("allowlists", "create", ALLOWLIST,
+          "--description", "Nethesis Threat Shield global allowlist")
+    for start in range(0, len(values), 500):
+        cscli("allowlists", "add", ALLOWLIST, *values[start:start + 500])
+
+
+catalog = threat_shield.load_catalog()
+enabled = threat_shield.enabled_feeds(catalog)
+
+if not enabled:
+    cleanup(catalog)
+    sys.exit(0)
+
+system_id, auth_token = threat_shield.identity()
+if not system_id or not auth_token:
+    print(agent.SD_NOTICE + "cluster/subscription has no identity, "
+          "skipping the Threat Shield import", file=sys.stderr)
+    cleanup(catalog, error="no_subscription")
+    sys.exit(0)
+
+subscription_type = threat_shield.probe_status()["type"] or "enterprise"
+
+# Allowlist first: applying it before the import means a newly allowlisted
+# address cannot be re-banned by the very same cycle.
+try:
+    allowlist_values = parse_values(
+        threat_shield.fetch(threat_shield.allowlist_url(catalog, subscription_type),
+                            system_id, auth_token))
+    apply_allowlist(allowlist_values)
+except (HTTPError, URLError, OSError, subprocess.CalledProcessError) as err:
+    reason = getattr(err, "reason", None) or getattr(err, "stderr", None) or err
+    if not allowlist_exists():
+        # No coverage beats banning a protected address.
+        print(agent.SD_ERR + f"threat-shield allowlist unavailable on first run, "
+              f"skipping the import: {reason}", file=sys.stderr)
+        write_status({}, error=f"allowlist unavailable: {str(reason).strip()[:300]}")
+        sys.exit(0)
+    print(agent.SD_WARNING + f"threat-shield allowlist refresh failed, keeping the "
+          f"previous one: {reason}", file=sys.stderr)
+
+# Feeds turned off since the last run must not keep their decisions alive.
+for key in catalog:
+    if key in enabled:
+        continue
+    try:
+        delete_feed_decisions(key)
+    except subprocess.CalledProcessError as err:
+        print(agent.SD_WARNING + f"threat-shield could not drop decisions of the "
+              f"disabled feed {key}: {err.stderr}", file=sys.stderr)
+
+status = {}
+for key in enabled:
+    url = threat_shield.feed_url(catalog[key], subscription_type)
+    try:
+        values = parse_values(threat_shield.fetch(url, system_id, auth_token))
+    except HTTPError as err:
+        print(agent.SD_WARNING + f"threat-shield feed {key} fetch failed: HTTP {err.code}",
+              file=sys.stderr)
+        status[key] = {"success": False, "entries": 0, "error": f"HTTP {err.code}"}
+        continue
+    except (URLError, OSError) as err:
+        reason = getattr(err, "reason", err)
+        print(agent.SD_WARNING + f"threat-shield feed {key} fetch failed: {reason}",
+              file=sys.stderr)
+        status[key] = {"success": False, "entries": 0, "error": str(reason)[:300]}
+        continue
+
+    try:
+        delete_feed_decisions(key)
+        if values:
+            cscli("decisions", "import", "-i", "-", "--format", "values",
+                  "-d", DECISION_DURATION, "-R", SCENARIO_PREFIX + key,
+                  "--batch", str(IMPORT_BATCH),
+                  stdin="\n".join(values))
+    except subprocess.CalledProcessError as err:
+        print(agent.SD_WARNING + f"threat-shield feed {key} import failed: {err.stderr}",
+              file=sys.stderr)
+        status[key] = {"success": False, "entries": 0, "error": err.stderr.strip()[:300]}
+        continue
+
+    status[key] = {"success": True, "entries": len(values), "error": None}
+
+write_status(status)

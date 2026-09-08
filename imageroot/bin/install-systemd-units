@@ -23,5 +23,11 @@ envsubst <"${AGENT_INSTALL_DIR}/crowdsec-import.service" >"/etc/systemd/system/$
 # create the timer to import the nethesis-insights consensus blocklist
 envsubst <"${AGENT_INSTALL_DIR}/crowdsec-import.timer" >"/etc/systemd/system/${MODULE_ID}-import.timer"
 
+# create the service to import the Nethesis Threat Shield premium blocklists
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-threat-shield.service" >"/etc/systemd/system/${MODULE_ID}-threat-shield.service"
+
+# create the timer to import the Nethesis Threat Shield premium blocklists
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-threat-shield.timer" >"/etc/systemd/system/${MODULE_ID}-threat-shield.timer"
+
 # reload and start service
 systemctl daemon-reload

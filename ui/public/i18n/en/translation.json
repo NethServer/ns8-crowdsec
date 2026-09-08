@@ -206,6 +206,34 @@
         "allowlist_info_title": "Avoid blocking trusted sources",
         "allowlist_info_description": "Entries in the allowlist are excluded from CrowdSec blocks. Use this list for trusted devices, networks or domains."
     },
+    "threat_shield": {
+        "title": "Threat Shield",
+        "feeds_title": "Premium blocklists",
+        "feeds_description": "Nethesis Threat Shield blocklists are imported as CrowdSec decisions and enforced by the firewall bouncer. They are refreshed every 6 hours and require an active subscription with the blocklist entitlement.",
+        "no_subscription_title": "Subscription required",
+        "no_subscription_description": "Threat Shield blocklists are available only on nodes with an active Nethesis or NethServer subscription.",
+        "no_entitlement_title": "Blocklist entitlement required",
+        "no_entitlement_description": "This subscription does not include the Threat Shield blocklists. Contact your provider to add the entitlement.",
+        "ips_listed": "{count} IP addresses blocked",
+        "refresh": "Refresh",
+        "last_import_title": "Last update",
+        "last_import_timestamp": "Last update",
+        "last_import_entries": "{count} entries",
+        "last_import_failure": "Update failed",
+        "no_import_yet": "The blocklists have not been imported yet",
+        "search_title": "Search a blocked IP address",
+        "search_hint": "Check whether an IP address is blocked by one of the Threat Shield blocklists, including addresses covered by a blocked network.",
+        "search_placeholder": "e.g. 185.220.101.5",
+        "search_button": "Search",
+        "invalid_ip": "Invalid IP address",
+        "ip_found_title": "IP address blocked",
+        "ip_found": "{ip} is blocked by Threat Shield",
+        "ip_not_found_title": "IP address not blocked",
+        "ip_not_found": "{ip} is not blocked by Threat Shield",
+        "col_feed": "Blocklist",
+        "col_value": "Blocked value",
+        "col_duration": "Time remaining"
+    },
     "insights": {
         "title": "Nethesis Insights",
         "tooltip": "Share ban decisions with the Nethesis Insights fleet-wide blocklist, and request allowlist exceptions",
@@ -261,7 +289,10 @@
         "get-capi-count": "Get CAPI count",
         "search-capi-decision": "Search CAPI decision",
         "set-insights": "Configure Nethesis Insights",
-        "request-allowlist": "Request allowlist exception"
+        "request-allowlist": "Request allowlist exception",
+        "list-threat-shield": "List Threat Shield blocklists",
+        "set-threat-shield": "Configure Threat Shield blocklists",
+        "search-threat-shield-decision": "Search Threat Shield decision"
     },
     "error": {
         "error": "Error",
