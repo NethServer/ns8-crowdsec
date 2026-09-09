@@ -6,7 +6,17 @@
   <cv-grid fullWidth>
     <cv-row>
       <cv-column class="page-title">
-        <h2>{{ $t("threat_shield.title") }}</h2>
+        <h2 class="title-row">
+          {{ $t("threat_shield.title") }}
+          <template v-if="!loading.listThreatShield && canEdit">
+            <NsTag
+              kind="green"
+              :icon="CheckmarkFilled16"
+              :label="$t('threat_shield.entitled_badge')"
+            />
+            <NsTag kind="blue" :label="$t('threat_shield.type_' + type)" />
+          </template>
+        </h2>
       </cv-column>
     </cv-row>
     <cv-row v-if="error.listThreatShield">
@@ -39,7 +49,7 @@
         />
       </cv-column>
     </cv-row>
-    <cv-row class="equal-height-row">
+    <cv-row v-if="loading.listThreatShield || canEdit" class="equal-height-row">
       <cv-column class="bx--col-lg-8">
         <cv-tile light>
           <h4 class="mg-bottom">{{ $t("threat_shield.feeds_title") }}</h4>
@@ -68,9 +78,30 @@
                   $t("settings.enabled")
                 }}</template>
               </NsToggle>
-              <span class="feed-count">{{
-                $t("threat_shield.ips_listed", { count: feed.count })
-              }}</span>
+              <div
+                v-if="feed.confidence > 0"
+                class="confidence-meter"
+                role="img"
+                :aria-label="
+                  $t('threat_shield.confidence_aria', {
+                    level: feed.confidence,
+                  })
+                "
+              >
+                <span class="confidence-title" aria-hidden="true">{{
+                  $t("threat_shield.confidence")
+                }}</span>
+                <span
+                  v-for="n in 10"
+                  :key="n"
+                  class="ts-dot"
+                  :class="{ 'ts-dot--filled': n <= feed.confidence }"
+                  aria-hidden="true"
+                />
+                <span class="confidence-label" aria-hidden="true"
+                  >{{ feed.confidence }}/10</span
+                >
+              </div>
             </div>
             <NsInlineNotification
               v-if="error.setThreatShield"
@@ -112,7 +143,7 @@
           <div v-else-if="lastImport" class="mg-top">
             <div class="info-row">
               <span class="info-label">{{
-                $t("threat_shield.last_import_timestamp")
+                $t("threat_shield.last_checked")
               }}</span>
               <span>{{ formatDateTime(lastImport.timestamp) }}</span>
             </div>
@@ -130,24 +161,29 @@
               class="info-row mg-top"
             >
               <span class="info-label">{{ feed.description }}</span>
-              <NsTag
-                :kind="feed.result.success ? 'green' : 'red'"
-                :label="
-                  feed.result.success
-                    ? $t('threat_shield.last_import_entries', {
-                        count: feed.result.entries,
-                      })
-                    : feed.result.error ||
-                      $t('threat_shield.last_import_failure')
-                "
-              />
+              <div class="info-value">
+                <NsTag
+                  :kind="feed.result.success ? 'green' : 'red'"
+                  :label="
+                    feed.result.success
+                      ? $t('threat_shield.last_import_entries', {
+                          count: feed.result.entries,
+                        })
+                      : feed.result.error ||
+                        $t('threat_shield.last_import_failure')
+                  "
+                />
+                <span class="feed-timestamp">{{
+                  formatDateTime(feed.result.timestamp)
+                }}</span>
+              </div>
             </div>
           </div>
           <NsEmptyState v-else :title="$t('threat_shield.no_import_yet')" />
         </cv-tile>
       </cv-column>
     </cv-row>
-    <cv-row class="equal-height-row">
+    <cv-row v-if="loading.listThreatShield || canEdit" class="equal-height-row">
       <cv-column class="bx--col-lg-8">
         <cv-tile light>
           <h4 class="mg-bottom">{{ $t("threat_shield.search_title") }}</h4>
@@ -227,6 +263,62 @@
           </div>
         </cv-tile>
       </cv-column>
+      <cv-column class="bx--col-lg-8">
+        <cv-tile light>
+          <h4 class="mg-bottom">{{ $t("threat_shield.allowlist_title") }}</h4>
+          <p class="mg-bottom">
+            {{ $t("threat_shield.allowlist_description") }}
+          </p>
+          <cv-form @submit.prevent="requestAllowlist">
+            <NsTextInput
+              :label="$t('threat_shield.cidr')"
+              v-model.trim="cidr"
+              class="mg-bottom maxwidth"
+              :disabled="!canEdit || loading.requestAllowlist"
+              ref="cidr"
+            />
+            <NsTextInput
+              :label="$t('threat_shield.reason')"
+              :helper-text="$t('threat_shield.reason_helper')"
+              v-model.trim="reason"
+              class="mg-bottom maxwidth"
+              :disabled="!canEdit || loading.requestAllowlist"
+              ref="reason"
+            />
+            <NsInlineNotification
+              v-if="error.requestAllowlist"
+              kind="error"
+              :title="$t('action.request-allowlist')"
+              :description="error.requestAllowlist"
+              :showCloseButton="false"
+              class="mg-bottom"
+            />
+            <NsInlineNotification
+              v-if="requestResult"
+              kind="success"
+              :title="$t('action.request-allowlist')"
+              :description="
+                $t('threat_shield.request_success', {
+                  count: requestResult.requests,
+                })
+              "
+              :showCloseButton="false"
+              class="mg-bottom"
+            />
+            <NsButton
+              kind="primary"
+              :loading="loading.requestAllowlist"
+              :disabled="
+                !canEdit ||
+                loading.requestAllowlist ||
+                !cidr.trim() ||
+                !reason.trim()
+              "
+              >{{ $t("threat_shield.request") }}</NsButton
+            >
+          </cv-form>
+        </cv-tile>
+      </cv-column>
     </cv-row>
   </cv-grid>
 </template>
@@ -266,21 +358,27 @@ export default {
       selected: {},
       subscription: false,
       entitled: false,
+      type: "",
       lastImport: null,
       searchIp: "",
       searchedIp: "",
       searchFound: false,
       searchDone: false,
       searchDecisions: [],
+      cidr: "",
+      reason: "",
+      requestResult: null,
       loading: {
         listThreatShield: false,
         setThreatShield: false,
         searchThreatShieldDecision: false,
+        requestAllowlist: false,
       },
       error: {
         listThreatShield: "",
         setThreatShield: "",
         searchThreatShieldDecision: "",
+        requestAllowlist: "",
       },
     };
   },
@@ -378,6 +476,7 @@ export default {
       this.feeds = output.feeds;
       this.subscription = output.subscription;
       this.entitled = output.entitled;
+      this.type = output.type;
       this.lastImport = output.last_import || null;
       // Replace the whole object so every key is reactive in Vue 2.
       this.selected = output.feeds.reduce((acc, feed) => {
@@ -497,6 +596,65 @@ export default {
       this.searchDone = true;
       this.loading.searchThreatShieldDecision = false;
     },
+    async requestAllowlist() {
+      if (!this.cidr.trim() || !this.reason.trim()) {
+        return;
+      }
+      this.loading.requestAllowlist = true;
+      this.error.requestAllowlist = "";
+      this.requestResult = null;
+      const taskAction = "request-allowlist";
+      const eventId = this.getUuid();
+
+      this.core.$root.$once(
+        `${taskAction}-aborted-${eventId}`,
+        this.requestAllowlistAborted
+      );
+      this.core.$root.$once(
+        `${taskAction}-validation-failed-${eventId}`,
+        this.requestAllowlistValidationFailed
+      );
+      this.core.$root.$once(
+        `${taskAction}-completed-${eventId}`,
+        this.requestAllowlistCompleted
+      );
+
+      const res = await to(
+        this.createModuleTaskForApp(this.instanceName, {
+          action: taskAction,
+          data: {
+            cidr: this.cidr,
+            reason: this.reason,
+          },
+          extra: {
+            title: this.$t("action." + taskAction),
+            isNotificationHidden: true,
+            eventId,
+          },
+        })
+      );
+      const err = res[0];
+
+      if (err) {
+        console.error(`error creating task ${taskAction}`, err);
+        this.error.requestAllowlist = this.getErrorMessage(err);
+        this.loading.requestAllowlist = false;
+      }
+    },
+    requestAllowlistAborted(taskResult, taskContext) {
+      console.error(`${taskContext.action} aborted`, taskResult);
+      this.error.requestAllowlist = this.getErrorMessage(taskResult);
+      this.loading.requestAllowlist = false;
+    },
+    requestAllowlistValidationFailed(validationErrors) {
+      console.error("request-allowlist validation failed", validationErrors);
+      this.error.requestAllowlist = this.$t("error.generic_error");
+      this.loading.requestAllowlist = false;
+    },
+    requestAllowlistCompleted(taskContext, taskResult) {
+      this.requestResult = taskResult.output;
+      this.loading.requestAllowlist = false;
+    },
   },
 };
 </script>
@@ -524,9 +682,41 @@ export default {
   margin-bottom: $spacing-05;
 }
 
-.feed-count {
-  color: $text-02;
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.confidence-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.ts-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #c6c6c6;
+}
+
+.ts-dot--filled {
+  background-color: #24a148;
+}
+
+.confidence-title {
+  margin-right: 0.25rem;
   font-size: 0.75rem;
+  color: #6f6f6f;
+}
+
+.confidence-label {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  color: #6f6f6f;
 }
 
 .last-import-header {
@@ -550,6 +740,17 @@ export default {
 .info-label {
   width: 12rem;
   font-weight: 600;
+}
+
+.info-value {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.feed-timestamp {
+  color: #6f6f6f;
+  font-size: 0.75rem;
 }
 
 .search-row {

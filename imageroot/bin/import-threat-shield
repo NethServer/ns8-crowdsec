@@ -27,7 +27,7 @@ import threat_shield
 
 # cscli decisions import always tags origin cscli-import regardless of -R, so
 # the scenario is what separates these rows from the insights import's rows.
-SCENARIO_PREFIX = "threat-shield/"
+SCENARIO_PREFIX = threat_shield.SCENARIO_PREFIX
 
 # Longer than the 6h timer interval, so one failed cycle degrades coverage
 # instead of dropping it; short enough that a value dropped upstream expires
@@ -130,6 +130,11 @@ def apply_allowlist(values):
 catalog = threat_shield.load_catalog()
 enabled = threat_shield.enabled_feeds(catalog)
 
+# Before any early exit: expand-configuration gates the insights push on the
+# cached entitlement verdict alone -- it runs as ExecStartPre and must never
+# probe -- so this 6h tick is what keeps that cache warm, feeds or no feeds.
+probe = threat_shield.probe_status()
+
 if not enabled:
     cleanup(catalog)
     sys.exit(0)
@@ -141,7 +146,7 @@ if not system_id or not auth_token:
     cleanup(catalog, error="no_subscription")
     sys.exit(0)
 
-subscription_type = threat_shield.probe_status()["type"] or "enterprise"
+subscription_type = probe["type"] or "enterprise"
 
 # Allowlist first: applying it before the import means a newly allowlisted
 # address cannot be re-banned by the very same cycle.

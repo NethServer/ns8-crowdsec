@@ -62,95 +62,58 @@ You can also modify settings with the configure-module action
 - `enable_online_api`: enable/disable to  push signals and receive bad IPs from crowdsec hub (true/false default is true)
 - `ban_local_network`: enable/disable to ban on private IP address range
 
-## Push blocked-IP evidence to nethesis-insights
-
-Every ban decision can be pushed in near-real-time to
-[`nethesis-insights`](https://github.com/nethesis/nethesis-insights), so a
-central service can aggregate them into a fleet-wide blacklist. Delivery uses
-CrowdSec's own `notification-http` plugin, driven by `profiles.yaml`: no
-polling, no cursor, no extra timer. Decisions fired within the same 30s window
-are batched into a single `POST /v1/threat-events`. Simulated alerts (`cscli
-simulation`) are never sent.
-
-    api-cli run module/crowdsec1/set-insights --data '{
-      "enabled": true,
-      "base_url": "https://insights.example.com",
-      "verify_tls": true
-    }'
-
-| Parameter | Env var | Required | Default |
-|---|---|---|---|
-| `enabled` | — | yes | `false` |
-| `base_url` | `INSIGHTS_SERVER_URL` | no | `https://insights.nethesis.it` |
-| `verify_tls` | `INSIGHTS_VERIFY_TLS` | no | `true` |
-
-Disable it again with:
-
-    api-cli run module/crowdsec1/set-insights --data '{"enabled": false}'
-
-No API key is required or accepted. Identity is not configurable: the
-`notifications/nethesis-insights.yaml` render reads `system_id` and `auth_token` from the
-`cluster/subscription` Redis hash and sends
-`Authorization: Basic base64(system_id:auth_token)`. The credential is never
-stored in the module environment, so a configured webhook cannot be pointed at
-another tenant by editing module state, and a subscription registered later
-starts working on the next reload with no reconfiguration. When the
-subscription is terminated the notification simply stops being wired into the
-active profile on the next reload — there is no separate credential to clear.
-
-`verify_tls: false` exists for self-signed test servers only.
-
-Delivery is best effort: a decision made while `crowdsec1` is mid-restart, or
-lost to a plugin subprocess crash, is not retried.
-
-The same `set-insights` configuration also drives a periodic pull in the
-other direction: every 15 minutes, `${MODULE_ID}-import.timer` fetches the
-fleet-wide consensus blocklist from `{base_url}/v1/blocklist` and imports it
-into this node's own decisions, tagged `origin: cscli-import`, `scenario:
-nethesis-insights` in `cscli decisions list` — distinct from any other
-origin, so each cycle's flush-and-reimport never touches CAPI, hub, or
-manually-added decisions.
-
-If the imported blocklist contains a false positive, request its removal
-from the fleet-wide feed:
-
-    api-cli run module/crowdsec1/request-allowlist --data '{
-      "cidr": "203.0.113.7",
-      "reason": "This is our office egress IP"
-    }'
-
-Returns `{"accepted": true, "requests": N}`, `N` being how many systems in
-the fleet have asked for that CIDR so far — repeating the same request is a
-no-op. Requires insights to be enabled; the server does the actual CIDR/reason
-validation.
-
 ## Threat Shield premium blocklists
 
 The Nethesis **Threat Shield** IP blocklists — the same feeds NethSecurity
 ships in `ns-threat_shield` — can be imported as CrowdSec decisions and are
-then enforced by the existing firewall bouncer. Five feeds are available:
+then enforced by the existing firewall bouncer. Six feeds are available: five
+premium `bl.nethesis.it` feeds, plus `nethesis-insights`, the fleet-wide
+consensus blocklist aggregated by
+[`nethesis-insights`](https://github.com/nethesis/nethesis-insights) from
+every subscribed node's own ban decisions. All six are selected the same way,
+through `set-threat-shield` and the `THREAT_SHIELD_FEEDS` environment
+variable — `nethesis-insights` is a *virtual* feed with no entry in
+`imageroot/threat-shield-feeds.json`, pulled on its own, faster timer (see
+below) rather than the shared 6-hour one:
 
-| Key | Description |
-|---|---|
-| `yoroimallvl1` | Yoroi malware - Level 1 |
-| `yoroimallvl2` | Yoroi malware - Level 2 |
-| `yoroisusplvl1` | Yoroi suspicious - Level 1 |
-| `yoroisusplvl2` | Yoroi suspicious - Level 2 |
-| `nethesislvl3` | Nethesis suspicious - Level 3 |
+| Key | Description | Confidence |
+|---|---|---|
+| `yoroimallvl1` | Yoroi malware - Level 1 | 10 |
+| `yoroimallvl2` | Yoroi malware - Level 2 | 8 |
+| `yoroisusplvl1` | Yoroi suspicious - Level 1 | 10 |
+| `yoroisusplvl2` | Yoroi suspicious - Level 2 | 8 |
+| `nethesislvl3` | Nethesis suspicious - Level 3 | 6 |
+| `nethesis-insights` | Nethesis Insights - fleet consensus | 8 |
+
+Confidence is a 1-10 rating shown next to each feed in the UI, derived from
+the feed's level suffix (`lvl1` → 10, `lvl2` → 8, `lvl3` → 6, `lvl4` → 5) and
+`-1` ("not rated") for any non-enterprise subscription; `nethesis-insights`
+carries no level suffix so it is rated explicitly at 8.
 
 Select the enabled feeds from the **Threat Shield** page of the UI, or with:
 
     api-cli run module/crowdsec1/set-threat-shield --data '{
-      "feeds": ["yoroimallvl1", "nethesislvl3"]
+      "feeds": ["yoroimallvl1", "nethesislvl3", "nethesis-insights"]
     }'
 
-An empty array disables the feature and removes every Threat Shield decision:
+An empty array removes every Threat Shield decision, the `nethesis-insights`
+ones included:
 
     api-cli run module/crowdsec1/set-threat-shield --data '{"feeds": []}'
 
-List the catalog, the decision count per feed and the last import outcome:
+The outbound push described below is not affected — it follows the
+entitlement, not the selection.
+
+List the catalog, the decision count per feed, the confidence rating and the
+last import outcome:
 
     api-cli run module/crowdsec1/list-threat-shield
+
+It returns `subscription`, `entitled`, `type`, a `feeds[]` array (each with
+`key`, `description`, `enabled`, `count`, `confidence`) and a merged
+`last_import` whose `feeds` map covers both the premium feeds and
+`nethesis-insights`, each entry carrying its own `timestamp` since the two
+run on different cadences.
 
 Look an address up, matching enclosing networks too:
 
@@ -167,14 +130,53 @@ probing the first feed and cached for 6 hours in `threat_shield_entitlement.json
 `set-threat-shield` busts that cache, so a freshly bought entitlement is
 picked up at once.
 
-`${MODULE_ID}-threat-shield.timer` refreshes the feeds every 6 hours. Each run
-is a flush-and-reimport per feed: decisions carry `origin: cscli-import` and
-`scenario: threat-shield/<feed key>`, so a failing or disabled feed never
-touches another feed's decisions, nor anything from CAPI, the hub, manual bans,
-or the nethesis-insights import. Decisions last 7 hours — longer than the
-interval, so one failed cycle degrades coverage instead of dropping it. The
-outcome of the last run is written to `threat_shield_last_import.json` and
-surfaced by `list-threat-shield`.
+`${MODULE_ID}-threat-shield.timer` refreshes the five premium feeds every 6
+hours. Each run is a flush-and-reimport per feed: decisions carry
+`origin: cscli-import` and `scenario: threat-shield/<feed key>`, so a failing
+or disabled feed never touches another feed's decisions, nor anything from
+CAPI, the hub, manual bans, or the `nethesis-insights` import. Decisions last
+7 hours — longer than the interval, so one failed cycle degrades coverage
+instead of dropping it.
+
+`nethesis-insights` is pulled separately by `imageroot/bin/import-blocklist`
+on its own `${MODULE_ID}-import.timer`, every 15 minutes, from
+`{insights_url}/v1/blocklist`. It's the same flush-and-reimport pattern —
+`cscli decisions delete --origin cscli-import --scenario nethesis-insights`
+then a fresh import — but with a bare `nethesis-insights` scenario tag rather
+than the `threat-shield/<key>` one the premium feeds use, and decisions last
+35 minutes to match the shorter interval. The server URL is the constant
+`INSIGHTS_DEFAULT_URL = "https://insights.nethesis.it"` in
+`imageroot/bin/threat_shield.py`; `INSIGHTS_SERVER_URL` and
+`INSIGHTS_VERIFY_TLS` still work as environment overrides for dev/test
+deployments pointed at a staging server, but no action sets them — there is
+no user-facing configuration for the server address. `verify_tls: false`
+(via `INSIGHTS_VERIFY_TLS`) exists for self-signed test servers only.
+
+Every ban decision this node makes is also pushed back in near-real-time to
+`nethesis-insights`, so the central service can fold it into that same
+fleet-wide consensus list. Delivery uses CrowdSec's own `notification-http`
+plugin, driven by `profiles.yaml`: no polling, no cursor, no extra timer.
+Decisions fired within the same 30s window are batched into a single
+`POST /v1/threat-events`. Simulated alerts (`cscli simulation`) are never
+sent. Delivery is best effort: a decision made while `crowdsec1` is
+mid-restart, or lost to a plugin subprocess crash, is not retried. There is
+no separate on/off switch for this direction: it is wired automatically
+whenever the node carries the Threat Shield entitlement and has a
+subscription identity, independent of which feeds are selected. The gate is
+read from the cached entitlement verdict in `threat_shield_entitlement.json`,
+never a live probe — `expand-configuration` runs as the service's
+`ExecStartPre`, and a live probe there could stall the start.
+
+Identity for both the push and the `nethesis-insights` pull is read fresh
+from the `cluster/subscription` Redis hash (`system_id`/`auth_token`) at
+render/run time and sent as `Authorization: Basic base64(system_id:auth_token)`
+— it is never persisted into the module environment, so a
+terminated/re-registered subscription starts working (or stops) on the very
+next reload with no reconfiguration.
+
+The outcome of each run — premium feeds every 6 hours, `nethesis-insights`
+every 15 minutes — is merged into the single `last_import` map surfaced by
+`list-threat-shield` described above.
 
 Every run also refreshes the Nethesis **global allowlist** into a dedicated
 `cscli allowlists` entry named `nethesis_threat_shield`, applied before the
@@ -188,25 +190,25 @@ every service start) so the two managers cannot clobber each other:
 If the allowlist cannot be fetched on the very first run the import is skipped
 for that cycle — no coverage beats banning a protected address.
 
+If the `nethesis-insights` blocklist contains a false positive, request its
+removal from the fleet-wide feed, from the **Threat Shield** page of the UI
+or with:
+
+    api-cli run module/crowdsec1/request-allowlist --data '{
+      "cidr": "203.0.113.7",
+      "reason": "This is our office egress IP"
+    }'
+
+Returns `{"accepted": true, "requests": N}`, `N` being how many systems in
+the fleet have asked for that CIDR so far — repeating the same request is a
+no-op. Requires the Threat Shield entitlement; the server does the actual
+CIDR/reason validation.
+
 ## get-configuration
 
 Display the configuration
 
     api-cli run get-configuration --agent module/crowdsec1 | jq
-
-The `insights` block reports the webhook state:
-
-```json
-"insights": {
-  "enabled": true,
-  "base_url": "https://insights.example.com",
-  "verify_tls": true
-}
-```
-
-`enabled` is `false` whenever the node has no subscription, even if the
-webhook was configured enabled: without a subscription there is no identity to
-authenticate with, so nothing can ship.
 
 ## Disable whitelist
 

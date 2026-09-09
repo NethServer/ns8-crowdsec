@@ -48,12 +48,6 @@ const routes = [
       ),
   },
   {
-    path: "/insights",
-    name: "Insights",
-    component: () =>
-      import(/* webpackChunkName: "insights" */ "../views/Insights.vue"),
-  },
-  {
     path: "/about",
     name: "About",
     // route level code-splitting

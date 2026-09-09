@@ -15,11 +15,15 @@ from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-import agent
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
 
-# Distinct from cscli's own origins (cscli, crowdsec, console, CAPI, ...) so
-# a flush-and-reimport can never touch anything but our own prior import.
-REASON = "nethesis-insights"
+import agent
+import threat_shield
+
+# Distinct from cscli's own origins (cscli, crowdsec, console, CAPI, ...) and
+# from the threat-shield/<key> tags, so a flush-and-reimport can never touch
+# anything but our own prior import.
+REASON = threat_shield.INSIGHTS_SCENARIO
 
 # A little over twice the server's own 15 min refresh window (Cache-Control:
 # max-age=900), so one missed cycle doesn't drop coverage but a stale entry
@@ -27,6 +31,8 @@ REASON = "nethesis-insights"
 DECISION_DURATION = "35m"
 
 STATUS_FILE = "insights_last_import.json"
+
+MODULE_ID = os.environ["MODULE_ID"]
 
 
 def write_status(success, entries=0, error=None):
@@ -39,17 +45,46 @@ def write_status(success, entries=0, error=None):
         }, f)
 
 
-insights_url = os.environ.get("INSIGHTS_SERVER_URL", "").rstrip("/")
-if not insights_url:
+def clear_decisions():
+    """Drop our own prior import. Failures are not worth aborting on: the
+    decisions expire in DECISION_DURATION anyway."""
+    subprocess.run(
+        ["podman", "exec", MODULE_ID, "cscli", "decisions", "delete",
+         "--origin", "cscli-import", "--scenario", REASON],
+        capture_output=True, text=True,
+    )
+
+
+# The consensus list is one of the Threat Shield blocklists, so the admin's
+# selection is what turns the pull on and off. Switching it off drops the rows
+# now instead of letting them age out over the next DECISION_DURATION.
+if not threat_shield.insights_enabled():
+    clear_decisions()
+    try:
+        os.unlink(STATUS_FILE)
+    except FileNotFoundError:
+        pass
     sys.exit(0)
 
-subscription = agent.redis_connect(use_replica=True).hgetall("cluster/subscription")
-system_id = subscription.get("system_id")
-auth_token = subscription.get("auth_token")
+# A premium feature: same entitlement as the rest of Threat Shield. Read from
+# the cache, like the push gate in expand-configuration, so the two directions
+# can never disagree within a cycle.
+if not threat_shield.cached_probe_status()["entitled"]:
+    print(agent.SD_NOTICE + "no Threat Shield entitlement, "
+          "skipping the nethesis-insights blocklist import", file=sys.stderr)
+    clear_decisions()
+    write_status(False, error="not_entitled")
+    sys.exit(0)
+
+insights_url = threat_shield.insights_url()
+
+system_id, auth_token = threat_shield.identity()
 if not system_id or not auth_token:
     print(agent.SD_NOTICE + "cluster/subscription has no identity, "
           "skipping blocklist import",
           file=sys.stderr)
+    clear_decisions()
+    write_status(False, error="no_subscription")
     sys.exit(0)
 
 basic_auth = base64.b64encode(f"{system_id}:{auth_token}".encode()).decode()
@@ -79,18 +114,16 @@ except URLError as err:
 
 values = [line for line in body.splitlines() if line and not line.startswith("#")]
 
-module_id = os.environ["MODULE_ID"]
-
 try:
     subprocess.run(
-        ["podman", "exec", module_id, "cscli", "decisions", "delete",
+        ["podman", "exec", MODULE_ID, "cscli", "decisions", "delete",
          "--origin", "cscli-import", "--scenario", REASON],
         check=True, capture_output=True, text=True,
     )
 
     if values:
         subprocess.run(
-            ["podman", "exec", "-i", module_id, "cscli", "decisions", "import",
+            ["podman", "exec", "-i", MODULE_ID, "cscli", "decisions", "import",
              "-i", "-", "--format", "values", "-d", DECISION_DURATION, "-R", REASON],
             input="\n".join(values), text=True, check=True, capture_output=True,
         )

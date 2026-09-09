@@ -42,6 +42,27 @@ TYPES = ["enterprise", "community"]
 
 HTTP_TIMEOUT = 20
 
+# The premium feeds' scenario tag. Defined here so import-threat-shield,
+# list-threat-shield and search-threat-shield-decision share one literal.
+SCENARIO_PREFIX = "threat-shield/"
+
+# The nethesis-insights fleet-consensus list is presented to the admin as one
+# more Threat Shield blocklist, but it is not a bl.nethesis.it feed: it has no
+# catalog entry, it is pulled by import-blocklist on its own 15-minute timer,
+# and its decisions carry the bare scenario below instead of SCENARIO_PREFIX.
+INSIGHTS_FEED_KEY = "nethesis-insights"
+INSIGHTS_FEED_DESCR = "Nethesis Insights - fleet consensus"
+INSIGHTS_SCENARIO = "nethesis-insights"
+
+# It carries no lvlN suffix for get_confidence() to read, so it is rated
+# explicitly: a fleet consensus is strong evidence, but it comes from our own
+# nodes' bans rather than curated threat intel, hence level 2's value.
+INSIGHTS_CONFIDENCE = 8
+
+# The production nethesis-insights service. INSIGHTS_SERVER_URL overrides it on
+# dev deployments; no action sets that variable, it is edited by hand.
+INSIGHTS_DEFAULT_URL = "https://insights.nethesis.it"
+
 
 def load_catalog():
     """Return the feed catalog as an ordered {key: {url_4, rule_4, descr}} dict."""
@@ -149,6 +170,24 @@ def probe_status(refresh=False):
     return status
 
 
+def cached_probe_status():
+    """The cached {entitled, type} verdict, never probing the network.
+
+    For callers that must not block: expand-configuration runs as the service's
+    ExecStartPre, where probe_status()'s live probe would stall the start for up
+    to 2 * HTTP_TIMEOUT if bl.nethesis.it is unreachable. The cache's age is
+    deliberately ignored -- a stale verdict beats no verdict, and the 6h
+    threat-shield timer, set-threat-shield and subscription-changed all refresh
+    it. An absent cache reads as "not entitled".
+    """
+    try:
+        with open(PROBE_CACHE_FILE) as fp:
+            status = json.load(fp)
+    except (OSError, ValueError):
+        return {"entitled": False, "type": None}
+    return {"entitled": bool(status.get("entitled")), "type": status.get("type")}
+
+
 def bust_probe_cache():
     """Forget the cached probe: an admin who just bought the entitlement must
     not be told "no" for another six hours."""
@@ -158,7 +197,50 @@ def bust_probe_cache():
         pass
 
 
-def enabled_feeds(catalog):
-    """Parse THREAT_SHIELD_FEEDS, dropping keys the catalog no longer knows."""
+def _selected_keys():
     raw = os.environ.get("THREAT_SHIELD_FEEDS", "")
-    return [key for key in (k.strip() for k in raw.split(",")) if key in catalog]
+    return [k.strip() for k in raw.split(",") if k.strip()]
+
+
+def enabled_feeds(catalog):
+    """Parse THREAT_SHIELD_FEEDS, dropping keys the catalog no longer knows.
+
+    The virtual insights key is not in the catalog, so it is filtered out here
+    too: import-threat-shield only ever deals with real bl.nethesis.it feeds.
+    """
+    return [key for key in _selected_keys() if key in catalog]
+
+
+def all_feed_keys(catalog):
+    """Every key the UI can toggle: the catalog plus the virtual insights feed."""
+    return list(catalog) + [INSIGHTS_FEED_KEY]
+
+
+def insights_enabled():
+    """Whether the admin has switched the insights consensus list on."""
+    return INSIGHTS_FEED_KEY in _selected_keys()
+
+
+def insights_url():
+    return os.environ.get("INSIGHTS_SERVER_URL", INSIGHTS_DEFAULT_URL).rstrip("/")
+
+
+def get_confidence(key, enterprise=False):
+    """How much to trust a feed, 1-10, or -1 when it cannot be rated.
+
+    Port of nethsecurity's ns.threatshield get_confidence(), kept
+    behaviour-identical so the same feed is rated the same in both products.
+    """
+    if not enterprise:
+        return -1
+    if key == INSIGHTS_FEED_KEY:
+        return INSIGHTS_CONFIDENCE
+    if key.endswith(("lvl1", "level1")):
+        return 10
+    if key.endswith(("lvl2", "level2")):
+        return 8
+    if key.endswith(("lvl3", "level3")):
+        return 6
+    if key.endswith(("lvl4", "level4")):
+        return 5
+    return -1

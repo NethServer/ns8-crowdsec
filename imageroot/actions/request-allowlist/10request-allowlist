@@ -13,18 +13,19 @@ import sys
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-import agent
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import threat_shield
 
 request = json.load(sys.stdin)
 
-insights_url = os.environ.get("INSIGHTS_SERVER_URL", "").rstrip("/")
-if not insights_url:
-    print("insights integration is not configured", file=sys.stderr)
+if not threat_shield.cached_probe_status()["entitled"]:
+    print("the Threat Shield entitlement is required to request an allowlist exception", file=sys.stderr)
     sys.exit(1)
 
-subscription = agent.redis_connect(use_replica=True).hgetall("cluster/subscription")
-system_id = subscription.get("system_id")
-auth_token = subscription.get("auth_token")
+insights_url = threat_shield.insights_url()
+
+system_id, auth_token = threat_shield.identity()
 if not system_id or not auth_token:
     print("cluster/subscription has no identity, cannot request an allowlist entry",
           file=sys.stderr)

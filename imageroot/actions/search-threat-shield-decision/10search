@@ -17,9 +17,10 @@ import os
 import subprocess
 import sys
 
-import agent
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
 
-SCENARIO_PREFIX = "threat-shield/"
+import agent
+import threat_shield
 
 request = json.load(sys.stdin)
 
@@ -57,7 +58,11 @@ for row in listed:
     # returns them flat otherwise.
     for decision in (row.get("decisions") or [row]):
         scenario = decision.get("scenario", "")
-        if not scenario.startswith(SCENARIO_PREFIX):
+        # The nethesis-insights consensus list is one of the blocklists shown
+        # on the same page, so its decisions must be findable from its search
+        # box -- and it carries a bare scenario, not the threat-shield/ tag.
+        if not (scenario.startswith(threat_shield.SCENARIO_PREFIX)
+                or scenario == threat_shield.INSIGHTS_SCENARIO):
             continue
         try:
             network = ipaddress.ip_network(decision.get("value", ""), strict=False)

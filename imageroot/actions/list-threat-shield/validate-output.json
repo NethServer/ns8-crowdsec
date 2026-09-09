@@ -13,17 +13,32 @@
                     "key": "yoroimallvl1",
                     "description": "Yoroi malware - Level 1",
                     "enabled": true,
-                    "count": 4213
+                    "count": 4213,
+                    "confidence": 10
+                },
+                {
+                    "key": "nethesis-insights",
+                    "description": "Nethesis Insights - fleet consensus",
+                    "enabled": true,
+                    "count": 33,
+                    "confidence": 8
                 }
             ],
             "last_import": {
-                "timestamp": "2026-09-08T10:00:00Z",
+                "timestamp": "2026-09-09T06:58:44Z",
                 "error": null,
                 "feeds": {
                     "yoroimallvl1": {
                         "success": true,
                         "entries": 4213,
-                        "error": null
+                        "error": null,
+                        "timestamp": "2026-09-09T06:09:40Z"
+                    },
+                    "nethesis-insights": {
+                        "success": true,
+                        "entries": 33,
+                        "error": null,
+                        "timestamp": "2026-09-09T06:58:44Z"
                     }
                 }
             }
@@ -59,12 +74,12 @@
             "description": "The feed catalog",
             "items": {
                 "type": "object",
-                "required": ["key", "description", "enabled", "count"],
+                "required": ["key", "description", "enabled", "count", "confidence"],
                 "properties": {
                     "key": {
                         "type": "string",
                         "title": "key",
-                        "description": "Catalog key of the feed"
+                        "description": "Catalog key of the feed, or \"nethesis-insights\" for the virtual fleet-consensus feed"
                     },
                     "description": {
                         "type": "string",
@@ -81,6 +96,13 @@
                         "minimum": 0,
                         "title": "count",
                         "description": "Active decisions currently held by this feed"
+                    },
+                    "confidence": {
+                        "type": "integer",
+                        "minimum": -1,
+                        "maximum": 10,
+                        "title": "confidence",
+                        "description": "How much to trust this feed, 1-10; -1 means not rated (e.g. a community subscription)"
                     }
                 }
             }
@@ -124,6 +146,11 @@
                                 "type": ["string", "null"],
                                 "title": "error",
                                 "description": "Failure reason, null on success"
+                            },
+                            "timestamp": {
+                                "type": "string",
+                                "title": "timestamp",
+                                "description": "UTC timestamp of the run that produced this feed's outcome (its own timer, not necessarily last_import.timestamp)"
                             }
                         }
                     }

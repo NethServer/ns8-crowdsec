@@ -7,10 +7,14 @@
 
 import base64
 import os
-import agent
 import re
 import shutil
 import sys
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import agent
+import threat_shield
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -93,7 +97,15 @@ if True:
 # threat-events webhook. The identity is never stored in the module
 # environment: it is re-read from cluster/subscription at every render, so a
 # subscription registered later starts working with no reconfiguration.
-insights_url = os.environ.get("INSIGHTS_SERVER_URL", "").rstrip("/")
+#
+# The push has no switch of its own: it follows the Threat Shield entitlement,
+# independent of which blocklists are selected. The verdict is taken from the
+# on-disk cache and never probed here -- this script is the service's
+# ExecStartPre, and a live probe would stall the start for up to 40s whenever
+# bl.nethesis.it is unreachable. import-threat-shield, set-threat-shield and
+# the subscription-changed event are what keep that cache warm.
+insights_url = threat_shield.insights_url()
+insights_entitled = threat_shield.cached_probe_status()["entitled"]
 
 files = ["crowdsec_config/notifications/nethesis-insights.yaml"]
 for f in files:
@@ -103,7 +115,7 @@ for f in files:
         pass
 
 nethesis_insights_notification = False
-if insights_url:
+if insights_url and insights_entitled:
     subscription = agent.redis_connect().hgetall('cluster/subscription')
     system_id = subscription.get('system_id')
     auth_token = subscription.get('auth_token')

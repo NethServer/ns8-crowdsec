@@ -164,8 +164,27 @@ Round-trip the configuration
 List the Threat Shield catalog
     ${output}    ${rc}=    Run Module Action    list-threat-shield
     Should Be Equal As Integers    ${rc}    0
+    # nethesis-insights is a virtual feed: no catalog entry, listed all the same
     ${keys}=    Execute Command    echo '${output}' | jq -r '[.feeds[].key] | sort | join(",")'
-    Should Be Equal    ${keys}    nethesislvl3,yoroimallvl1,yoroimallvl2,yoroisusplvl1,yoroisusplvl2
+    Should Be Equal    ${keys}    nethesis-insights,nethesislvl3,yoroimallvl1,yoroimallvl2,yoroisusplvl1,yoroisusplvl2
+    # every row carries a confidence rating; CI has no subscription, so every
+    # one of them is the "not rated" -1 that a non-enterprise node gets
+    ${rated}=    Execute Command    echo '${output}' | jq '[.feeds[] | select(.confidence == -1)] | length'
+    Should Be Equal As Integers    ${rated}    6
+
+The insights consensus list is selectable like any other feed
+    ${output}    ${rc}=    Run Module Action    set-threat-shield    {"feeds": ["nethesis-insights"]}
+    Should Be Equal As Integers    ${rc}    0
+    ${enabled}=    Execute Command    api-cli run list-threat-shield --agent module/${module_id} | jq -r '[.feeds[] | select(.enabled) | .key] | join(",")'
+    Should Be Equal    ${enabled}    nethesis-insights
+    # leave the instance with the feature off
+    ${output}    ${rc}=    Run Module Action    set-threat-shield    {"feeds": []}
+    Should Be Equal As Integers    ${rc}    0
+
+The configuration no longer carries an insights block
+    # list-threat-shield is the single source for the premium integration now
+    ${insights}=    Execute Command    api-cli run get-configuration --agent module/${module_id} | jq -r 'has("insights")'
+    Should Be Equal    ${insights}    false
 
 Disabling every Threat Shield feed is a clean no-op
     ${output}    ${rc}=    Run Module Action    set-threat-shield    {"feeds": []}
