@@ -21,15 +21,17 @@ SCENARIO_PREFIX = "threat-shield/"
 def decision_counts():
     """Active decisions per Threat Shield scenario.
 
-    One dump grouped client-side beats one cscli call per feed. --limit 0
-    removes the default 100-row cap, and --ip is deliberately never used --
-    see search-threat-shield-decision for why.
+    One unfiltered dump grouped client-side beats one cscli call per feed.
+    --limit 0 removes the default 100-row cap. No server-side filter is used:
+    --origin cscli-import takes ~90s on a few hundred decisions, where the
+    same dump with no filter takes 0.6s. The plain listing also leaves out the
+    community blocklist, which keeps the payload to our own rows.
     """
     counts = {}
     try:
         result = subprocess.run(
             ["podman", "exec", os.environ["MODULE_ID"], "cscli", "decisions", "list",
-             "--origin", "cscli-import", "--limit", "0", "--output", "json"],
+             "--limit", "0", "--output", "json"],
             check=True, capture_output=True, text=True,
         )
     except subprocess.CalledProcessError as err:

@@ -35,12 +35,14 @@ except ValueError:
     }], fp=sys.stdout)
     sys.exit(3)
 
-# --limit 0 removes the default 100-row cap. We deliberately do NOT pass --ip:
-# on IPv4 it triggers a range-containment lookup that hangs on large datasets,
-# the same reason search-capi-decision avoids it.
+# --limit 0 removes the default 100-row cap. No server-side filter is used:
+# --origin cscli-import takes ~90s on a few hundred decisions, where the same
+# dump with no filter takes 0.6s, and --ip triggers an IPv4 range-containment
+# lookup that hangs on large datasets. The plain listing also leaves out the
+# community blocklist, which keeps the payload to our own rows.
 result = subprocess.run(
     ["podman", "exec", os.environ["MODULE_ID"], "cscli", "decisions", "list",
-     "--origin", "cscli-import", "--limit", "0", "--output", "json"],
+     "--limit", "0", "--output", "json"],
     check=True, capture_output=True, text=True,
 )
 
