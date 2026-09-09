@@ -37,7 +37,7 @@ ctx = None if verify_tls else ssl._create_unverified_context()
 
 body = json.dumps({"cidr": request["cidr"], "reason": request["reason"]}).encode()
 http_request = Request(
-    f"{insights_url}/v1/allowlist-requests",
+    f"{insights_url}/blocklist/v1/allowlist-requests",
     data=body,
     method="POST",
     headers={

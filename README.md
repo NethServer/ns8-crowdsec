@@ -140,7 +140,7 @@ instead of dropping it.
 
 `nethesis-insights` is pulled separately by `imageroot/bin/import-blocklist`
 on its own `${MODULE_ID}-import.timer`, every 15 minutes, from
-`{insights_url}/v1/blocklist`. It's the same flush-and-reimport pattern —
+`{insights_url}/blocklist/v1/feed`. It's the same flush-and-reimport pattern —
 `cscli decisions delete --origin cscli-import --scenario nethesis-insights`
 then a fresh import — but with a bare `nethesis-insights` scenario tag rather
 than the `threat-shield/<key>` one the premium feeds use, and decisions last
@@ -157,7 +157,7 @@ Every ban decision this node makes is also pushed back in near-real-time to
 fleet-wide consensus list. Delivery uses CrowdSec's own `notification-http`
 plugin, driven by `profiles.yaml`: no polling, no cursor, no extra timer.
 Decisions fired within the same 30s window are batched into a single
-`POST /v1/threat-events`. Simulated alerts (`cscli simulation`) are never
+`POST /blocklist/v1/events`. Simulated alerts (`cscli simulation`) are never
 sent. Delivery is best effort: a decision made while `crowdsec1` is
 mid-restart, or lost to a plugin subprocess crash, is not retried. There is
 no separate on/off switch for this direction: it is wired automatically

@@ -92,7 +92,7 @@ verify_tls = os.environ.get("INSIGHTS_VERIFY_TLS", "1") != "0"
 ctx = None if verify_tls else ssl._create_unverified_context()
 
 request = Request(
-    f"{insights_url}/v1/blocklist",
+    f"{insights_url}/blocklist/v1/feed",
     headers={"Authorization": f"Basic {basic_auth}"},
 )
 
