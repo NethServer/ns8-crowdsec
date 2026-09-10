@@ -13,8 +13,13 @@ decisions:
  - type: ban
    duration: {{bantime}}
 {% endif %}
-{% if email %}
+{% if email or nethesis_insights %}
 notifications:
+{% if email %}
  - email_default  # Set the required email parameters in /etc/crowdsec/notifications/email.yaml before enabling this.
+{% endif %}
+{% if nethesis_insights %}
+ - nethesis_insights  # Pushes every decision to nethesis-insights, see /etc/crowdsec/notifications/nethesis-insights.yaml
+{% endif %}
 {% endif %}
 on_success: break

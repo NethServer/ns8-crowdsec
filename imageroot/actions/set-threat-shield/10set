@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import json
+import os
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import agent
+import threat_shield
+
+request = json.load(sys.stdin)
+catalog = threat_shield.load_catalog()
+requested = request.get("feeds", [])
+
+known = threat_shield.all_feed_keys(catalog)
+unknown = [key for key in requested if key not in known]
+if unknown:
+    agent.set_status("validation-failed")
+    json.dump([{
+        "field": "feeds",
+        "parameter": "feeds",
+        "value": unknown[0],
+        "error": "unknown_feed",
+    }], fp=sys.stdout)
+    sys.exit(3)
+
+# Deduplicate and store in catalog order, so the environment value is stable
+# whatever order the UI sends. Iterating known rather than catalog matters: the
+# virtual nethesis-insights key has no catalog entry and would be dropped.
+feeds = [key for key in known if key in requested]
+
+if feeds:
+    agent.set_env("THREAT_SHIELD_FEEDS", ",".join(feeds))
+else:
+    agent.unset_env("THREAT_SHIELD_FEEDS")
+
+# An admin who just bought the entitlement must not be told "no" for another
+# six hours. Re-probe right away rather than leaving the cache empty: the
+# insights push is wired from the cached verdict, and expand-configuration
+# cannot probe for itself from ExecStartPre.
+threat_shield.bust_probe_cache()
+threat_shield.probe_status(refresh=True)
+
+module_id = os.environ["MODULE_ID"]
+
+# Run both imports now instead of waiting for their next timer tick, so the
+# decision counts the UI reloads right after are the real ones. Each records
+# its own failures in its status file, which list-threat-shield surfaces, so a
+# unit that does not start cleanly warns instead of failing the action.
+for unit in (f"{module_id}-threat-shield.service", f"{module_id}-import.service"):
+    result = subprocess.run(["systemctl", "start", unit],
+                            stdout=sys.stderr, stderr=sys.stderr, text=True)
+    if result.returncode != 0:
+        print(agent.SD_WARNING + f"{unit} did not start cleanly", file=sys.stderr)
+
+# Last: the main unit's ExecReload re-renders the configuration against the
+# entitlement verdict written above, wiring or unwiring the insights push.
+# try-reload-or-restart, not reload: a stopped unit would make plain reload
+# fail, and it needs no help -- its ExecStartPre renders at the next start.
+subprocess.run(["systemctl", "try-reload-or-restart", f"{module_id}.service"],
+               stdout=sys.stderr, stderr=sys.stderr, text=True, check=True)

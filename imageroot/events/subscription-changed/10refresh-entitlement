@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+"""Re-resolve the Threat Shield entitlement after a subscription change.
+
+The verdict is cached for six hours, and both directions of the Nethesis
+premium integration are gated on that cache: expand-configuration wires the
+insights push from it (it runs as ExecStartPre and must never probe), and
+import-blocklist gates the pull on it. Without this step a node that just
+gained or lost its subscription would keep the stale answer until the next
+threat-shield timer tick, up to six hours away.
+
+Runs before 20restart, so the reload that follows renders against the fresh
+verdict.
+"""
+
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import threat_shield
+
+threat_shield.bust_probe_cache()
+status = threat_shield.probe_status(refresh=True)
+
+print(f"Threat Shield entitlement after the subscription change: "
+      f"entitled={status['entitled']} type={status['type']}", file=sys.stderr)

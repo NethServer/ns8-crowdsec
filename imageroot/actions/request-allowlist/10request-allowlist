@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import base64
+import json
+import os
+import ssl
+import sys
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import threat_shield
+
+request = json.load(sys.stdin)
+
+if not threat_shield.cached_probe_status()["entitled"]:
+    print("the Threat Shield entitlement is required to request an allowlist exception", file=sys.stderr)
+    sys.exit(1)
+
+insights_url = threat_shield.insights_url()
+
+system_id, auth_token = threat_shield.identity()
+if not system_id or not auth_token:
+    print("cluster/subscription has no identity, cannot request an allowlist entry",
+          file=sys.stderr)
+    sys.exit(1)
+
+basic_auth = base64.b64encode(f"{system_id}:{auth_token}".encode()).decode()
+verify_tls = os.environ.get("INSIGHTS_VERIFY_TLS", "1") != "0"
+ctx = None if verify_tls else ssl._create_unverified_context()
+
+body = json.dumps({"cidr": request["cidr"], "reason": request["reason"]}).encode()
+http_request = Request(
+    f"{insights_url}/blocklist/v1/allowlist-requests",
+    data=body,
+    method="POST",
+    headers={
+        "Authorization": f"Basic {basic_auth}",
+        "Content-Type": "application/json",
+    },
+)
+
+try:
+    with urlopen(http_request, timeout=20, context=ctx) as response:
+        result = json.load(response)
+except HTTPError as err:
+    detail = err.read().decode(errors="replace")
+    print(f"nethesis-insights rejected the allowlist request: HTTP {err.code} {detail}",
+          file=sys.stderr)
+    sys.exit(1)
+except URLError as err:
+    print(f"could not reach nethesis-insights: {err.reason}", file=sys.stderr)
+    sys.exit(1)
+
+json.dump(result, fp=sys.stdout)

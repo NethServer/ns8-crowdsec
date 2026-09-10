@@ -1,0 +1,161 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://schema.nethserver.org/crowdsec/list-threat-shield-output.json",
+    "title": "list-threat-shield output",
+    "description": "Nethesis Threat Shield feed catalog, enablement state, decision counts and last import status",
+    "examples": [
+        {
+            "subscription": true,
+            "entitled": true,
+            "type": "enterprise",
+            "feeds": [
+                {
+                    "key": "yoroimallvl1",
+                    "description": "Yoroi malware - Level 1",
+                    "enabled": true,
+                    "count": 4213,
+                    "confidence": 10
+                },
+                {
+                    "key": "nethesis-insights",
+                    "description": "Nethesis Insights - fleet consensus",
+                    "enabled": true,
+                    "count": 33,
+                    "confidence": 8
+                }
+            ],
+            "last_import": {
+                "timestamp": "2026-09-09T06:58:44Z",
+                "error": null,
+                "feeds": {
+                    "yoroimallvl1": {
+                        "success": true,
+                        "entries": 4213,
+                        "error": null,
+                        "timestamp": "2026-09-09T06:09:40Z"
+                    },
+                    "nethesis-insights": {
+                        "success": true,
+                        "entries": 33,
+                        "error": null,
+                        "timestamp": "2026-09-09T06:58:44Z"
+                    }
+                }
+            }
+        },
+        {
+            "subscription": false,
+            "entitled": false,
+            "type": "",
+            "feeds": []
+        }
+    ],
+    "type": "object",
+    "required": ["subscription", "entitled", "type", "feeds"],
+    "properties": {
+        "subscription": {
+            "type": "boolean",
+            "title": "subscription",
+            "description": "True if the cluster has a subscription identity"
+        },
+        "entitled": {
+            "type": "boolean",
+            "title": "entitled",
+            "description": "True if the subscription carries the blocklist entitlement"
+        },
+        "type": {
+            "type": "string",
+            "title": "type",
+            "description": "Resolved subscription type used in the feed URLs (enterprise or community), empty if unknown"
+        },
+        "feeds": {
+            "type": "array",
+            "title": "feeds",
+            "description": "The feed catalog",
+            "items": {
+                "type": "object",
+                "required": ["key", "description", "enabled", "count", "confidence"],
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "title": "key",
+                        "description": "Catalog key of the feed, or \"nethesis-insights\" for the virtual fleet-consensus feed"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "description",
+                        "description": "Human readable feed name"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "title": "enabled",
+                        "description": "True if the feed is currently imported"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "count",
+                        "description": "Active decisions currently held by this feed"
+                    },
+                    "confidence": {
+                        "type": "integer",
+                        "minimum": -1,
+                        "maximum": 10,
+                        "title": "confidence",
+                        "description": "How much to trust this feed, 1-10; -1 means not rated (e.g. a community subscription)"
+                    }
+                }
+            }
+        },
+        "last_import": {
+            "type": "object",
+            "title": "last_import",
+            "description": "Outcome of the last import run, absent until the timer has run once",
+            "required": ["timestamp", "feeds"],
+            "properties": {
+                "timestamp": {
+                    "type": "string",
+                    "title": "timestamp",
+                    "description": "UTC timestamp of the last import run"
+                },
+                "error": {
+                    "type": ["string", "null"],
+                    "title": "error",
+                    "description": "Error that aborted the whole run, null when the run completed"
+                },
+                "feeds": {
+                    "type": "object",
+                    "title": "feeds",
+                    "description": "Per-feed outcome, keyed by catalog key",
+                    "additionalProperties": {
+                        "type": "object",
+                        "required": ["success", "entries"],
+                        "properties": {
+                            "success": {
+                                "type": "boolean",
+                                "title": "success",
+                                "description": "True if the feed was fetched and imported"
+                            },
+                            "entries": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "title": "entries",
+                                "description": "Number of imported values"
+                            },
+                            "error": {
+                                "type": ["string", "null"],
+                                "title": "error",
+                                "description": "Failure reason, null on success"
+                            },
+                            "timestamp": {
+                                "type": "string",
+                                "title": "timestamp",
+                                "description": "UTC timestamp of the run that produced this feed's outcome (its own timer, not necessarily last_import.timestamp)"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

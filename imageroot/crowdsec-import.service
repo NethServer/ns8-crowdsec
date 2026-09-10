@@ -1,0 +1,8 @@
+[Unit]
+Description=Import the nethesis-insights consensus blocklist
+Requisite=${MODULE_ID}.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/runagent -m ${MODULE_ID} import-blocklist
+SyslogIdentifier=%N

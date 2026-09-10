@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import json
+import os
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import agent
+import threat_shield
+
+
+def decision_counts():
+    """Active decisions per Threat Shield feed, including the virtual
+    nethesis-insights feed.
+
+    One unfiltered dump grouped client-side beats one cscli call per feed.
+    --limit 0 removes the default 100-row cap. No server-side filter is used:
+    --origin cscli-import takes ~90s on a few hundred decisions, where the
+    same dump with no filter takes 0.6s. The plain listing also leaves out
+    the community blocklist, which keeps the payload small; scenarios are
+    matched client-side instead, against both the threat-shield/ prefix and
+    the bare nethesis-insights scenario.
+    """
+    counts = {}
+    try:
+        result = subprocess.run(
+            ["podman", "exec", os.environ["MODULE_ID"], "cscli", "decisions", "list",
+             "--limit", "0", "--output", "json"],
+            check=True, capture_output=True, text=True,
+        )
+    except subprocess.CalledProcessError as err:
+        print(agent.SD_WARNING + f"cannot list Threat Shield decisions: {err.stderr}",
+              file=sys.stderr)
+        return counts
+
+    try:
+        listed = json.loads(result.stdout or "null") or []
+    except ValueError:
+        return counts
+
+    for row in listed:
+        # cscli groups decisions under an alert when the LAPI returns alerts,
+        # and returns them flat otherwise.
+        for decision in (row.get("decisions") or [row]):
+            scenario = decision.get("scenario", "")
+            if scenario.startswith(threat_shield.SCENARIO_PREFIX):
+                key = scenario[len(threat_shield.SCENARIO_PREFIX):]
+                counts[key] = counts.get(key, 0) + 1
+            elif scenario == threat_shield.INSIGHTS_SCENARIO:
+                key = threat_shield.INSIGHTS_FEED_KEY
+                counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
+catalog = threat_shield.load_catalog()
+enabled = set(threat_shield.enabled_feeds(catalog))
+counts = decision_counts()
+
+system_id, auth_token = threat_shield.identity()
+has_subscription = bool(system_id) and bool(auth_token)
+probe = threat_shield.probe_status() if has_subscription else {"entitled": False, "type": None}
+enterprise = probe.get("type") == "enterprise"
+
+feeds = [
+    {
+        "key": key,
+        "description": entry.get("descr", key),
+        "enabled": key in enabled,
+        "count": counts.get(key, 0),
+        "confidence": threat_shield.get_confidence(key, enterprise),
+    }
+    for key, entry in catalog.items()
+]
+
+# The nethesis-insights fleet-consensus list is a virtual feed: it has no
+# catalog entry, and it is pulled by import-blocklist on its own 15-minute
+# timer rather than by import-threat-shield's 6h one.
+feeds.append({
+    "key": threat_shield.INSIGHTS_FEED_KEY,
+    "description": threat_shield.INSIGHTS_FEED_DESCR,
+    "enabled": threat_shield.insights_enabled(),
+    "count": counts.get(threat_shield.INSIGHTS_FEED_KEY, 0),
+    "confidence": threat_shield.get_confidence(threat_shield.INSIGHTS_FEED_KEY, enterprise),
+})
+
+output = {
+    "subscription": has_subscription,
+    "entitled": bool(probe.get("entitled")),
+    "type": probe.get("type") or "",
+    "feeds": feeds,
+}
+
+# Two independent timers write two independent status files: threat-shield's
+# covers every catalog feed under one run-level timestamp, nethesis-insights'
+# is a flat single-feed record on its own 15-minute cadence. Merge them into
+# one last_import so the UI has a single place to look, tolerating either
+# file being absent (its timer hasn't run yet).
+last_import = {}
+last_import_feeds = {}
+
+try:
+    with open("threat_shield_last_import.json") as fp:
+        threat_shield_status = json.load(fp)
+except (FileNotFoundError, ValueError):
+    threat_shield_status = None
+
+ts_timestamp = None
+if threat_shield_status is not None:
+    ts_timestamp = threat_shield_status.get("timestamp")
+    last_import["error"] = threat_shield_status.get("error")
+    for key, status in (threat_shield_status.get("feeds") or {}).items():
+        last_import_feeds[key] = dict(status, timestamp=ts_timestamp)
+
+try:
+    with open("insights_last_import.json") as fp:
+        insights_status = json.load(fp)
+except (FileNotFoundError, ValueError):
+    insights_status = None
+
+insights_timestamp = None
+if insights_status is not None:
+    insights_timestamp = insights_status.get("timestamp")
+    last_import_feeds[threat_shield.INSIGHTS_FEED_KEY] = {
+        "success": insights_status.get("success"),
+        "entries": insights_status.get("entries"),
+        "error": insights_status.get("error"),
+        "timestamp": insights_timestamp,
+    }
+
+if ts_timestamp is not None or insights_timestamp is not None:
+    # Both files stamp "%Y-%m-%dT%H:%M:%SZ" strings, so lexicographic order
+    # matches chronological order and a plain string max() picks the newer
+    # timestamp without parsing either one.
+    last_import["timestamp"] = max(t for t in (ts_timestamp, insights_timestamp) if t is not None)
+    last_import["feeds"] = last_import_feeds
+    output["last_import"] = last_import
+
+json.dump(output, fp=sys.stdout)
