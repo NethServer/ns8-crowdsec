@@ -1,0 +1,26 @@
+{
+        "nethesis-insights": {
+                "url_4": "https://insights.nethesis.it/blocklist/v1/feed",
+                "descr": "Nethesis Insights - Level 2"
+        },
+        "yoroimallvl1": {
+                "url_4": "https://__USER__:__PASSWORD__@bl.nethesis.it/plain/__TYPE__/nethesis-blacklists/yoroi_malware_level1.ipset",
+                "descr": "Yoroi malware - Level 1"
+        },
+        "yoroimallvl2": {
+                "url_4": "https://__USER__:__PASSWORD__@bl.nethesis.it/plain/__TYPE__/nethesis-blacklists/yoroi_malware_level2.ipset",
+                "descr": "Yoroi malware - Level 2"
+        },
+        "yoroisusplvl1": {
+                "url_4": "https://__USER__:__PASSWORD__@bl.nethesis.it/plain/__TYPE__/nethesis-blacklists/yoroi_souspicious_level1.ipset",
+                "descr": "Yoroi suspicious - Level 1"
+        },
+        "yoroisusplvl2": {
+                "url_4": "https://__USER__:__PASSWORD__@bl.nethesis.it/plain/__TYPE__/nethesis-blacklists/yoroi_souspicious_level2.ipset",
+                "descr": "Yoroi suspicious - Level 2"
+        },
+        "nethesislvl3": {
+                "url_4": "https://__USER__:__PASSWORD__@bl.nethesis.it/plain/__TYPE__/nethesis-blacklists/nethesis_level3.netset",
+                "descr": "Nethesis suspicious - Level 3"
+        }
+}

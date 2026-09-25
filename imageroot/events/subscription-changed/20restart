@@ -8,3 +8,9 @@
 # If the control reaches this step, the service can be enabled and started
 
 systemctl try-reload-or-restart "${MODULE_ID}.service"
+
+# Follow the subscription with the timer, but run the import once anyway:
+# without a subscription it drops the decisions and the allowlist of earlier
+# runs. Restart, as a running import read the old subscription.
+sync-threat-shield-timer
+systemctl --no-block restart "${MODULE_ID}-threat-shield.service"

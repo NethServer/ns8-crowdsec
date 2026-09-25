@@ -481,6 +481,7 @@ import ConfirmUnbanIpModal from "@/components/ConfirmUnbanIpModal.vue";
 import ConfirmUnbanAllIpsModal from "@/components/ConfirmUnbanAllIpsModal.vue";
 import Unlocked20 from "@carbon/icons-vue/es/unlocked/20";
 import Launch16 from "@carbon/icons-vue/es/launch/16";
+import { isValidIpAddress } from "@/lib/ip";
 
 export default {
   name: "Blocklists",
@@ -568,12 +569,7 @@ export default {
       return this.tableColumns.map((c) => (c ? this.$t("unban.col_" + c) : ""));
     },
     isValidIp() {
-      const ip = this.searchIp.trim();
-      if (!ip) return false;
-      const ipv4 =
-        /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)){3}$/;
-      const ipv6 = /^[0-9a-fA-F]{0,4}(:[0-9a-fA-F]{0,4}){2,7}$/;
-      return ipv4.test(ip) || ipv6.test(ip);
+      return isValidIpAddress(this.searchIp);
     },
   },
   beforeRouteEnter(to, from, next) {

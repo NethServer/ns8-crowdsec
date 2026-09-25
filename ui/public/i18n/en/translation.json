@@ -206,6 +206,35 @@
         "allowlist_info_title": "Avoid blocking trusted sources",
         "allowlist_info_description": "Entries in the allowlist are excluded from CrowdSec blocks. Use this list for trusted devices, networks or domains."
     },
+    "threat_shield": {
+        "title": "Threat Shield",
+        "blocklist_title": "Blocklist",
+        "blocklist_description": "All blocklists refresh every 30 minutes.",
+        "col_blocklist": "Blocklist",
+        "col_status": "Status",
+        "col_confidence": "Confidence",
+        "col_entries": "Entries",
+        "col_last_update": "Last update",
+        "no_blocklists": "No blocklists available",
+        "insights_tooltip": "Built from attacks blocked across NethServer and NethSecurity installations. When enough servers report the same IP, it is added to this list and distributed to every server with Threat Shield add-on.",
+        "confidence_aria": "Confidence level {level} out of 10",
+        "no_subscription_title": "Subscription required",
+        "no_subscription_description": "Threat Shield blocklists require an active subscription that includes the Threat Shield add-on. Register this system to a subscription to enable them.",
+        "no_entitlement_title": "Threat Shield add-on required",
+        "no_entitlement_description": "This subscription does not include the Threat Shield add-on, so the blocklists cannot be enabled. The system still shares its bans with Nethesis and receives the Nethesis global allowlist. Contact your provider to add the add-on.",
+        "refresh": "Refresh",
+        "last_import_failure": "Update failed",
+        "feed_import_failure": "{feed}: update failed",
+        "search_title": "Search IP in Threat Shield blocklists",
+        "search_hint": "Check whether an address is blocked, including addresses covered by a blocked network.",
+        "search_placeholder": "Enter an IP address",
+        "search_button": "Search",
+        "invalid_ip": "Invalid IP address",
+        "ip_found_title": "IP address found",
+        "ip_found": "The IP address {ip} is listed in the {feeds} blocklist | The IP address {ip} is listed in the {feeds} blocklists",
+        "ip_not_found_title": "Address not found",
+        "ip_not_found": "This IP address is not currently listed in the Threat Shield blocklists."
+    },
     "about": {
         "title": "About"
     },
@@ -232,7 +261,10 @@
         "delete-detections": "Delete detections",
         "get-capi-status": "Get CAPI status",
         "get-capi-count": "Get CAPI count",
-        "search-capi-decision": "Search CAPI decision"
+        "search-capi-decision": "Search CAPI decision",
+        "list-threat-shield": "List Threat Shield blocklists",
+        "set-threat-shield": "Configure Threat Shield blocklists",
+        "search-threat-shield-decision": "Search Threat Shield decision"
     },
     "error": {
         "error": "Error",

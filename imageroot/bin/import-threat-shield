@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+"""Import the Nethesis global allowlist and the selected feeds, Nethesis
+Insights included."""
+
+import ipaddress
+import json
+import os
+import subprocess
+import sys
+from datetime import datetime, timezone
+from urllib.error import HTTPError, URLError
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import agent
+import threat_shield
+
+# All imports share origin cscli-import: the per-feed scenario tells them apart.
+SCENARIO_PREFIX = threat_shield.SCENARIO_PREFIX
+
+# About twice the 30-minute timer interval, so one failed run keeps the bans.
+DECISION_DURATION = "65m"
+
+# Rows per cscli transaction; feeds can hold tens of thousands of entries.
+IMPORT_BATCH = 5000
+
+ALLOWLIST = "nethesis_threat_shield"
+
+STATUS_FILE = "threat_shield_last_import.json"
+
+MODULE_ID = os.environ["MODULE_ID"]
+
+
+def cscli(*args, stdin=None):
+    return subprocess.run(
+        ["podman", "exec"] + (["-i"] if stdin is not None else []) + [MODULE_ID, "cscli"] + list(args),
+        input=stdin, text=True, check=True, capture_output=True,
+    )
+
+
+def write_status(feeds, error=None):
+    with open(STATUS_FILE, "w") as fp:
+        json.dump({
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "error": error,
+            "feeds": feeds,
+        }, fp)
+
+
+def parse_values(body):
+    """Keep only the lines that are a valid IP or CIDR."""
+    values = []
+    for line in body.splitlines():
+        line = line.strip().rstrip(",")
+        if not line or line.startswith("#"):
+            continue
+        try:
+            ipaddress.ip_network(line, strict=False)
+        except ValueError:
+            continue
+        values.append(line)
+    return values
+
+
+def delete_feed_decisions(key):
+    cscli("decisions", "delete", "--origin", "cscli-import",
+          "--scenario", SCENARIO_PREFIX + key)
+
+
+def cleanup(catalog, error=None):
+    """Drop every decision this feature owns, plus its allowlist."""
+    for key in catalog:
+        try:
+            delete_feed_decisions(key)
+        except subprocess.CalledProcessError as err:
+            print(agent.SD_WARNING + f"threat-shield cleanup of {key} failed: {err.stderr}",
+                  file=sys.stderr)
+    try:
+        cscli("allowlists", "delete", ALLOWLIST)
+    except subprocess.CalledProcessError:
+        pass  # not created yet, or already gone
+    write_status({}, error=error)
+
+
+def allowlist_exists():
+    # inspect fails when the allowlist is missing.
+    try:
+        cscli("allowlists", "inspect", ALLOWLIST)
+    except subprocess.CalledProcessError:
+        return False
+    return True
+
+
+def allowlist_values():
+    """Values in the allowlist, or None when it does not exist."""
+    try:
+        result = cscli("allowlists", "inspect", ALLOWLIST, "-o", "json")
+    except subprocess.CalledProcessError:
+        return None
+    items = (json.loads(result.stdout or "null") or {}).get("items") or []
+    return {item["value"] for item in items if item.get("value")}
+
+
+def apply_allowlist(values):
+    """Update the allowlist in place, adding before removing, so it is never emptied."""
+    current = allowlist_values()
+    if current is None:
+        cscli("allowlists", "create", ALLOWLIST,
+              "--description", "Nethesis Threat Shield global allowlist")
+        current = set()
+    added = [value for value in values if value not in current]
+    for start in range(0, len(added), 500):
+        cscli("allowlists", "add", ALLOWLIST, *added[start:start + 500])
+    removed = sorted(current - set(values))
+    for start in range(0, len(removed), 500):
+        cscli("allowlists", "remove", ALLOWLIST, *removed[start:start + 500])
+
+
+def feed_alerts():
+    """{feed key: ids of the alerts holding its active decisions}."""
+    alerts = {}
+    result = cscli("decisions", "list", "--limit", "0", "--output", "json")
+    for row in json.loads(result.stdout or "null") or []:
+        for decision in row.get("decisions") or []:
+            scenario = decision.get("scenario", "")
+            if scenario.startswith(SCENARIO_PREFIX):
+                alerts.setdefault(scenario[len(SCENARIO_PREFIX):], set()).add(row["id"])
+    return alerts
+
+
+def drop_all_feed_decisions():
+    for key in catalog:
+        try:
+            delete_feed_decisions(key)
+        except subprocess.CalledProcessError as err:
+            print(agent.SD_WARNING + f"threat-shield could not drop decisions of "
+                  f"feed {key}: {err.stderr}", file=sys.stderr)
+
+
+catalog = threat_shield.load_catalog()
+enabled = threat_shield.enabled_feeds(catalog)
+
+# Refresh the entitlement cache on every run, before any early exit.
+probe = threat_shield.probe_status()
+
+system_id, auth_token = threat_shield.identity()
+if not system_id or not auth_token:
+    print(agent.SD_NOTICE + "cluster/subscription has no identity, "
+          "skipping the Threat Shield import", file=sys.stderr)
+    cleanup(catalog, error="no_subscription" if enabled else None)
+    sys.exit(0)
+
+# Without entitlement the probe finds no type: use the provider's guess.
+subscription_type = probe["type"] or threat_shield.provider_type() or "enterprise"
+
+# The allowlist needs only a subscription. Apply it before the import, so
+# a newly allowed address is not banned again by this run.
+allowlist_error = None
+try:
+    downloaded = parse_values(
+        threat_shield.fetch(threat_shield.allowlist_url(catalog, subscription_type),
+                            system_id, auth_token))
+    if not downloaded:
+        # Most likely a broken reply, not a list emptied on purpose.
+        raise ValueError("the downloaded allowlist is empty")
+    apply_allowlist(downloaded)
+except (HTTPError, URLError, OSError, ValueError, subprocess.CalledProcessError) as err:
+    reason = getattr(err, "reason", None) or getattr(err, "stderr", None) or err
+    if allowlist_exists():
+        print(agent.SD_WARNING + f"threat-shield allowlist refresh failed, keeping the "
+              f"current one: {reason}", file=sys.stderr)
+    else:
+        allowlist_error = f"allowlist unavailable: {str(reason).strip()[:300]}"
+        print(agent.SD_ERR + f"threat-shield allowlist unavailable: {reason}",
+              file=sys.stderr)
+
+# Blocklists need the entitlement: without it, or with none selected, drop
+# the decisions of earlier runs.
+if not enabled or not probe["entitled"]:
+    if enabled:
+        print(agent.SD_NOTICE + "no Threat Shield entitlement, "
+              "skipping the premium blocklists import", file=sys.stderr)
+    drop_all_feed_decisions()
+    write_status({})
+    sys.exit(0)
+
+if allowlist_error:
+    # Better no bans than banning an allowed address.
+    print(agent.SD_ERR + "threat-shield allowlist unavailable on first run, "
+          "skipping the import", file=sys.stderr)
+    write_status({}, error=allowlist_error)
+    sys.exit(0)
+
+# Drop the decisions of feeds that are no longer selected.
+for key in catalog:
+    if key in enabled:
+        continue
+    try:
+        delete_feed_decisions(key)
+    except subprocess.CalledProcessError as err:
+        print(agent.SD_WARNING + f"threat-shield could not drop decisions of the "
+              f"disabled feed {key}: {err.stderr}", file=sys.stderr)
+
+try:
+    old_alerts = feed_alerts()
+except (subprocess.CalledProcessError, ValueError, KeyError) as err:
+    # The old copies then just expire on their own.
+    print(agent.SD_WARNING + f"threat-shield cannot list the previous imports: "
+          f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
+    old_alerts = {}
+
+status = {}
+for key in enabled:
+    url = threat_shield.feed_url(catalog[key], subscription_type)
+    try:
+        values = parse_values(threat_shield.fetch(url, system_id, auth_token))
+    except HTTPError as err:
+        print(agent.SD_WARNING + f"threat-shield feed {key} fetch failed: HTTP {err.code}",
+              file=sys.stderr)
+        status[key] = {"success": False, "entries": 0, "error": f"HTTP {err.code}"}
+        continue
+    except (URLError, OSError) as err:
+        reason = getattr(err, "reason", err)
+        print(agent.SD_WARNING + f"threat-shield feed {key} fetch failed: {reason}",
+              file=sys.stderr)
+        status[key] = {"success": False, "entries": 0, "error": str(reason)[:300]}
+        continue
+
+    # Import first: if it fails, the previous copies keep the bans.
+    try:
+        if values:
+            cscli("decisions", "import", "-i", "-", "--format", "values",
+                  "-d", DECISION_DURATION, "-R", SCENARIO_PREFIX + key,
+                  "--batch", str(IMPORT_BATCH),
+                  stdin="\n".join(values))
+    except subprocess.CalledProcessError as err:
+        print(agent.SD_WARNING + f"threat-shield feed {key} import failed: {err.stderr}",
+              file=sys.stderr)
+        status[key] = {"success": False, "entries": 0, "error": err.stderr.strip()[:300]}
+        continue
+
+    # Really delete the old copies: `decisions delete` only expires them, and they pile up.
+    for alert_id in sorted(old_alerts.get(key, ())):
+        try:
+            cscli("alerts", "delete", "--id", str(alert_id))
+        except subprocess.CalledProcessError as err:
+            print(agent.SD_WARNING + f"threat-shield could not delete alert {alert_id} "
+                  f"of feed {key}: {err.stderr}", file=sys.stderr)
+
+    status[key] = {"success": True, "entries": len(values), "error": None}
+
+write_status(status)
