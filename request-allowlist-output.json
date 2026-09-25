@@ -1,0 +1,1 @@
+{"$schema":"http://json-schema.org/draft-07/schema#","title":"request-allowlist output","$id":"http://schema.nethserver.org/crowdsec/request-allowlist-output.json","description":"Response of nethesis-insights to an allowlist request, relayed as-is","examples":[{"accepted":true,"requests":1}]}
