@@ -1,0 +1,20 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://schema.nethserver.org/crowdsec/search-threat-shield-decision-input.json",
+    "title": "search-threat-shield-decision input",
+    "description": "Search for an IP address in the Nethesis Threat Shield decisions",
+    "examples": [
+        {
+            "ip": "185.220.101.5"
+        }
+    ],
+    "type": "object",
+    "required": ["ip"],
+    "properties": {
+        "ip": {
+            "type": "string",
+            "title": "ip",
+            "description": "IP address to look up. Matches both exact values and enclosing CIDR bans."
+        }
+    }
+}

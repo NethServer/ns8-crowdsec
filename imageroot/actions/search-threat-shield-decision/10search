@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+"""Look up an address in the Threat Shield decisions, including networks."""
+
+import ipaddress
+import json
+import os
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import agent
+import threat_shield
+
+request = json.load(sys.stdin)
+
+try:
+    needle = ipaddress.ip_address(request["ip"].strip())
+except ValueError:
+    agent.set_status("validation-failed")
+    json.dump([{
+        "field": "ip",
+        "parameter": "ip",
+        "value": request.get("ip", ""),
+        "error": "not_valid",
+    }], fp=sys.stdout)
+    sys.exit(3)
+
+# One listing filtered here: the default listing skips CAPI decisions,
+# which keeps it fast. --limit 0 lifts the 100-row cap.
+result = subprocess.run(
+    ["podman", "exec", os.environ["MODULE_ID"], "cscli", "decisions", "list",
+     "--limit", "0", "--output", "json"],
+    check=True, capture_output=True, text=True,
+)
+
+try:
+    listed = json.loads(result.stdout or "null") or []
+except ValueError:
+    listed = []
+
+matches = []
+for row in listed:
+    # Decisions come either grouped under alerts or flat.
+    for decision in (row.get("decisions") or [row]):
+        scenario = decision.get("scenario", "")
+        if not scenario.startswith(threat_shield.SCENARIO_PREFIX):
+            continue
+        try:
+            network = ipaddress.ip_network(decision.get("value", ""), strict=False)
+        except ValueError:
+            continue
+        if needle.version == network.version and needle in network:
+            matches.append(decision)
+
+json.dump({"found": bool(matches), "decisions": matches}, fp=sys.stdout)

@@ -6,9 +6,6 @@
 #
 
 import os
-import json
-import agent
-import agent.tasks
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 

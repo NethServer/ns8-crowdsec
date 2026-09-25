@@ -6,3 +6,6 @@
 #
 
 install-systemd-units
+
+# enable the Threat Shield timer only if there is a subscription
+sync-threat-shield-timer

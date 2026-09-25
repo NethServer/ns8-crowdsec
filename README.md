@@ -62,6 +62,91 @@ You can also modify settings with the configure-module action
 - `enable_online_api`: enable/disable to  push signals and receive bad IPs from crowdsec hub (true/false default is true)
 - `ban_local_network`: enable/disable to ban on private IP address range
 
+## Threat Shield premium blocklists
+
+Nethesis **Threat Shield** blocklists, imported as CrowdSec decisions and
+enforced by the firewall bouncer.
+
+- **Subscription**: this node sends its own bans to Nethesis Insights and
+  receives the Nethesis global allowlist.
+- **Threat Shield entitlement**: required to download the blocklists. Without
+  it, previously imported entries are removed and the UI page is disabled.
+
+Available blocklists:
+
+| Key | Description | Confidence |
+|---|---|---|
+| `yoroimallvl1` | Yoroi malware - Level 1 | 10 |
+| `yoroimallvl2` | Yoroi malware - Level 2 | 8 |
+| `yoroisusplvl1` | Yoroi suspicious - Level 1 | 10 |
+| `yoroisusplvl2` | Yoroi suspicious - Level 2 | 8 |
+| `nethesislvl3` | Nethesis suspicious - Level 3 | 6 |
+| `nethesis-insights` | Nethesis Insights - Level 2 | 8 |
+
+Confidence goes from 1 to 10; it is not shown for community subscriptions.
+All lists are refreshed every 30 minutes.
+
+Enable blocklists from the **Threat Shield** page of the UI, or with:
+
+    api-cli run module/crowdsec1/set-threat-shield --data '{
+      "feeds": ["yoroimallvl1", "nethesislvl3", "nethesis-insights"]
+    }'
+
+Disable all blocklists and remove their entries:
+
+    api-cli run module/crowdsec1/set-threat-shield --data '{"feeds": []}'
+
+Sending bans and the global allowlist do not depend on this selection.
+
+Show blocklists, entry counts, confidence and last update:
+
+    api-cli run module/crowdsec1/list-threat-shield
+
+Check whether an address is blocked, including addresses inside a blocked
+network:
+
+    api-cli run module/crowdsec1/search-threat-shield-decision --data '{"ip": "185.220.101.5"}'
+
+Show the imported blocklist entries enforced by the firewall:
+
+    nft list set crowdsec crowdsec-blacklists-cscli-import
+
+Known limitation: the firewall bouncer, in nftables mode, cannot enforce
+network (CIDR) entries. It drops only the first address of each network,
+for example `1.19.0.0` for `1.19.0.0/16`, and lets the rest through
+([cs-firewall-bouncer#396](https://github.com/crowdsecurity/cs-firewall-bouncer/issues/396)).
+The CrowdSec decisions, the UI entry counts and the search above still
+cover the whole network. The Yoroi lists hold single addresses only, while
+`nethesislvl3` includes many networks, so most of the addresses it lists
+are not actually blocked.
+
+Show the Nethesis global allowlist:
+
+    runagent -m crowdsec1 cscli allowlists inspect nethesis_threat_shield
+
+Test servers only: change the `nethesis-insights` URL in
+`/var/lib/nethserver/crowdsec1/etc/threat-shield-feeds.json`, then run
+`systemctl reload crowdsec1`. The server certificate must be trusted, and
+module updates restore the file.
+
+### Request an allowlist exception
+
+Available from the command line only. Ask Nethesis to remove a false positive
+from the `nethesis-insights` blocklist:
+
+    api-cli run module/crowdsec1/request-allowlist --data '{
+      "cidr": "203.0.113.7",
+      "reason": "This is our office egress IP"
+    }'
+
+- `cidr`: an address or a network, at most `/24` (IPv4) or `/48` (IPv6).
+- `reason`: why the address should be allowed.
+
+Returns `{"accepted": true, "requests": N}`, where `N` is how many systems
+have asked for the same address. Repeating a request has no effect. Requires
+the Threat Shield entitlement; if the server rejects the request, the task
+fails with the server's error.
+
 ## get-configuration
 
 Display the configuration
