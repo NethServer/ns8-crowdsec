@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+"""Refresh the cached Threat Shield entitlement after a subscription change."""
+
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import threat_shield
+
+# No bust: an unreachable server must not erase the last verdict.
+status = threat_shield.probe_status(refresh=True)

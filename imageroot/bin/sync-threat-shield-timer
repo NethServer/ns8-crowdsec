@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+"""Enable the Threat Shield import timer only when the subscription has an
+identity: without it there is no allowlist nor blocklist to import."""
+
+import os
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import threat_shield
+
+system_id, auth_token = threat_shield.identity()
+timer = f"{os.environ['MODULE_ID']}-threat-shield.timer"
+
+if system_id and auth_token:
+    subprocess.run(["systemctl", "enable", "--now", timer], check=True)
+else:
+    # A running import keeps going; the subscription-changed restart cleans up.
+    subprocess.run(["systemctl", "disable", "--now", timer], check=True)

@@ -17,5 +17,11 @@ envsubst <"${AGENT_INSTALL_DIR}/crowdsec-upgrade-hub.service" >"/etc/systemd/sys
 # create the timer to update the crowdsec hub for collections
 envsubst <"${AGENT_INSTALL_DIR}/crowdsec-upgrade-hub.timer" >"/etc/systemd/system/${MODULE_ID}-upgrade-hub.timer"
 
+# create the Threat Shield import service
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-threat-shield.service" >"/etc/systemd/system/${MODULE_ID}-threat-shield.service"
+
+# create the Threat Shield import timer
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-threat-shield.timer" >"/etc/systemd/system/${MODULE_ID}-threat-shield.timer"
+
 # reload and start service
 systemctl daemon-reload
