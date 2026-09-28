@@ -145,20 +145,21 @@ def feed_alerts():
 
 
 def refresh_firewall():
-    """Rewrite the bouncer's cscli-import sets from the DB: the bouncer adds
-    an address once and never renews its timeout."""
+    """Rewrite the bouncer's cscli-import sets from the active bans: the bouncer
+    adds an address once and never renews its timeout."""
     try:
         # Filtered in Python: --origin/--type make cscli take tens of seconds.
         result = cscli("decisions", "list", "--limit", "0", "--output", "json")
         rows = json.loads(result.stdout or "null") or []
     except (subprocess.CalledProcessError, ValueError) as err:
-        print(agent.SD_WARNING + f"threat-shield cannot list the imported decisions, firewall "
+        print(agent.SD_WARNING + f"threat-shield cannot list the decisions, firewall "
               f"not refreshed: {getattr(err, 'stderr', None) or err}", file=sys.stderr)
         return
     addresses = {4: set(), 6: set()}
     for row in rows:
         for decision in row.get("decisions") or []:
-            if decision.get("origin") != "cscli-import" or decision.get("type") != "ban":
+            # cscli lists an address once, under its newest ban: take any origin.
+            if decision.get("type") != "ban" or decision.get("simulated"):
                 continue
             try:
                 address = ipaddress.ip_address(decision.get("value", ""))
