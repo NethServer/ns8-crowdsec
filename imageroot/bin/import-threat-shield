@@ -36,6 +36,12 @@ STATUS_FILE = "threat_shield_last_import.json"
 
 MODULE_ID = os.environ["MODULE_ID"]
 
+# Bouncer sets holding the cscli-import decisions, by IP version.
+NFT_SETS = {
+    4: "ip crowdsec crowdsec-blacklists-cscli-import",
+    6: "ip6 crowdsec6 crowdsec6-blacklists-cscli-import",
+}
+
 
 def cscli(*args, stdin=None):
     return subprocess.run(
@@ -136,6 +142,44 @@ def feed_alerts():
             if scenario.startswith(SCENARIO_PREFIX):
                 alerts.setdefault(scenario[len(SCENARIO_PREFIX):], set()).add(row["id"])
     return alerts
+
+
+def refresh_firewall():
+    """Rewrite the bouncer's cscli-import sets from the DB: the bouncer adds
+    an address once and never renews its timeout."""
+    try:
+        # Filtered in Python: --origin/--type make cscli take tens of seconds.
+        result = cscli("decisions", "list", "--limit", "0", "--output", "json")
+        rows = json.loads(result.stdout or "null") or []
+    except (subprocess.CalledProcessError, ValueError) as err:
+        print(agent.SD_WARNING + f"threat-shield cannot list the imported decisions, firewall "
+              f"not refreshed: {getattr(err, 'stderr', None) or err}", file=sys.stderr)
+        return
+    addresses = {4: set(), 6: set()}
+    for row in rows:
+        for decision in row.get("decisions") or []:
+            if decision.get("origin") != "cscli-import" or decision.get("type") != "ban":
+                continue
+            try:
+                address = ipaddress.ip_address(decision.get("value", ""))
+            except ValueError:
+                continue  # ranges are dropped at import
+            addresses[address.version].add(str(address))
+    for version, target in NFT_SETS.items():
+        values = sorted(addresses[version])
+        # One file is one transaction: no address is ever unblocked.
+        script = f"flush set {target}\n" + "".join(
+            f"add element {target} {{ "
+            + ", ".join(f"{value} timeout {DECISION_DURATION}" for value in values[start:start + 1000])
+            + " }\n" for start in range(0, len(values), 1000))
+        try:
+            subprocess.run(["nft", "-f", "-"], input=script, text=True,
+                           check=True, capture_output=True)
+        except (OSError, subprocess.CalledProcessError) as err:
+            # A missing set is created by the bouncer with its first import decision.
+            if "No such file or directory" not in (getattr(err, "stderr", None) or ""):
+                print(agent.SD_WARNING + f"threat-shield could not refresh {target}: "
+                      f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
 
 
 def drop_all_feed_decisions():
@@ -259,5 +303,7 @@ for key in enabled:
                   f"of feed {key}: {err.stderr}", file=sys.stderr)
 
     status[key] = {"success": True, "entries": len(values), "error": None}
+
+refresh_firewall()
 
 write_status(status)
