@@ -68,7 +68,9 @@ Nethesis **Threat Shield** blocklists, imported as CrowdSec decisions and
 enforced by the firewall bouncer.
 
 - **Subscription**: this node sends its own bans to Nethesis Insights and
-  receives the Nethesis global allowlist.
+  receives the Nethesis global allowlist. The push is always on while the
+  cluster has a subscription, even with no blocklist enabled, and cannot be
+  turned off.
 - **Threat Shield entitlement**: required to download the blocklists. Without
   it, previously imported entries are removed and the UI page is disabled.
 
