@@ -8,4 +8,9 @@
 set -e
 
 podman exec "$MODULE_ID" cscli alerts delete --all
+
+# --all also drops the Threat Shield imports: bring them back now, not in 30 minutes.
+if systemctl -q is-enabled "${MODULE_ID}-threat-shield.timer"; then
+    systemctl restart "${MODULE_ID}-threat-shield.service" 1>&2 || :
+fi
 echo '{}'

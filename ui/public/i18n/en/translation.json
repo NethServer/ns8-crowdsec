@@ -147,7 +147,7 @@
         "history_all": "All events",
         "delete_alerts": "Delete all detections",
         "confirm_delete_title": "Delete all detections",
-        "confirm_delete_message": "All CrowdSec detection events will be permanently removed from the database. Existing bans and decisions will not be affected. This action cannot be undone."
+        "confirm_delete_message": "All CrowdSec detection events and the bans they created will be permanently removed from the database. Blocked addresses stay in the firewall until their ban expires. Threat Shield and community blocklists are downloaded again automatically, manually imported bans are lost. This action cannot be undone."
     },
     "collections": {
         "title": "Collections",
