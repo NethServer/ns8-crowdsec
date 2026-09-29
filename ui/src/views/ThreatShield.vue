@@ -86,7 +86,7 @@
                       {{ feed.description }}
                       <cv-interactive-tooltip
                         v-if="feed.key === insightsFeedKey"
-                        alignment="start"
+                        alignment="center"
                         direction="bottom"
                         class="info"
                       >
