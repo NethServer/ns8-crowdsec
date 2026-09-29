@@ -203,6 +203,7 @@ if not system_id or not auth_token:
     print(agent.SD_NOTICE + "cluster/subscription has no identity, "
           "skipping the Threat Shield import", file=sys.stderr)
     cleanup(catalog, error="no_subscription" if enabled else None)
+    refresh_firewall()
     sys.exit(0)
 
 # Without entitlement the probe finds no type: use the provider's guess.
@@ -236,6 +237,7 @@ if not enabled or not probe["entitled"]:
         print(agent.SD_NOTICE + "no Threat Shield entitlement, "
               "skipping the premium blocklists import", file=sys.stderr)
     drop_all_feed_decisions()
+    refresh_firewall()
     write_status({})
     sys.exit(0)
 
