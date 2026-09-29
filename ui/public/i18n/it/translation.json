@@ -273,7 +273,6 @@
         "insights_tooltip": "Costruito da attacchi bloccati attraverso installazioni NethServer e NethSecurity. Quando abbastanza server segnalano lo stesso IP, questo viene aggiunto alla lista e distribuito ad ogni server con l'add-on Threat Shield.",
         "no_subscription_title": "Subscription richiesta",
         "title": "Threat Shield",
-        "refresh": "Aggiorna",
         "col_blocklist": "Blocklist",
         "search_placeholder": "Inserire un indirizzo IP",
         "last_import_failure": "Aggiornamento non riuscito"

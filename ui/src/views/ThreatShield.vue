@@ -36,17 +36,6 @@
           <p class="mg-bottom">
             {{ $t("threat_shield.blocklist_description") }}
           </p>
-          <NsButton
-            kind="secondary"
-            class="mg-bottom"
-            :icon="Restart20"
-            :loading="loading.listThreatShield"
-            :disabled="
-              !canEdit || loading.listThreatShield || loading.setThreatShield
-            "
-            @click="listThreatShield"
-            >{{ $t("threat_shield.refresh") }}</NsButton
-          >
           <cv-form @submit.prevent="setThreatShield">
             <NsInlineNotification
               v-for="failure in canEdit && !loading.listThreatShield
@@ -255,7 +244,6 @@ import {
   IconService,
   PageTitleService,
 } from "@nethserver/ns8-ui-lib";
-import Restart20 from "@carbon/icons-vue/es/restart/20";
 import { isValidIpAddress } from "@/lib/ip";
 
 export default {
@@ -282,7 +270,6 @@ export default {
         "entries",
         "last_update",
       ],
-      Restart20,
       urlCheckInterval: null,
       // Must match threat_shield.INSIGHTS_FEED_KEY in the backend.
       insightsFeedKey: "nethesis-insights",

@@ -222,7 +222,6 @@
         "no_subscription_description": "Threat Shield blocklists require an active subscription that includes the Threat Shield add-on. Register this system to a subscription to enable them.",
         "no_entitlement_title": "Threat Shield add-on required",
         "no_entitlement_description": "This subscription does not include the Threat Shield add-on, so the blocklists cannot be enabled. The system still shares its bans with Nethesis and receives the Nethesis global allowlist. Contact your provider to add the add-on.",
-        "refresh": "Refresh",
         "last_import_failure": "Update failed",
         "feed_import_failure": "{feed}: update failed",
         "search_title": "Search IP in Threat Shield blocklists",
