@@ -14,7 +14,7 @@
         "ip": {
             "type": "string",
             "title": "ip",
-            "description": "IP address to look up. Matches both exact values and enclosing CIDR bans."
+            "description": "IP address to look up."
         }
     }
 }

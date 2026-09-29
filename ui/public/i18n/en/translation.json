@@ -226,7 +226,7 @@
         "last_import_failure": "Update failed",
         "feed_import_failure": "{feed}: update failed",
         "search_title": "Search IP in Threat Shield blocklists",
-        "search_hint": "Check whether an address is blocked, including addresses covered by a blocked network.",
+        "search_hint": "Check whether an address is blocked by a Threat Shield blocklist.",
         "search_placeholder": "Enter an IP address",
         "search_button": "Search",
         "invalid_ip": "Invalid IP address",

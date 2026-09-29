@@ -355,8 +355,7 @@ export default {
     isValidIp() {
       return isValidIpAddress(this.searchIp);
     },
-    // Names of the blocklists matching the searched IP, once each: a feed
-    // can hold both the address and a network covering it.
+    // Names of the blocklists matching the searched IP, once each.
     searchFeeds() {
       return [
         ...new Set(this.searchDecisions.map((d) => this.feedLabel(d.scenario))),

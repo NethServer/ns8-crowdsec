@@ -72,7 +72,7 @@
                     "value": {
                         "type": "string",
                         "title": "value",
-                        "description": "IP or CIDR targeted by the decision"
+                        "description": "IP address targeted by the decision"
                     },
                     "simulated": {
                         "type": "boolean",
