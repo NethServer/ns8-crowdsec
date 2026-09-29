@@ -116,7 +116,10 @@
         "get-capi-status": "Stato CAPI",
         "list-detections": "Elenco rilevamenti",
         "toggle-collection": "Abilita/disabilita raccolta",
-        "delete-detections": "Elimina rilevamento"
+        "delete-detections": "Elimina rilevamento",
+        "set-threat-shield": "Configura le blocklist Threat Shield",
+        "list-threat-shield": "Lista blocklist Threat Shield",
+        "search-threat-shield-decision": "Ricerca in Threat Shield"
     },
     "about": {
         "title": "Informazioni"
@@ -166,7 +169,7 @@
         "inspect_leak": "perdita",
         "col_created_at": "Rilevato il",
         "inspect_action_applied": "Azione applicata",
-        "confirm_delete_message": "Tutti gli eventi di rilevamento di CrowdSec verranno rimossi definitivamente dal database. I divieti e le decisioni esistenti non saranno influenzati. Questa azione non può essere annullata.",
+        "confirm_delete_message": "Tutti gli eventi di rilevamento di CrowdSec verranno rimossi definitivamente dal database. Gli indirizzi bloccati restano nel firewall fino alla scadenza del ban. Threat Shield e le blocklist della community vengono scaricati nuovamente in automatico, mentre i ban importati manualmente andranno persi. Questa azione non può essere annullata.",
         "no_alerts_filtered": "Nessun rilevamento corrispondente",
         "inspect_timestamp": "Data e ora",
         "confirm_delete_title": "Elimina tutti i rilevamenti",
@@ -245,5 +248,34 @@
         "title": "Blocklist",
         "tab_local": "Blocklist locale",
         "tooltip": "Gestisce gli indirizzi IP bloccati localmente, bloccati dalla comunità di CrowdSec e gli indirizzi IP consentiti per bypassare il blocco"
+    },
+    "threat_shield": {
+        "no_entitlement_title": "E' richiesto l'add-on Threat Shield",
+        "invalid_ip": "Indirizzo IP non valido",
+        "no_blocklists": "Nessuna blocklist disponibile",
+        "confidence_aria": "Livello confidenza {level} di 10",
+        "col_entries": "Voci",
+        "col_status": "Stato",
+        "ip_not_found_title": "Indirizzo non trovato",
+        "feed_import_failure": "{feed}: aggiornamento fallito",
+        "search_hint": "Controlla se un indirizzo è bloccato, compresi gli indirizzi coperti da una rete bloccata.",
+        "ip_found": "L'indirizzo IP {ip} è elencato nelle blocklist {feeds} | L'indirizzo IP {ip} è elencato nella blocklist {feeds}",
+        "ip_found_title": "Indirizzo IP trovato",
+        "blocklist_description": "Tutte le blocklist vengono aggiornate ogni 30 minuti.",
+        "no_subscription_description": "Le blocklist Threat Shield richiedono una sottoscrizione attiva che includa l'add-on Threat Shield. Registra questo sistema con una subscription per abilitarle.",
+        "no_entitlement_description": "Questa subscription non include l'add-on Threat Shield, quindi le blocklist non possono essere abilitate. Il sistema continua comunque a condividere i propri ban con Nethesis e a ricevere la global allowlist di Nethesis. Contatta il tuo provider per aggiungere l'add-on.",
+        "search_button": "Cerca",
+        "ip_not_found": "Questo indirizzo IP non è attualmente elencato nelle blocklist Threat Shield.",
+        "search_title": "Ricerca IP in Threat Shield blocklist",
+        "col_confidence": "Confidence",
+        "blocklist_title": "Blocklist",
+        "col_last_update": "Ultimo aggiornamento",
+        "insights_tooltip": "Costruito da attacchi bloccati attraverso installazioni NethServer e NethSecurity. Quando abbastanza server segnalano lo stesso IP, questo viene aggiunto alla lista e distribuito ad ogni server con l'add-on Threat Shield.",
+        "no_subscription_title": "Subscription richiesta",
+        "title": "Threat Shield",
+        "refresh": "Aggiorna",
+        "col_blocklist": "Blocklist",
+        "search_placeholder": "Inserire un indirizzo IP",
+        "last_import_failure": "Aggiornamento non riuscito"
     }
 }

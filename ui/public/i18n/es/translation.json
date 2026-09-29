@@ -122,7 +122,10 @@
         "get-capi-status": "Get CAPI status",
         "list-detections": "List detections",
         "toggle-collection": "Toggle collection",
-        "delete-detections": "Delete detections"
+        "delete-detections": "Delete detections",
+        "set-threat-shield": "Configure Threat Shield blocklists",
+        "list-threat-shield": "List Threat Shield blocklists",
+        "search-threat-shield-decision": "Search Threat Shield decision"
     },
     "error": {
         "404": "Recurso no encontrado",
@@ -245,5 +248,34 @@
         "title": "Blocklists",
         "tab_local": "Local blocklist",
         "tooltip": "Manage IP addresses blocked locally, blocked by the CrowdSec community, and IP addresses allowed to bypass blocking"
+    },
+    "threat_shield": {
+        "no_entitlement_title": "Threat Shield add-on required",
+        "invalid_ip": "Invalid IP address",
+        "no_blocklists": "No blocklists available",
+        "confidence_aria": "Confidence level {level} out of 10",
+        "col_entries": "Entries",
+        "col_status": "Status",
+        "ip_not_found_title": "Address not found",
+        "feed_import_failure": "{feed}: update failed",
+        "search_hint": "Check whether an address is blocked, including addresses covered by a blocked network.",
+        "ip_found": "The IP address {ip} is listed in the {feeds} blocklist | The IP address {ip} is listed in the {feeds} blocklists",
+        "ip_found_title": "IP address found",
+        "blocklist_description": "All blocklists refresh every 30 minutes.",
+        "no_subscription_description": "Threat Shield blocklists require an active subscription that includes the Threat Shield add-on. Register this system to a subscription to enable them.",
+        "no_entitlement_description": "This subscription does not include the Threat Shield add-on, so the blocklists cannot be enabled. The system still shares its bans with Nethesis and receives the Nethesis global allowlist. Contact your provider to add the add-on.",
+        "search_button": "Search",
+        "ip_not_found": "This IP address is not currently listed in the Threat Shield blocklists.",
+        "search_title": "Search IP in Threat Shield blocklists",
+        "col_confidence": "Confidence",
+        "blocklist_title": "Blocklist",
+        "col_last_update": "Last update",
+        "insights_tooltip": "Built from attacks blocked across NethServer and NethSecurity installations. When enough servers report the same IP, it is added to this list and distributed to every server with Threat Shield add-on.",
+        "no_subscription_title": "Subscription required",
+        "title": "Threat Shield",
+        "refresh": "Refresh",
+        "col_blocklist": "Blocklist",
+        "search_placeholder": "Enter an IP address",
+        "last_import_failure": "Update failed"
     }
 }
