@@ -161,6 +161,9 @@ def refresh_firewall():
             # cscli lists an address once, under its newest ban: take any origin.
             if decision.get("type") != "ban" or decision.get("simulated"):
                 continue
+            # Expired siblings of an active decision in the same alert, e.g. an unbanned IP.
+            if (decision.get("duration") or "").startswith("-"):
+                continue
             try:
                 address = ipaddress.ip_address(decision.get("value", ""))
             except ValueError:
