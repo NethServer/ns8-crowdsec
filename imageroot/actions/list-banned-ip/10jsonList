@@ -10,5 +10,6 @@ list=$(podman exec $MODULE_ID cscli decisions list --output json)
 if [[ $list == 'null' ]];then
     echo '[]'
 else
-    echo $list
+    # Threat Shield imports have their own page.
+    echo "$list" | jq -c 'map(select(any(.decisions[]?; (.scenario // "") | startswith("threat-shield/")) | not))'
 fi

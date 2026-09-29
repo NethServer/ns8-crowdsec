@@ -23,12 +23,13 @@ if [[ "$action" == "unban" ]]; then
 elif [[ "$action" == "unban_all" ]]; then
     # Unban all IPs
     # Using xargs to parallelize the deletion process for efficiency
-    # The command lists all decisions, extracts the IPs, and deletes them in parallel
+    # The command lists all decisions, extracts their ids, and deletes them in parallel
     # Note: Adjust the -P value in xargs based on system capabilities for optimal performance
     # The counter will be handled more accurately by the bouncer, since a single IP can appear in multiple jails.
+    # Skip Threat Shield decisions and delete by id, so their copy of an IP stays.
     podman exec ${MODULE_ID} cscli decisions list -o json \
-        | jq -r '.[].decisions[].value' \
-        | podman exec -i "${MODULE_ID}" xargs -l -P10 cscli decision delete -i &>/dev/null
+        | jq -r '.[]?.decisions[]? | select((.scenario // "") | startswith("threat-shield/") | not) | .id' \
+        | podman exec -i "${MODULE_ID}" xargs -l -P10 cscli decision delete --id &>/dev/null
 else
     echo "Unknown action: $action"
     exit 1
