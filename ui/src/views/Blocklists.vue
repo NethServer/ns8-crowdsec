@@ -572,6 +572,12 @@ export default {
       return isValidIpAddress(this.searchIp);
     },
   },
+  watch: {
+    // hide the previous result as soon as the IP is edited
+    searchIp() {
+      this.searchDone = false;
+    },
+  },
   beforeRouteEnter(to, from, next) {
     next((vm) => {
       vm.watchQueryData(vm);

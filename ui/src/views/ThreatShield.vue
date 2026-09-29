@@ -352,6 +352,7 @@ export default {
   watch: {
     searchIp() {
       this.error.searchIp = "";
+      this.searchDone = false;
     },
   },
   beforeRouteEnter(to, from, next) {
