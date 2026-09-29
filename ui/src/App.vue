@@ -135,4 +135,9 @@ export default {
     height: 3rem;
   }
 }
+
+// Carbon forces a 288px min-width, wider than a tile on phones
+.bx--inline-notification {
+  min-width: 0;
+}
 </style>
