@@ -1,0 +1,8 @@
+name: nethserver/mattermost-whitelist
+description: "Skip Mattermost ID-ending API GETs (http-crawl-non_statics false positives)"
+filter: "evt.Meta.service == 'http' && evt.Meta.log_type == 'http_access-log' && evt.Parsed.traefik_router_name matches '^(https?-)?mattermost[0-9]+-'"
+whitelist:
+  reason: "Mattermost client fetching one URL per thread/channel/team ID"
+  expression:
+   # any status: stale IDs return 403/404; plain path segments and query, no '..' or %-encoding
+   - evt.Meta.http_verb in ['GET', 'HEAD'] && evt.Meta.http_path matches '^/(api/v4|plugins)(/[A-Za-z0-9_-][A-Za-z0-9._-]*)*/[a-z0-9]{26}(\\?[A-Za-z0-9_=&.,-]*)?$'
