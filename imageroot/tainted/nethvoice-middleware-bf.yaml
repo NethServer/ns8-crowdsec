@@ -1,7 +1,7 @@
 type: leaky
 name: nethserver/nethvoice-middleware-bf
 description: "Detect brute force / token-guessing against nethcti-middleware API"
-filter: "evt.Meta.log_type == 'nethvoice_middleware_access-log' && evt.Meta.http_status in ['401', '403']"
+filter: "evt.Meta.log_type == 'nethvoice_middleware_access-log' && evt.Meta.http_status == '401'"
 groupby: evt.Meta.source_ip
 capacity: 8
 leakspeed: "10m"
