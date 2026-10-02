@@ -1,7 +1,7 @@
 type: leaky
 name: nethserver/nethvoice-middleware-bf
-description: "Detect brute force / token-guessing against nethcti-middleware API"
-filter: "evt.Meta.log_type == 'nethvoice_middleware_access-log' && evt.Meta.http_status == '401'"
+description: "Detect login brute force against nethcti-middleware API"
+filter: "evt.Meta.log_type == 'nethvoice_middleware_access-log' && evt.Meta.http_status == '401' && evt.Meta.http_verb == 'POST' && evt.Meta.http_path in ['/login', '/2fa/verify', '/2fa/recovery', '/authentication/phone_island_token_login']"
 groupby: evt.Meta.source_ip
 capacity: 8
 leakspeed: "10m"
