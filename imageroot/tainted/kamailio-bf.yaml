@@ -4,7 +4,7 @@ description: "Detect SIP login bruteforce on kamailio (nethvoice-proxy)"
 filter: "evt.Meta.log_type == 'kamailio_auth_fail'"
 groupby: "evt.Meta.source_ip"
 capacity: 20
-leakspeed: "10s"
+leakspeed: "1s"
 blackhole: "1m"
 labels:
   confidence: 2
