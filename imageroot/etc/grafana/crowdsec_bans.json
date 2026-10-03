@@ -44,12 +44,12 @@
         "x": 0,
         "y": 0,
         "w": 24,
-        "h": 4
+        "h": 2
       },
       "targets": [],
       "options": {
         "mode": "markdown",
-        "content": "Bans decided by the local CrowdSec detections only. Community blocklist (CAPI), console and Threat Shield blocklists are not shown.\n\nLocations come from GeoIP: they are approximate, often the centre of a city or a country. IP addresses are not stored. History starts when this CrowdSec version is installed, and Loki answers queries of up to 30 days."
+        "content": "Local bans only, no blocklists. Approximate GeoIP locations, no IP stored. History starts at install. Max 30 days per view."
       }
     },
     {
@@ -62,7 +62,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 4,
+        "y": 2,
         "w": 6,
         "h": 4
       },
@@ -114,7 +114,7 @@
       },
       "gridPos": {
         "x": 6,
-        "y": 4,
+        "y": 2,
         "w": 6,
         "h": 4
       },
@@ -166,7 +166,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 4,
+        "y": 2,
         "w": 6,
         "h": 4
       },
@@ -218,7 +218,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 4,
+        "y": 2,
         "w": 6,
         "h": 4
       },
@@ -270,7 +270,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 8,
+        "y": 6,
         "w": 16,
         "h": 14
       },
@@ -420,7 +420,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 8,
+        "y": 6,
         "w": 8,
         "h": 14
       },
@@ -500,7 +500,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 22,
+        "y": 20,
         "w": 16,
         "h": 9
       },
@@ -559,7 +559,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 22,
+        "y": 20,
         "w": 8,
         "h": 9
       },
@@ -642,7 +642,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 31,
+        "y": 29,
         "w": 12,
         "h": 10
       },
@@ -722,7 +722,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 31,
+        "y": 29,
         "w": 12,
         "h": 10
       },
@@ -802,7 +802,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 41,
+        "y": 39,
         "w": 24,
         "h": 8
       },
@@ -860,7 +860,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 49,
+        "y": 47,
         "w": 24,
         "h": 10
       },
