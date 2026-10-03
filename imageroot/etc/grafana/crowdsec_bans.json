@@ -74,7 +74,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "sum (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" [$__range]))",
+          "expr": "sum (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [$__range]))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -126,7 +126,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "count(sum by (ip) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" | ip!=\"\" [$__range])) > 1)",
+          "expr": "count(sum by (ip) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [$__range])) > 1)",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -178,7 +178,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "count(sum by (country) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" | country!=\"\" [$__range])))",
+          "expr": "count(sum by (country) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" | country!=\"\" [$__range])))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -230,7 +230,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "count(sum by (asn) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" | asn!=\"\" [$__range])))",
+          "expr": "count(sum by (asn) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" | asn!=\"\" [$__range])))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -282,7 +282,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "count(sum by (module_id) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" [$__range])))",
+          "expr": "count(sum by (module_id) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [$__range])))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -334,7 +334,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "topk(300, sum by (lat, lon, country) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" | lat!=\"\" [$__range])))",
+          "expr": "topk(300, sum by (lat, lon, country) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" | lat!=\"\" [$__range])))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -505,7 +505,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "topk(10, sum by (country) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" | country!=\"\" [$__range])))",
+          "expr": "topk(10, sum by (country) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" | country!=\"\" [$__range])))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -1358,7 +1358,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "sum by (service) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" [$__interval]))",
+          "expr": "sum by (service) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [$__interval]))",
           "queryType": "range",
           "legendFormat": "{{service}}"
         }
@@ -1418,7 +1418,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "sum by (service) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" [$__range]))",
+          "expr": "sum by (service) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [$__range]))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -1501,7 +1501,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "topk(10, sum by (as) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" | asn!=\"\" | label_format as=\"AS{{.asn}} {{.as_name}}\" [$__range])))",
+          "expr": "topk(10, sum by (as) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" | asn!=\"\" | label_format as=\"AS{{.asn}} {{.as_name}}\" [$__range])))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -1582,7 +1582,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "topk(10, sum by (scenario) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" [$__range])))",
+          "expr": "topk(10, sum by (scenario) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [$__range])))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -1663,7 +1663,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "topk(20, sum by (ip, country, as_name) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\" | ip!=\"\" [$__range])))",
+          "expr": "topk(20, sum by (ip, country, as_name) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [$__range])))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -1740,7 +1740,7 @@
                 "value": [
                   {
                     "title": "Show only this IP",
-                    "url": "/d/crowdsec-bans/crowdsec-bans?${__url_time_range}&${datasource:queryparam}&${crowdsec:queryparam}&${service_filter:queryparam}&${country:queryparam}&var-ip=${__value.raw}"
+                    "url": "/d/crowdsec-bans/crowdsec-bans?${__url_time_range}&${datasource:queryparam}&${crowdsec:queryparam}&${service:queryparam}&${country:queryparam}&var-ip=${__value.raw}"
                   }
                 ]
               }
@@ -2576,7 +2576,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "{module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=~\"1|2\" | country=~\"$country\" | service=~\"$service_filter\" | ip=~\"$ip\"",
+          "expr": "{module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\"",
           "queryType": "range",
           "legendFormat": "",
           "maxLines": 200
@@ -2693,7 +2693,7 @@
                 "value": [
                   {
                     "title": "Show only this IP",
-                    "url": "/d/crowdsec-bans/crowdsec-bans?${__url_time_range}&${datasource:queryparam}&${crowdsec:queryparam}&${service_filter:queryparam}&${country:queryparam}&var-ip=${__value.raw}"
+                    "url": "/d/crowdsec-bans/crowdsec-bans?${__url_time_range}&${datasource:queryparam}&${crowdsec:queryparam}&${service:queryparam}&${country:queryparam}&var-ip=${__value.raw}"
                   }
                 ]
               }
@@ -3556,7 +3556,7 @@
       },
       {
         "label": "Service (regex)",
-        "name": "service_filter",
+        "name": "service",
         "type": "textbox",
         "query": ".*",
         "current": {
