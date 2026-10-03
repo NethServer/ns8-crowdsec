@@ -38,7 +38,7 @@
     {
       "id": 1,
       "type": "text",
-      "title": "About this dashboard",
+      "title": "",
       "datasource": null,
       "gridPos": {
         "x": 0,
@@ -517,7 +517,8 @@
           "legendFormat": "{{service}}"
         }
       ],
-      "interval": "1h",
+      "interval": "5m",
+      "maxDataPoints": 60,
       "fieldConfig": {
         "defaults": {
           "unit": "short",
@@ -819,7 +820,8 @@
           "legendFormat": "{{module_id}}"
         }
       ],
-      "interval": "1h",
+      "interval": "5m",
+      "maxDataPoints": 60,
       "fieldConfig": {
         "defaults": {
           "unit": "short",
