@@ -16,15 +16,15 @@ Parsing the CrowdSec logs depends on the log format of each release and the line
 
 ## Decision
 
-A systemd timer runs `bin/export-alerts` every 5 minutes. It reads new local alerts with `cscli alerts list --kind crowdsec`, keeps those with a ban decision, and writes one JSON line per ban to stdout with a fixed schema: `v`, `ts`, `alert_id`, `country`, `asn`, `as_name`, `scenario`, `service`, `lat`, `lon`. Each field is validated against a strict format, `as_name` is reduced to a safe character set. A malformed alert aborts the run, nothing is written and the cursor stays. Loki parses the JSON at query time, the fields never become labels.
+A systemd timer runs `bin/export-alerts` every 5 minutes. It reads new local alerts with `cscli alerts list --kind crowdsec`, keeps those with a ban decision, and writes one JSON line per ban to stdout with a fixed schema: `v`, `ts`, `alert_id`, `ip`, `country`, `asn`, `as_name`, `scenario`, `service`, `lat`, `lon`. Each field is validated against a strict format, the IP is parsed by the Python `ipaddress` module, `as_name` is reduced to a safe character set. A malformed alert aborts the run, nothing is written and the cursor stays. Loki parses the JSON at query time, the fields never become labels.
 
 The `crowdsec_bans` dashboard reads Loki and is published with the other CrowdSec dashboards. The timer is always on, there is no setting to turn it off.
 
 ## Security
 
-What we protect against: the alert source IP, which is personal data, and the attacker-controlled text of the alert (message, events, meta, target user) never reach Loki. A crafted log line cannot inject markup or LogQL into the dashboard because no free text is passed through. The trust boundary is the CrowdSec database: only the allowlisted, validated fields cross it.
+What we protect against: the attacker-controlled text of the alert (message, events, meta, target user) never reaches Loki. A crafted log line cannot inject markup or LogQL into the dashboard because no free text is passed through. The trust boundary is the CrowdSec database: only the allowlisted, validated fields cross it.
 
-What we do not protect: country, ASN, AS name and approximate coordinates of each ban are readable by anyone with Grafana access, for the whole Loki retention period (365 days by default). The export is always on, so this applies to every installation from install or update.
+What we do not protect: the banned IP, which is personal data, and the country, ASN, AS name and approximate coordinates of each ban are readable by anyone with Grafana access, for the whole Loki retention period (365 days by default). The export is always on, so this applies to every installation from install or update. The IP is kept on purpose, to count how often the same address is banned over a period longer than the 7 days of the LAPI. A keyed hash of the IP was considered and rejected: it would hide the address that administrators need to act on.
 
 ## Consequences
 

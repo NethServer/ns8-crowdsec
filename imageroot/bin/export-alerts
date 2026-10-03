@@ -8,11 +8,12 @@
 """Write one JSON line per new local ban to stdout, so journald and Loki
 keep a history for the Grafana bans dashboard.
 
-Only an allowlist of fields is emitted. The IP and the attacker-controlled
-alert text (message, meta, events) never leave the LAPI.
+Only an allowlist of fields is emitted. The attacker-controlled alert text
+(message, meta, events) never leaves the LAPI.
 """
 
 import argparse
+import ipaddress
 import json
 import math
 import os
@@ -22,7 +23,7 @@ import sys
 import time
 
 CURSOR_FILE = "export_alerts_cursor"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 # The LAPI flushes alerts after 7 days or past 5000 items (db_config.flush).
 FLUSH_MAX_AGE = 7 * 86400
 FLUSH_MAX_ITEMS = 5000
@@ -93,6 +94,10 @@ def to_line(alert):
     if not isinstance(ts, str) or not TS_RE.match(ts):
         raise InvalidAlert(f"alert {alert_id}: unexpected created_at format")
     source = alert.get("source") or {}
+    try:
+        ip = str(ipaddress.ip_address(source.get("ip")))
+    except ValueError:
+        raise InvalidAlert(f"alert {alert_id}: invalid source ip")
     country = source.get("cn")
     asn = source.get("as_number")
     lat = coordinate(source.get("latitude"), 90)
@@ -104,6 +109,7 @@ def to_line(alert):
         "v": SCHEMA_VERSION,
         "ts": ts,
         "alert_id": alert_id,
+        "ip": ip,
         "country": country if isinstance(country, str) and COUNTRY_RE.match(country) else None,
         "asn": int(asn) if isinstance(asn, str) and ASN_RE.match(asn) and int(asn) > 0 else None,
         "as_name": as_name_of(source.get("as_name")),

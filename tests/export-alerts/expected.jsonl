@@ -1,4 +1,4 @@
-{"v":1,"ts":"2026-10-03T09:58:00Z","alert_id":41,"country":"FR","asn":16276,"as_name":"OVH SAS","scenario":"crowdsecurity/ssh-bf","service":"ssh","lat":48.8582,"lon":2.3387}
-{"v":1,"ts":"2026-10-03T10:00:00Z","alert_id":42,"country":null,"asn":null,"as_name":null,"scenario":"nethserver/kamailio-bf","service":"sip","lat":null,"lon":null}
-{"v":1,"ts":"2026-10-03T10:01:12Z","alert_id":43,"country":"US","asn":54113,"as_name":"FASTLYscript","scenario":"crowdsecurity/http-probing","service":"http","lat":37.751,"lon":-97.822}
-{"v":1,"ts":"2026-10-03T10:02:00Z","alert_id":44,"country":null,"asn":null,"as_name":null,"scenario":"crowdsecurity/postfix-spam","service":"mail","lat":null,"lon":null}
+{"v":2,"ts":"2026-10-03T09:58:00Z","alert_id":41,"ip":"198.51.100.7","country":"FR","asn":16276,"as_name":"OVH SAS","scenario":"crowdsecurity/ssh-bf","service":"ssh","lat":48.8582,"lon":2.3387}
+{"v":2,"ts":"2026-10-03T10:00:00Z","alert_id":42,"ip":"192.0.2.1","country":null,"asn":null,"as_name":null,"scenario":"nethserver/kamailio-bf","service":"sip","lat":null,"lon":null}
+{"v":2,"ts":"2026-10-03T10:01:12Z","alert_id":43,"ip":"203.0.113.9","country":"US","asn":54113,"as_name":"FASTLYscript","scenario":"crowdsecurity/http-probing","service":"http","lat":37.751,"lon":-97.822}
+{"v":2,"ts":"2026-10-03T10:02:00Z","alert_id":44,"ip":"2001:db8::10","country":null,"asn":null,"as_name":null,"scenario":"crowdsecurity/postfix-spam","service":"mail","lat":null,"lon":null}

@@ -22,9 +22,17 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 "${script}" --input "${here}/alerts.json" --cursor 40 --dry-run 2>/dev/null >out.jsonl
 diff -u "${here}/expected.jsonl" out.jsonl || fail "output differs from expected.jsonl"
 
-# No IP and no attacker-controlled text may leave the LAPI.
-if grep -E '198\.51\.100\.|203\.0\.113\.|192\.0\.2\.|root|events over|<script>' out.jsonl; then
-    fail "IP or alert text leaked"
+# No attacker-controlled text may leave the LAPI.
+if grep -E 'root|events over|<script>' out.jsonl; then
+    fail "alert text leaked"
+fi
+
+# The IP comes only from source.ip, never from the decision or the message.
+[[ $(jq -s 'map(.ip) | join(",")' out.jsonl) == '"198.51.100.7,192.0.2.1,203.0.113.9,2001:db8::10"' ]] || fail "unexpected ip values"
+
+# An alert with an invalid source ip aborts the run.
+if "${script}" --input <(jq '[.[2]]' "${here}/invalid.json") --cursor 0 2>/dev/null >out.jsonl; then
+    fail "invalid ip must fail"
 fi
 
 # One invalid alert aborts the whole run: no partial output, non-zero exit.
