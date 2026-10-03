@@ -3561,6 +3561,7 @@
         "multi": true,
         "includeAll": true,
         "allValue": ".*",
+        "allowCustomValue": true,
         "query": "ssh,http,mail,sip,nethvoice,nextcloud,database,ftp,other",
         "current": {
           "text": [

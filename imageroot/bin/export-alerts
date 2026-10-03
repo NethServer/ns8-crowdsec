@@ -22,6 +22,8 @@ import subprocess
 import sys
 import time
 
+import yaml
+
 CURSOR_FILE = "export_alerts_cursor"
 SCHEMA_VERSION = 2
 # The LAPI flushes alerts after 7 days or past 5000 items (db_config.flush).
@@ -32,13 +34,14 @@ FETCH_WINDOW = "8d"
 SCENARIO_RE = re.compile(r"^[A-Za-z0-9_./-]{1,128}$")
 COUNTRY_RE = re.compile(r"^[A-Z]{2}$")
 ASN_RE = re.compile(r"^[0-9]{1,10}$")
+SERVICE_RE = re.compile(r"^[A-Za-z0-9_-]{1,32}$")
 TS_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
 # AS names come from the GeoIP database, written by network registrants.
 AS_NAME_DROP_RE = re.compile(r"[^\w .,&'()/+-]")
 
 # First match wins, tested against the scenario name without its author.
 SERVICES = [
-    ("sip", ("kamailio",)),
+    ("sip", ("kamailio", "asterisk", "sip")),
     ("nethvoice", ("nethvoice",)),
     ("nextcloud", ("nextcloud",)),
     ("ssh", ("ssh",)),
@@ -60,12 +63,29 @@ def log(level, message):
     print(f"<{level}>{message}", file=sys.stderr, flush=True)
 
 
-def service_of(scenario):
-    name = scenario.rsplit("/", 1)[-1].lower()
-    for service, keywords in SERVICES:
-        if any(k in name for k in keywords):
-            return service
-    return "other"
+def service_of(scenario, label=None):
+    # The name covers the common cases; the scenario's own service label covers the rest of the hub.
+    for text in (scenario.rsplit("/", 1)[-1].lower(), (label or "").lower()):
+        for service, keywords in SERVICES:
+            if any(k in text for k in keywords):
+                return service
+    return label.lower() if label and SERVICE_RE.match(label) else "other"
+
+
+def scenario_labels():
+    """Map each installed scenario to its labels.service, empty when it cannot be read."""
+    try:
+        proc = subprocess.run(
+            ["podman", "exec", os.environ["MODULE_ID"], "sh", "-c",
+             "for f in $(find -L /etc/crowdsec/scenarios -name '*.yaml'); do cat \"$f\"; printf '\\n---\\n'; done"],
+            text=True, check=True, capture_output=True,
+        )
+        docs = yaml.safe_load_all(proc.stdout)
+        return {d["name"]: d["labels"]["service"] for d in docs
+                if isinstance(d, dict) and isinstance(d.get("labels"), dict) and isinstance(d["labels"].get("service"), str)}
+    except (subprocess.CalledProcessError, yaml.YAMLError, KeyError, TypeError) as err:
+        log(4, f"cannot read the scenario labels, services fall back to the scenario name: {err}")
+        return {}
 
 
 def coordinate(value, limit):
@@ -83,7 +103,7 @@ def as_name_of(value):
     return value or None
 
 
-def to_line(alert):
+def to_line(alert, labels=None):
     alert_id = alert.get("id")
     if isinstance(alert_id, bool) or not isinstance(alert_id, int) or alert_id < 1:
         raise InvalidAlert("missing or invalid id")
@@ -114,7 +134,7 @@ def to_line(alert):
         "asn": int(asn) if isinstance(asn, str) and ASN_RE.match(asn) and int(asn) > 0 else None,
         "as_name": as_name_of(source.get("as_name")),
         "scenario": scenario,
-        "service": service_of(scenario),
+        "service": service_of(scenario, (labels or {}).get(scenario)),
         "lat": lat,
         "lon": lon,
     }
@@ -199,7 +219,8 @@ def main():
     new = sorted((a for a in alerts if isinstance(a.get("id"), int) and a["id"] > cursor["alert_id"]),
                  key=lambda a: a["id"])
     try:
-        lines = [json.dumps(to_line(a), separators=(",", ":")) for a in new if is_ban(a)]
+        labels = scenario_labels() if new and not args.input else {}
+        lines = [json.dumps(to_line(a, labels), separators=(",", ":")) for a in new if is_ban(a)]
     except InvalidAlert as err:
         # Fail closed: nothing is emitted and the cursor stays, so the next run retries.
         log(3, f"export aborted, {err}")
