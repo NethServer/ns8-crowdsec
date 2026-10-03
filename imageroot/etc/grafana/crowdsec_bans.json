@@ -854,7 +854,7 @@
     },
     {
       "id": 13,
-      "type": "logs",
+      "type": "table",
       "title": "Latest bans",
       "datasource": {
         "type": "loki",
@@ -874,21 +874,142 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "{module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"1\" | country=~\"$country\" | service=~\"$service\" | line_format \"{{.ts}}  {{.module_id}}  {{or .country \\\"--\\\"}}  AS{{or .asn \\\"?\\\"}} {{.as_name}}  {{.scenario}}\"",
+          "expr": "{module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"1\" | country=~\"$country\" | service=~\"$service\"",
           "queryType": "range",
           "legendFormat": "",
           "maxLines": 200
         }
       ],
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels",
+            "format": "json",
+            "replace": true,
+            "keepTime": false
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "includeByName": {
+              "ts": true,
+              "module_id": true,
+              "country": true,
+              "asn": true,
+              "as_name": true,
+              "scenario": true,
+              "service": true
+            },
+            "indexByName": {
+              "ts": 0,
+              "module_id": 1,
+              "country": 2,
+              "asn": 3,
+              "as_name": 4,
+              "service": 5,
+              "scenario": 6
+            },
+            "renameByName": {
+              "ts": "Time (UTC)",
+              "module_id": "CrowdSec",
+              "country": "Country",
+              "asn": "ASN",
+              "as_name": "Provider",
+              "service": "Service",
+              "scenario": "Scenario"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Time (UTC)",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
       "options": {
-        "showTime": false,
-        "showLabels": false,
-        "showCommonLabels": false,
-        "wrapLogMessage": false,
-        "prettifyLogMessage": false,
-        "enableLogDetails": false,
-        "dedupStrategy": "none",
-        "sortOrder": "Descending"
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time (UTC)"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 190
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CrowdSec"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Country"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ASN"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Service"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
       }
     }
   ],
