@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer of the CrowdSec bans export
+
+[Timer]
+OnActiveSec=2min
+OnUnitInactiveSec=5min
+
+[Install]
+WantedBy=timers.target

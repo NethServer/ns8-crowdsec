@@ -23,5 +23,9 @@ envsubst <"${AGENT_INSTALL_DIR}/crowdsec-threat-shield.service" >"/etc/systemd/s
 # create the Threat Shield import timer
 envsubst <"${AGENT_INSTALL_DIR}/crowdsec-threat-shield.timer" >"/etc/systemd/system/${MODULE_ID}-threat-shield.timer"
 
+# create the bans export service and its timer
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-export-alerts.service" >"/etc/systemd/system/${MODULE_ID}-export-alerts.service"
+envsubst <"${AGENT_INSTALL_DIR}/crowdsec-export-alerts.timer" >"/etc/systemd/system/${MODULE_ID}-export-alerts.timer"
+
 # reload and start service
 systemctl daemon-reload

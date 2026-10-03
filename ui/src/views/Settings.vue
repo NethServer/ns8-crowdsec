@@ -49,6 +49,25 @@
                 $t("settings.enabled")
               }}</template>
             </NsToggle>
+            <NsToggle
+              :label="$t('settings.export_bans')"
+              class="maxwidth"
+              value="export_bans"
+              :form-item="true"
+              v-model="export_bans"
+              :disabled="loading.getConfiguration || loading.configureModule"
+              ref="export_bans"
+            >
+              <template slot="tooltip">
+                <span>{{ $t("settings.export_bans_tips") }}</span>
+              </template>
+              <template slot="text-left">{{
+                $t("settings.disabled")
+              }}</template>
+              <template slot="text-right">{{
+                $t("settings.enabled")
+              }}</template>
+            </NsToggle>
             <label class="bx--label">
               {{ $t("settings.bantime") }}
               <cv-interactive-tooltip
@@ -251,6 +270,7 @@ export default {
       urlCheckInterval: null,
       mail_configured: false,
       ban_local_network: false,
+      export_bans: true,
       helo_host: "",
       receiver_emails: [],
       bantime: "1m",
@@ -267,6 +287,7 @@ export default {
         getConfiguration: "",
         configureModule: "",
         ban_local_network: "",
+        export_bans: "",
         helo_host: "",
         receiver_emails: "",
         bantime: "",
@@ -387,6 +408,7 @@ export default {
       this.loading.getConfiguration = false;
       this.focusElement("ban_local_network");
       this.ban_local_network = config.ban_local_network;
+      this.export_bans = config.export_bans;
       this.mail_configured = config.mail_configured;
       this.group_threshold = String(config.group_threshold);
       this.dynamicBantimeDuration = String(config.dynamic_bantime_duration);
@@ -439,6 +461,7 @@ export default {
             bantime: String(this.bantime),
             dyn_bantime: this.dyn_bantime === "dynamic",
             ban_local_network: this.ban_local_network,
+            export_bans: this.export_bans,
             group_threshold: parseInt(this.group_threshold),
             dynamic_bantime_duration:
               this.dyn_bantime === "dynamic"

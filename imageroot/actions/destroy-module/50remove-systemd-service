@@ -23,6 +23,11 @@ systemctl disable --now "${MODULE_ID}-threat-shield.timer" || :
 rm -vf /etc/systemd/system/${MODULE_ID}-threat-shield.service
 rm -vf /etc/systemd/system/${MODULE_ID}-threat-shield.timer
 
+# remove the bans export timer
+systemctl disable --now "${MODULE_ID}-export-alerts.timer" || :
+rm -vf /etc/systemd/system/${MODULE_ID}-export-alerts.service
+rm -vf /etc/systemd/system/${MODULE_ID}-export-alerts.timer
+
 # remove the bouncer service
 systemctl disable --now "${MODULE_ID}-firewall-bouncer.service"
 rm -vf "/etc/systemd/system/${MODULE_ID}-firewall-bouncer.service"

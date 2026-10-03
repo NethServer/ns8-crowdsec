@@ -1,0 +1,8 @@
+[Unit]
+Description=Export new CrowdSec bans to the journal for Grafana
+Requisite=${MODULE_ID}.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/runagent -m ${MODULE_ID} export-alerts
+SyslogIdentifier=%N
