@@ -49,7 +49,7 @@
       "targets": [],
       "options": {
         "mode": "markdown",
-        "content": "Local bans only, no blocklists. Approximate GeoIP locations, no IP stored. History starts at install. Max 30 days per view."
+        "content": "Local bans only, no blocklists. Approximate GeoIP locations, no IP stored. Max 30 days per view."
       }
     },
     {
