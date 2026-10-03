@@ -83,12 +83,8 @@
                 "value": 0
               },
               {
-                "color": "#E02F44",
-                "value": 10
-              },
-              {
                 "color": "#299c46",
-                "value": 10
+                "value": 1
               }
             ]
           },
@@ -234,7 +230,7 @@
             "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(increase(cs_filesource_hits_total[$__interval])) by (instance)",
+          "expr": "sum(increase(cs_filesource_hits_total[$__rate_interval])) by (instance)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -246,7 +242,7 @@
             "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(increase(cs_journalctlsource_hits_total[$__interval])) by (instance)",
+          "expr": "sum(increase(cs_journalctlsource_hits_total[$__rate_interval])) by (instance)",
           "hide": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -258,7 +254,7 @@
             "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(increase(cs_cloudwatch_stream_hits_total[$__interval])) by (instance)",
+          "expr": "sum(increase(cs_cloudwatch_stream_hits_total[$__rate_interval])) by (instance)",
           "hide": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -270,7 +266,7 @@
             "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(increase(cs_syslogsource_hits_total[$__interval])) by (instance)",
+          "expr": "sum(increase(cs_syslogsource_hits_total[$__rate_interval])) by (instance)",
           "hide": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -374,7 +370,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(cs_parser_hits_total[$__interval])) by (instance)",
+          "expr": "sum(increase(cs_parser_hits_total[$__rate_interval])) by (instance)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -478,7 +474,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(cs_bucket_overflowed_total[$__interval])) by (instance)",
+          "expr": "sum(increase(cs_bucket_overflowed_total[$__rate_interval])) by (instance)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -864,7 +860,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(increase(cs_node_hits_ok_total[$__interval])) by (name)",
+              "expr": "sum(increase(cs_node_hits_ok_total[$__rate_interval])) by (name)",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -905,7 +901,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(increase(cs_node_hits_ko_total[$__interval])) by (name)",
+              "expr": "sum(increase(cs_node_hits_ko_total[$__rate_interval])) by (name)",
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "{{name}}",
@@ -958,7 +954,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(increase(cs_bucket_created_total[$__interval])) by (name)",
+              "expr": "sum(increase(cs_bucket_instantiation_total[$__rate_interval])) by (name)",
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "{{name}}",
@@ -997,7 +993,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(increase(cs_bucket_overflowed_total[$__interval])) by (name)",
+              "expr": "sum(increase(cs_bucket_overflowed_total[$__rate_interval])) by (name)",
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "{{name}}",
