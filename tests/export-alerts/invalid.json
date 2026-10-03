@@ -5,6 +5,7 @@
     "created_at": "2026-10-03T10:00:00Z",
     "scenario": "crowdsecurity/ssh-bf",
     "source": {
+      "scope": "Ip",
       "cn": "IT",
       "ip": "198.51.100.20"
     },
@@ -20,6 +21,7 @@
     "created_at": "2026-10-03T10:01:00Z",
     "scenario": "evil scenario {{.MESSAGE}}",
     "source": {
+      "scope": "Ip",
       "cn": "IT",
       "ip": "198.51.100.21"
     },
@@ -35,6 +37,7 @@
     "created_at": "2026-10-03T10:02:00Z",
     "scenario": "crowdsecurity/ssh-bf",
     "source": {
+      "scope": "Ip",
       "ip": "not-an-ip"
     },
     "decisions": [

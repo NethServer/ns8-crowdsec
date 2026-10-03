@@ -88,6 +88,7 @@
     "scenario": "crowdsecurity/postfix-spam",
     "source": {
       "ip": "2001:db8::10",
+      "scope": "Ip",
       "cn": "fr; DROP",
       "as_number": "12a",
       "latitude": 123.0,

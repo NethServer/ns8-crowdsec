@@ -35,6 +35,11 @@ if "${script}" --input <(jq '[.[2]]' "${here}/invalid.json") --cursor 0 2>/dev/n
     fail "invalid ip must fail"
 fi
 
+# A custom-scope alert has no IP to export: it is skipped, not fatal.
+jq '[.[0] | .source = {"scope": "username", "value": "root"}]' "${here}/alerts.json" >custom.json
+"${script}" --input custom.json --cursor 40 --dry-run 2>/dev/null >out.jsonl || fail "custom scope must not fail"
+[[ ! -s out.jsonl ]] || fail "custom scope must be skipped"
+
 # One invalid alert aborts the whole run: no partial output, non-zero exit.
 if "${script}" --input "${here}/invalid.json" --cursor 0 2>/dev/null >out.jsonl; then
     fail "invalid input must fail"
@@ -56,6 +61,11 @@ echo '{"alert_id": 42, "time": '"$(date +%s)"'}' >export_alerts_cursor
 "${script}" --input "${here}/alerts.json" 2>/dev/null >out.jsonl
 [[ $(jq -s 'map(.alert_id) | join(",")' out.jsonl) == '"43,44"' ]] || fail "expected bans 43,44"
 [[ $(jq .alert_id export_alerts_cursor) == 45 ]] || fail "cursor must move to 45"
+
+# A run with nothing new refreshes the cursor time, so a quiet node does not warn.
+echo '{"alert_id": 45, "time": 0}' >export_alerts_cursor
+"${script}" --input "${here}/alerts.json" 2>/dev/null >/dev/null
+(( $(jq .time export_alerts_cursor) > 0 )) || fail "cursor time must be refreshed"
 
 # A stale cursor warns about possible loss.
 echo '{"alert_id": 45, "time": 0}' >export_alerts_cursor

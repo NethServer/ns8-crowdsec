@@ -121,6 +121,9 @@ def to_line(alert):
 
 
 def is_ban(alert):
+    # Custom-scope scenarios (a user name, a session) carry no source IP to export.
+    if (alert.get("source") or {}).get("scope") not in ("Ip", "Range"):
+        return False
     return any(isinstance(d, dict) and d.get("type") == "ban" for d in alert.get("decisions") or [])
 
 
@@ -205,8 +208,8 @@ def main():
     for line in lines:
         print(line)
     sys.stdout.flush()
-    if new and not args.dry_run:
-        write_cursor(new[-1]["id"])
+    if not args.dry_run:
+        write_cursor(new[-1]["id"] if new else cursor["alert_id"])
     if lines:
         log(6, f"exported {len(lines)} bans")
     return 0
