@@ -493,7 +493,7 @@
     {
       "id": 8,
       "type": "timeseries",
-      "title": "Bans per day",
+      "title": "Bans over time",
       "datasource": {
         "type": "loki",
         "uid": "${datasource}"
@@ -517,7 +517,7 @@
           "legendFormat": "{{service}}"
         }
       ],
-      "interval": "1d",
+      "interval": "1h",
       "fieldConfig": {
         "defaults": {
           "unit": "short",
@@ -795,7 +795,7 @@
     {
       "id": 12,
       "type": "timeseries",
-      "title": "Bans per day by CrowdSec instance",
+      "title": "Bans over time by CrowdSec instance",
       "datasource": {
         "type": "loki",
         "uid": "${datasource}"
@@ -819,7 +819,7 @@
           "legendFormat": "{{module_id}}"
         }
       ],
-      "interval": "1d",
+      "interval": "1h",
       "fieldConfig": {
         "defaults": {
           "unit": "short",
