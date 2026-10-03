@@ -142,11 +142,6 @@
             "type": "boolean",
             "title": "pull_community_blocklist",
             "description": "Pull the CrowdSec community blocklist from the Central API"
-        },
-        "export_bans": {
-            "type": "boolean",
-            "title": "export_bans",
-            "description": "Export local bans (country, ASN, scenario, no IP) to the journal for the Grafana bans dashboard"
         }
     }
 }

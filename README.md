@@ -61,7 +61,6 @@ You can also modify settings with the configure-module action
 - `whitelists`: whitelist domain, ip or network to crowdsec, no ban will occurs for that list
 - `enable_online_api`: enable/disable to  push signals and receive bad IPs from crowdsec hub (true/false default is true)
 - `ban_local_network`: enable/disable to ban on private IP address range
-- `export_bans`: enable/disable the ban history used by the Grafana `CrowdSec Bans` dashboard (true/false default is true), see [Ban analytics in Grafana](#ban-analytics-in-grafana)
 
 ## Threat Shield premium blocklists
 
@@ -241,13 +240,11 @@ Every 5 minutes, the `crowdsec1-export-alerts.timer` writes one JSON line per ne
 
 Only these fields are written. The IP address and the alert text (message, events, meta) never leave the CrowdSec database. Bans coming from the community blocklist, the console and Threat Shield are not exported. Coordinates come from GeoIP and are approximate.
 
-History starts when the export is enabled: older alerts are not imported, because Loki would stamp them all with the import time. The cursor (`state/export_alerts_cursor`) is not backed up, so after a restore history restarts from the restore time without duplicates.
+History starts when the module is installed or updated to a version with the export: older alerts are not imported, because Loki would stamp them all with the import time. The cursor (`state/export_alerts_cursor`) is not backed up, so after a restore history restarts from the restore time without duplicates.
 
 Preview the lines without moving the cursor:
 
     runagent -m crowdsec1 export-alerts --dry-run
-
-Disable the export with `"export_bans": false` in `configure-module`, or from the Settings page.
 
 ## Uninstall
 

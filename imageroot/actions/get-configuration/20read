@@ -28,6 +28,5 @@ config["mail_configured"] = True if smtp["host"] else False
 config["group_threshold"] = int(os.getenv("GROUP_THRESHOLD", 100))
 config['dynamic_bantime_duration'] = os.getenv("DYNAMIC_BANTIME_DURATION", "4")
 config['pull_community_blocklist'] = os.getenv("PULL_COMMUNITY_BLOCKLIST", "True") == "True"
-config['export_bans'] = os.getenv("EXPORT_BANS", "True") == "True"
 
 json.dump(config, fp=sys.stdout)

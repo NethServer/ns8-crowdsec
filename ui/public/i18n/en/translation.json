@@ -82,9 +82,7 @@
         "group_threshold_label": "Notification threshold",
         "group_threshold_placeholder": "Between {min} and {max}",
         "pull_community_blocklist": "Community blocklist",
-        "pull_community_blocklist_tips": "When enabled, CrowdSec can block IP addresses received from the community blocklist.",
-        "export_bans": "Ban history for Grafana",
-        "export_bans_tips": "When enabled, each local ban is written to the logs with its country, network provider and scenario, without the IP address. The CrowdSec Bans dashboard in Grafana uses this history. The logs keep it for the cluster log retention period."
+        "pull_community_blocklist_tips": "When enabled, CrowdSec can block IP addresses received from the community blocklist."
     },
     "unban": {
         "title": "Banned IP",

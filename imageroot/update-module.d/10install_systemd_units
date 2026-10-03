@@ -10,4 +10,4 @@ install-systemd-units
 # enable the Threat Shield timer only if there is a subscription
 sync-threat-shield-timer
 
-sync-export-alerts-timer
+systemctl enable --now "${MODULE_ID}-export-alerts.timer"
