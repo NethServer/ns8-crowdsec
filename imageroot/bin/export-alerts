@@ -42,7 +42,7 @@ SERVICES = [
     ("nethvoice", ("nethvoice",)),
     ("nextcloud", ("nextcloud",)),
     ("ssh", ("ssh",)),
-    ("mail", ("dovecot", "postfix", "smtp", "imap", "pop3")),
+    ("mail", ("dovecot", "postfix", "postscreen", "smtp", "imap", "pop3")),
     ("database", ("mariadb", "mysql", "pgsql")),
     ("ftp", ("ftp",)),
     ("http", ("http", "cve", "wordpress", "log4j", "spring4shell", "thinkphp",
