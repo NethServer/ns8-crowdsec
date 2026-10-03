@@ -39,21 +39,6 @@ TS_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
 # AS names come from the GeoIP database, written by network registrants.
 AS_NAME_DROP_RE = re.compile(r"[^\w .,&'()/+-]")
 
-# First match wins, tested against the scenario name without its author.
-SERVICES = [
-    ("sip", ("kamailio", "asterisk", "sip")),
-    ("nethvoice", ("nethvoice",)),
-    ("nextcloud", ("nextcloud",)),
-    ("ssh", ("ssh",)),
-    ("mail", ("dovecot", "postfix", "postscreen", "smtp", "imap", "pop3")),
-    ("database", ("mariadb", "mysql", "pgsql")),
-    ("ftp", ("ftp",)),
-    ("http", ("http", "cve", "wordpress", "log4j", "spring4shell", "thinkphp",
-              "jira", "grafana", "vmware", "fortinet", "f5-big-ip", "pulse-secure",
-              "netgear", "w00tw00t", "nginx", "apache")),
-]
-
-
 class InvalidAlert(ValueError):
     pass
 
@@ -63,13 +48,8 @@ def log(level, message):
     print(f"<{level}>{message}", file=sys.stderr, flush=True)
 
 
-def service_of(scenario, label=None):
-    # The name covers the common cases; the scenario's own service label covers the rest of the hub.
-    for text in (scenario.rsplit("/", 1)[-1].lower(), (label or "").lower()):
-        for service, keywords in SERVICES:
-            if any(k in text for k in keywords):
-                return service
-    return label.lower() if label and SERVICE_RE.match(label) else "other"
+def service_of(label):
+    return label.lower() if isinstance(label, str) and SERVICE_RE.match(label) else "other"
 
 
 def scenario_labels():
@@ -84,7 +64,7 @@ def scenario_labels():
         return {d["name"]: d["labels"]["service"] for d in docs
                 if isinstance(d, dict) and isinstance(d.get("labels"), dict) and isinstance(d["labels"].get("service"), str)}
     except (subprocess.CalledProcessError, yaml.YAMLError, KeyError, TypeError) as err:
-        log(4, f"cannot read the scenario labels, services fall back to the scenario name: {err}")
+        log(4, f"cannot read the scenario labels, every service is other: {err}")
         return {}
 
 
@@ -101,6 +81,11 @@ def as_name_of(value):
         return None
     value = " ".join(AS_NAME_DROP_RE.sub("", value).split())[:64]
     return value or None
+
+
+def load_labels(path):
+    with open(path) as fp:
+        return json.load(fp)
 
 
 def to_line(alert, labels=None):
@@ -134,7 +119,7 @@ def to_line(alert, labels=None):
         "asn": int(asn) if isinstance(asn, str) and ASN_RE.match(asn) and int(asn) > 0 else None,
         "as_name": as_name_of(source.get("as_name")),
         "scenario": scenario,
-        "service": service_of(scenario, (labels or {}).get(scenario)),
+        "service": service_of((labels or {}).get(scenario)),
         "lat": lat,
         "lon": lon,
     }
@@ -180,6 +165,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true", help="print the lines, keep the cursor untouched")
     parser.add_argument("--input", help="read the alerts JSON from this file instead of cscli")
+    parser.add_argument("--labels", help="read the scenario service labels from this JSON file instead of the container")
     parser.add_argument("--cursor", type=int, help="export alerts newer than this id, ignoring the cursor file")
     args = parser.parse_args()
 
@@ -219,7 +205,7 @@ def main():
     new = sorted((a for a in alerts if isinstance(a.get("id"), int) and a["id"] > cursor["alert_id"]),
                  key=lambda a: a["id"])
     try:
-        labels = scenario_labels() if new and not args.input else {}
+        labels = load_labels(args.labels) if args.labels else (scenario_labels() if new else {})
         lines = [json.dumps(to_line(a, labels), separators=(",", ":")) for a in new if is_ban(a)]
     except InvalidAlert as err:
         # Fail closed: nothing is emitted and the cursor stays, so the next run retries.

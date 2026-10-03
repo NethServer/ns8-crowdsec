@@ -3555,23 +3555,21 @@
         "options": []
       },
       {
-        "label": "Service",
+        "label": "Service (regex)",
         "name": "service",
-        "type": "custom",
-        "multi": true,
-        "includeAll": true,
-        "allValue": ".*",
-        "allowCustomValue": true,
-        "query": "ssh,http,mail,sip,nethvoice,nextcloud,database,ftp,other",
+        "type": "textbox",
+        "query": ".*",
         "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": ".*",
+          "value": ".*"
         },
-        "options": []
+        "options": [
+          {
+            "selected": true,
+            "text": ".*",
+            "value": ".*"
+          }
+        ]
       },
       {
         "label": "Country (ISO code, regex)",

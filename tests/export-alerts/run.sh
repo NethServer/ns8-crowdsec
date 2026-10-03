@@ -19,7 +19,7 @@ export MODULE_ID=crowdsec-test
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
 # Allowlisted fields only, sorted by id, non-ban and already exported alerts skipped.
-"${script}" --input "${here}/alerts.json" --cursor 40 --dry-run 2>/dev/null >out.jsonl
+"${script}" --input "${here}/alerts.json" --labels "${here}/labels.json" --cursor 40 --dry-run 2>/dev/null >out.jsonl
 diff -u "${here}/expected.jsonl" out.jsonl || fail "output differs from expected.jsonl"
 
 # No attacker-controlled text may leave the LAPI.
