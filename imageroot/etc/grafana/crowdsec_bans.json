@@ -63,7 +63,7 @@
       "gridPos": {
         "x": 0,
         "y": 2,
-        "w": 5,
+        "w": 4,
         "h": 4
       },
       "targets": [
@@ -105,6 +105,119 @@
       }
     },
     {
+      "id": 16,
+      "type": "stat",
+      "title": "Vs previous period",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": ""
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [$__range] offset $__range))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 0,
+          "noValue": "-",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.25
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "description": "Change in the number of bans compared with the same length of time just before the selected range.",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "binary",
+            "alias": "diff",
+            "binary": {
+              "left": "Value #A",
+              "operator": "-",
+              "right": "Value #B"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "binary",
+            "alias": "change",
+            "binary": {
+              "left": "diff",
+              "operator": "/",
+              "right": "Value #B"
+            },
+            "replaceFields": true
+          }
+        }
+      ]
+    },
+    {
       "id": 3,
       "type": "stat",
       "title": "Repeat IPs",
@@ -113,9 +226,9 @@
         "uid": "${datasource}"
       },
       "gridPos": {
-        "x": 5,
+        "x": 8,
         "y": 2,
-        "w": 5,
+        "w": 4,
         "h": 4
       },
       "targets": [
@@ -165,9 +278,9 @@
         "uid": "${datasource}"
       },
       "gridPos": {
-        "x": 10,
+        "x": 12,
         "y": 2,
-        "w": 5,
+        "w": 4,
         "h": 4
       },
       "targets": [
@@ -217,9 +330,9 @@
         "uid": "${datasource}"
       },
       "gridPos": {
-        "x": 15,
+        "x": 16,
         "y": 2,
-        "w": 5,
+        "w": 4,
         "h": 4
       },
       "targets": [
@@ -1759,7 +1872,7 @@
       "gridPos": {
         "x": 0,
         "y": 47,
-        "w": 24,
+        "w": 16,
         "h": 10
       },
       "targets": [
@@ -2659,6 +2772,159 @@
             ]
           }
         ]
+      }
+    },
+    {
+      "id": 18,
+      "type": "barchart",
+      "title": "Ban durations",
+      "description": "Number of bans for each ban length. With the dynamic ban time, an IP that comes back gets a longer ban.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 47,
+        "w": 8,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "",
+          "expr": "sum by (bucket) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" | ban_minutes!=\"\" | label_format bucket=`{{ $m := int .ban_minutes }}{{ if lt $m 60 }}60{{ else if lt $m 240 }}240{{ else if lt $m 720 }}720{{ else if lt $m 1440 }}1440{{ else if lt $m 10080 }}10080{{ else }}99999{{ end }}` [$__range]))"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "bucket",
+                "destinationType": "number"
+              }
+            ],
+            "fields": {}
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "bucket",
+                "desc": false
+              }
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value #A": "Bans"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 1
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bucket"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Ban length"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "60": {
+                        "text": "< 1h",
+                        "index": 0
+                      },
+                      "240": {
+                        "text": "1-4h",
+                        "index": 1
+                      },
+                      "720": {
+                        "text": "4-12h",
+                        "index": 2
+                      },
+                      "1440": {
+                        "text": "12-24h",
+                        "index": 3
+                      },
+                      "10080": {
+                        "text": "1-7 days",
+                        "index": 4
+                      },
+                      "99999": {
+                        "text": "> 7 days",
+                        "index": 5
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "xField": "bucket",
+        "orientation": "vertical",
+        "showValue": "auto",
+        "barWidth": 0.8,
+        "xTickLabelRotation": 0,
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       }
     },
     {
