@@ -211,7 +211,7 @@
     {
       "id": 5,
       "type": "stat",
-      "title": "Autonomous systems",
+      "title": "Providers",
       "datasource": {
         "type": "loki",
         "uid": "${datasource}"
@@ -1482,7 +1482,7 @@
     {
       "id": 11,
       "type": "bargauge",
-      "title": "Top autonomous systems",
+      "title": "Top providers",
       "datasource": {
         "type": "loki",
         "uid": "${datasource}"

@@ -1,6 +1,0 @@
-{
-  "crowdsecurity/ssh-bf": "ssh",
-  "crowdsecurity/http-probing": "http",
-  "crowdsecurity/postfix-spam": "postfix",
-  "nethserver/kamailio-bf": "bad label!"
-}

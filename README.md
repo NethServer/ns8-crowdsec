@@ -232,7 +232,7 @@ Once done you need to accept inside the website the `Instance enroll request`
 
 ## Ban analytics in Grafana
 
-When the Metrics and Loki modules are installed, the `CrowdSec Bans` dashboard shows where local bans come from: a world map, bans over time, top countries, top autonomous systems, services, scenarios, and the IPs banned most often. Click an IP to show only its bans. The `CrowdSec` variable switches between all instances of the cluster and a single one.
+When the Metrics and Loki modules are installed, the `CrowdSec Bans` dashboard shows where local bans come from: a world map, bans over time, top countries, top providers, services, scenarios, and the IPs banned most often. Click an IP to show only its bans. The `CrowdSec` variable switches between all instances of the cluster and a single one.
 
 Every 5 minutes, the `crowdsec1-export-alerts.timer` writes one JSON line per new local ban to the journal, and Loki keeps it for the cluster log retention period:
 
@@ -301,10 +301,6 @@ With the upgrade the service `crowdsec-firewall-bouncer` has been stopped but no
 ## Running tests locally
 
 This module uses the NS8 standard testing infrastructure. For instructions on how to run the test suite locally, refer to the [Running tests locally](https://github.com/NethServer/ns8-github-actions/blob/v1/README.md#running-tests-locally) section of the ns8-github-actions repository.
-
-The bans export has a fixture test that needs only Python 3 and `jq`:
-
-    tests/export-alerts/run.sh
 
 ## UI translation
 
