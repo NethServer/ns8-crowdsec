@@ -1340,7 +1340,7 @@
       "id": 15,
       "type": "timeseries",
       "title": "Bans per 24h",
-      "description": "Each point is the number of bans in the 24 hours before it. A banned IP that comes back counts again.",
+      "description": "Each point is the number of bans in the 24 hours before it. A banned IP that comes back counts again. With several CrowdSec instances, each one is a stacked area and the line is the total.",
       "datasource": {
         "type": "loki",
         "uid": "${datasource}"
@@ -1361,9 +1361,20 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
+          "expr": "sum by (module_id) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [24h]))",
+          "queryType": "range",
+          "legendFormat": "{{module_id}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
           "expr": "sum (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [24h]))",
           "queryType": "range",
-          "legendFormat": "Bans"
+          "legendFormat": "Total"
         }
       ],
       "fieldConfig": {
@@ -1371,29 +1382,64 @@
           "unit": "short",
           "decimals": 0,
           "color": {
-            "mode": "fixed",
-            "fixedColor": "red"
+            "mode": "palette-classic"
           },
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 15,
+            "lineWidth": 1,
+            "fillOpacity": 35,
             "showPoints": "never",
-            "axisSoftMin": 0
+            "axisSoftMin": 0,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
-          "showLegend": false,
+          "showLegend": true,
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "calcs": []
         },
         "tooltip": {
-          "mode": "single",
-          "sort": "none"
+          "mode": "multi",
+          "sort": "desc"
         }
       }
     },
