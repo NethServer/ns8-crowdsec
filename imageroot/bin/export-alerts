@@ -214,13 +214,16 @@ def main():
 
     new = sorted((a for a in alerts if isinstance(a.get("id"), int) and a["id"] > cursor["alert_id"]),
                  key=lambda a: a["id"])
-    try:
-        labels = scenario_labels() if new else {}
-        lines = [json.dumps(to_line(a, labels), separators=(",", ":")) for a in new if is_ban(a)]
-    except InvalidAlert as err:
-        # Fail closed: nothing is emitted and the cursor stays, so the next run retries.
-        log(3, f"export aborted, {err}")
-        return 1
+    labels = scenario_labels() if new else {}
+    lines = []
+    for a in new:
+        if not is_ban(a):
+            continue
+        try:
+            lines.append(json.dumps(to_line(a, labels), separators=(",", ":")))
+        except InvalidAlert as err:
+            # Skip it: retrying would block every later ban until the LAPI flushes this one.
+            log(4, f"alert skipped, {err}")
 
     for line in lines:
         print(line)
