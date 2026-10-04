@@ -1337,6 +1337,67 @@
       }
     },
     {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Bans per 24h",
+      "description": "Each point is the number of bans in the 24 hours before it. A banned IP that comes back counts again.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 24,
+        "h": 8
+      },
+      "interval": "5m",
+      "maxDataPoints": 200,
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [24h]))",
+          "queryType": "range",
+          "legendFormat": "Bans"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "showPoints": "never",
+            "axisSoftMin": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
       "id": 9,
       "type": "timeseries",
       "title": "Bans over time",
@@ -1346,7 +1407,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 20,
+        "y": 28,
         "w": 16,
         "h": 9
       },
@@ -1406,7 +1467,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 20,
+        "y": 28,
         "w": 8,
         "h": 9
       },
@@ -1489,7 +1550,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 29,
+        "y": 37,
         "w": 12,
         "h": 10
       },
@@ -1570,7 +1631,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 29,
+        "y": 37,
         "w": 12,
         "h": 10
       },
@@ -1651,7 +1712,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 39,
+        "y": 47,
         "w": 24,
         "h": 10
       },
@@ -2564,7 +2625,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 49,
+        "y": 57,
         "w": 24,
         "h": 10
       },
