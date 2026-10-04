@@ -1361,9 +1361,9 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "sum by (module_id) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [24h]))",
+          "expr": "sum by (module_id, node_id) (count_over_time({module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" [24h]))",
           "queryType": "range",
-          "legendFormat": "{{module_id}}"
+          "legendFormat": "{{module_id}} (node {{node_id}})"
         },
         {
           "refId": "B",
@@ -2683,7 +2683,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "{module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\"",
+          "expr": "{module_id=~\"$crowdsec\"} |= \"export-alerts\" | json SYSLOG_IDENTIFIER, MESSAGE | SYSLOG_IDENTIFIER=~\".+-export-alerts\" | line_format \"{{.MESSAGE}}\" | json | __error__=\"\" | v=\"2\" | country=~\"$country\" | service=~\"$service\" | ip=~\"$ip\" | label_format crowdsec=\"{{.module_id}} (node {{.node_id}})\"",
           "queryType": "range",
           "legendFormat": "",
           "maxLines": 200
@@ -2704,33 +2704,33 @@
           "options": {
             "includeByName": {
               "ts": true,
-              "module_id": true,
               "ip": true,
               "country": true,
               "asn": true,
               "as_name": true,
               "scenario": true,
-              "service": true
+              "service": true,
+              "crowdsec": true
             },
             "indexByName": {
               "ts": 0,
-              "module_id": 1,
               "ip": 2,
               "country": 3,
               "asn": 4,
               "as_name": 5,
               "service": 6,
-              "scenario": 7
+              "scenario": 7,
+              "crowdsec": 1
             },
             "renameByName": {
               "ts": "Time (UTC)",
-              "module_id": "CrowdSec",
               "ip": "IP",
               "country": "Country",
               "asn": "ASN",
               "as_name": "Provider",
               "service": "Service",
-              "scenario": "Scenario"
+              "scenario": "Scenario",
+              "crowdsec": "CrowdSec"
             }
           }
         },
@@ -2781,7 +2781,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 150
               }
             ]
           },
