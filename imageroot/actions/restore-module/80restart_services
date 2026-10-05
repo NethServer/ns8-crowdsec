@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+exec 1>&2 # never generate action output. Write to stderr instead.
+set -e
+
+# The restored database holds the old localhost machine password: removing the
+# credentials file makes the container register localhost again at start.
+rm -f crowdsec_config/local_api_credentials.yaml
+
+# The database was replaced under the running service, and the bouncer must
+# reload the restored API key.
+systemctl restart "${MODULE_ID}.service"
+systemctl restart "${MODULE_ID}-firewall-bouncer.service"
