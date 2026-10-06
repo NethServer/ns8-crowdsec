@@ -230,6 +230,16 @@ you can force the enrollment with another key
 
 Once done you need to accept inside the website the `Instance enroll request`
 
+## Ban analytics in Grafana
+
+When the Metrics and Loki modules are installed, the `CrowdSec Bans` dashboard shows where local bans come from: a world map per country, bans over time, top countries, top providers (AS number), scenarios, ban durations and the IPs banned most often. Click an IP to show only its bans. The `CrowdSec` variable switches between all instances of the cluster and a single one.
+
+The dashboard reads the line CrowdSec already logs for each ban, so history goes as far back as the cluster log retention (365 days by default). Nothing new is written:
+
+    (localhost/crowdsec) crowdsecurity/ssh-bf by ip 198.51.100.7 (FR/16276) : 4h ban on Ip 198.51.100.7
+
+Only bans decided by the local agent are counted. Bans from the community blocklist, the console, Threat Shield and `cscli decisions add` are left out. The banned IP address stays in Loki for the whole retention period, and anyone with Grafana access can read it.
+
 ## Uninstall
 
 To uninstall the instance:
