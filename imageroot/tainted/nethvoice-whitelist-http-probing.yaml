@@ -16,4 +16,6 @@ whitelist:
    - evt.Meta.http_status == '403' && evt.Meta.http_verb == 'GET' && evt.Meta.http_path contains '/freepbx/rest/migration'
    - evt.Meta.http_verb == 'GET' && evt.Meta.http_path contains '/janus/' # http code not provided
    - evt.Meta.http_status == '200' && evt.Meta.http_verb == 'GET' && evt.Meta.http_path contains '/webrest/astproxy/qmanager_qstats/'
+   - evt.Meta.http_status == '404' && evt.Meta.http_verb == 'GET' && evt.Meta.http_path startsWith '/admin/images/'
+   - evt.Meta.http_status == '404' && evt.Meta.http_verb == 'GET' && evt.Meta.http_path == '/admin/modules/userman/assets/js/adminPwdExpReminder.js'
    - evt.Meta.http_status == '403' && evt.Parsed.traefik_router_name matches '^nethvoice[0-9]+-middleware-cti-server-api-'
