@@ -3470,7 +3470,7 @@
       "id": 18,
       "type": "barchart",
       "title": "Ban durations",
-      "description": "Number of bans for each ban length. With the dynamic ban time, an IP that comes back gets a longer ban.",
+      "description": "Number of bans for each ban duration. With the dynamic ban time, an IP that comes back gets a longer ban.",
       "datasource": {
         "type": "loki",
         "uid": "${datasource}"
@@ -3577,7 +3577,7 @@
           "id": "organize",
           "options": {
             "renameByName": {
-              "Field": "Ban length",
+              "Field": "Ban duration",
               "Last *": "Bans"
             }
           }
@@ -3599,7 +3599,7 @@
         "overrides": []
       },
       "options": {
-        "xField": "Ban length",
+        "xField": "Ban duration",
         "orientation": "vertical",
         "showValue": "auto",
         "barWidth": 0.8,
@@ -3681,7 +3681,7 @@
               "country": "Country",
               "asn": "ASN",
               "scenario": "Scenario",
-              "duration": "Ban length"
+              "duration": "Ban duration"
             }
           }
         },
