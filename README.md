@@ -104,8 +104,8 @@ Show blocklists, entry counts, confidence and last update:
 
     api-cli run module/crowdsec1/list-threat-shield
 
-Check whether an address is blocked, including addresses inside a blocked
-network:
+Check whether an address is blocked by a Threat Shield blocklist (exact
+addresses only, see the known limitation below):
 
     api-cli run module/crowdsec1/search-threat-shield-decision --data '{"ip": "185.220.101.5"}'
 
