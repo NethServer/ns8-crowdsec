@@ -1,0 +1,3904 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Where local CrowdSec bans come from: countries, autonomous systems, scenarios, history",
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [
+        "crowdsec"
+      ],
+      "targetBlank": false,
+      "title": "CrowdSec Dashboards",
+      "tooltip": "",
+      "type": "dashboards",
+      "url": ""
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "",
+      "datasource": null,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "targets": [],
+      "options": {
+        "mode": "markdown",
+        "content": "Local bans only, no blocklists. Locations per country. Max 30 days per view. Click an IP to filter the dashboard."
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Bans",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 16,
+      "type": "stat",
+      "title": "Vs previous period",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": ""
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" [$__range] offset $__range))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 0,
+          "noValue": "-",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.25
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "description": "Change in the number of bans compared with the same length of time just before the selected range.",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "binary",
+            "alias": "diff",
+            "binary": {
+              "left": "Value #A",
+              "operator": "-",
+              "right": "Value #B"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "binary",
+            "alias": "change",
+            "binary": {
+              "left": "diff",
+              "operator": "/",
+              "right": "Value #B"
+            },
+            "replaceFields": true
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Repeat IPs",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "count(sum by (ip) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" [$__range])) > 1)",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Countries",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "count(sum by (country) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | country!=\"\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Providers",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "count(sum by (asn) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | asn!=\"\" | asn!=\"0\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Banned by",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "count(sum by (module_id) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: CrowdSec",
+          "noValue": "0",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "type": "geomap",
+      "title": "Ban origins",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 16,
+        "h": 14
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (country) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | country!=\"\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              },
+              {
+                "color": "dark-orange",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 20
+              },
+              {
+                "color": "dark-red",
+                "value": 50
+              }
+            ]
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "view": {
+          "id": "zero",
+          "lat": 20,
+          "lon": 0,
+          "zoom": 1.6,
+          "allLayers": true
+        },
+        "controls": {
+          "showZoom": true,
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showScale": false,
+          "showMeasure": false,
+          "showDebug": false
+        },
+        "basemap": {
+          "type": "osm-standard",
+          "name": "OpenStreetMap",
+          "config": {}
+        },
+        "tooltip": {
+          "mode": "details"
+        },
+        "layers": [
+          {
+            "type": "markers",
+            "name": "Bans",
+            "tooltip": true,
+            "location": {
+              "mode": "lookup",
+              "lookup": "country",
+              "gazetteer": "public/gazetteer/countries.json"
+            },
+            "config": {
+              "showLegend": true,
+              "style": {
+                "color": {
+                  "field": "Value #A",
+                  "fixed": "dark-red"
+                },
+                "opacity": 0.75,
+                "size": {
+                  "field": "Value #A",
+                  "fixed": 5,
+                  "max": 30,
+                  "min": 6
+                },
+                "symbol": {
+                  "fixed": "img/icons/marker/circle.svg",
+                  "mode": "fixed"
+                },
+                "symbolAlign": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                },
+                "text": {
+                  "fixed": "",
+                  "mode": "fixed"
+                },
+                "textConfig": {
+                  "fontSize": 12,
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "textAlign": "center",
+                  "textBaseline": "middle"
+                },
+                "rotation": {
+                  "fixed": 0,
+                  "max": 360,
+                  "min": -360,
+                  "mode": "mod"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": "bargauge",
+      "title": "Top countries",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 6,
+        "w": 8,
+        "h": 14
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "topk(10, sum by (country) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | country!=\"\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Value #A",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "valueMode": "text",
+        "showUnfilled": true,
+        "namePlacement": "left",
+        "sizing": "manual",
+        "minVizHeight": 16,
+        "maxVizHeight": 24,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true,
+          "limit": 10
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "displayName": "${__data.fields.country}"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "country"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "AD": {
+                        "text": "AD Andorra"
+                      },
+                      "AE": {
+                        "text": "AE United Arab Emirates"
+                      },
+                      "AF": {
+                        "text": "AF Afghanistan"
+                      },
+                      "AG": {
+                        "text": "AG Antigua and Barbuda"
+                      },
+                      "AI": {
+                        "text": "AI Anguilla"
+                      },
+                      "AL": {
+                        "text": "AL Albania"
+                      },
+                      "AM": {
+                        "text": "AM Armenia"
+                      },
+                      "AN": {
+                        "text": "AN Netherlands Antilles"
+                      },
+                      "AO": {
+                        "text": "AO Angola"
+                      },
+                      "AQ": {
+                        "text": "AQ Antarctica"
+                      },
+                      "AR": {
+                        "text": "AR Argentina"
+                      },
+                      "AS": {
+                        "text": "AS American Samoa"
+                      },
+                      "AT": {
+                        "text": "AT Austria"
+                      },
+                      "AU": {
+                        "text": "AU Australia"
+                      },
+                      "AW": {
+                        "text": "AW Aruba"
+                      },
+                      "AX": {
+                        "text": "AX Åland"
+                      },
+                      "AZ": {
+                        "text": "AZ Azerbaijan"
+                      },
+                      "BA": {
+                        "text": "BA Bosnia and Herzegovina"
+                      },
+                      "BB": {
+                        "text": "BB Barbados"
+                      },
+                      "BD": {
+                        "text": "BD Bangladesh"
+                      },
+                      "BE": {
+                        "text": "BE Belgium"
+                      },
+                      "BF": {
+                        "text": "BF Burkina Faso"
+                      },
+                      "BG": {
+                        "text": "BG Bulgaria"
+                      },
+                      "BH": {
+                        "text": "BH Bahrain"
+                      },
+                      "BI": {
+                        "text": "BI Burundi"
+                      },
+                      "BJ": {
+                        "text": "BJ Benin"
+                      },
+                      "BL": {
+                        "text": "BL Saint-Barthélemy"
+                      },
+                      "BM": {
+                        "text": "BM Bermuda"
+                      },
+                      "BN": {
+                        "text": "BN Brunei"
+                      },
+                      "BO": {
+                        "text": "BO Bolivia"
+                      },
+                      "BQ": {
+                        "text": "BQ Bonaire, Sint Eustatius, and Saba"
+                      },
+                      "BR": {
+                        "text": "BR Brazil"
+                      },
+                      "BS": {
+                        "text": "BS Bahamas"
+                      },
+                      "BT": {
+                        "text": "BT Bhutan"
+                      },
+                      "BV": {
+                        "text": "BV Bouvet Island"
+                      },
+                      "BW": {
+                        "text": "BW Botswana"
+                      },
+                      "BY": {
+                        "text": "BY Belarus"
+                      },
+                      "BZ": {
+                        "text": "BZ Belize"
+                      },
+                      "CA": {
+                        "text": "CA Canada"
+                      },
+                      "CC": {
+                        "text": "CC Cocos [Keeling] Islands"
+                      },
+                      "CD": {
+                        "text": "CD Congo [DRC]"
+                      },
+                      "CF": {
+                        "text": "CF Central African Republic"
+                      },
+                      "CG": {
+                        "text": "CG Congo [Republic]"
+                      },
+                      "CH": {
+                        "text": "CH Switzerland"
+                      },
+                      "CI": {
+                        "text": "CI Côte d'Ivoire"
+                      },
+                      "CK": {
+                        "text": "CK Cook Islands"
+                      },
+                      "CL": {
+                        "text": "CL Chile"
+                      },
+                      "CM": {
+                        "text": "CM Cameroon"
+                      },
+                      "CN": {
+                        "text": "CN China"
+                      },
+                      "CO": {
+                        "text": "CO Colombia"
+                      },
+                      "CR": {
+                        "text": "CR Costa Rica"
+                      },
+                      "CU": {
+                        "text": "CU Cuba"
+                      },
+                      "CV": {
+                        "text": "CV Cape Verde"
+                      },
+                      "CW": {
+                        "text": "CW Curaçao"
+                      },
+                      "CX": {
+                        "text": "CX Christmas Island"
+                      },
+                      "CY": {
+                        "text": "CY Cyprus"
+                      },
+                      "CZ": {
+                        "text": "CZ Czech Republic"
+                      },
+                      "DE": {
+                        "text": "DE Germany"
+                      },
+                      "DJ": {
+                        "text": "DJ Djibouti"
+                      },
+                      "DK": {
+                        "text": "DK Denmark"
+                      },
+                      "DM": {
+                        "text": "DM Dominica"
+                      },
+                      "DO": {
+                        "text": "DO Dominican Republic"
+                      },
+                      "DZ": {
+                        "text": "DZ Algeria"
+                      },
+                      "EC": {
+                        "text": "EC Ecuador"
+                      },
+                      "EE": {
+                        "text": "EE Estonia"
+                      },
+                      "EG": {
+                        "text": "EG Egypt"
+                      },
+                      "EH": {
+                        "text": "EH Western Sahara"
+                      },
+                      "ER": {
+                        "text": "ER Eritrea"
+                      },
+                      "ES": {
+                        "text": "ES Spain"
+                      },
+                      "ET": {
+                        "text": "ET Ethiopia"
+                      },
+                      "FI": {
+                        "text": "FI Finland"
+                      },
+                      "FJ": {
+                        "text": "FJ Fiji"
+                      },
+                      "FK": {
+                        "text": "FK Falkland Islands [Islas Malvinas]"
+                      },
+                      "FM": {
+                        "text": "FM Micronesia"
+                      },
+                      "FO": {
+                        "text": "FO Faroe Islands"
+                      },
+                      "FR": {
+                        "text": "FR France"
+                      },
+                      "GA": {
+                        "text": "GA Gabon"
+                      },
+                      "GB": {
+                        "text": "GB United Kingdom"
+                      },
+                      "GD": {
+                        "text": "GD Grenada"
+                      },
+                      "GE": {
+                        "text": "GE Georgia"
+                      },
+                      "GF": {
+                        "text": "GF French Guiana"
+                      },
+                      "GG": {
+                        "text": "GG Guernsey"
+                      },
+                      "GH": {
+                        "text": "GH Ghana"
+                      },
+                      "GI": {
+                        "text": "GI Gibraltar"
+                      },
+                      "GL": {
+                        "text": "GL Greenland"
+                      },
+                      "GM": {
+                        "text": "GM Gambia"
+                      },
+                      "GN": {
+                        "text": "GN Guinea"
+                      },
+                      "GP": {
+                        "text": "GP Guadeloupe"
+                      },
+                      "GQ": {
+                        "text": "GQ Equatorial Guinea"
+                      },
+                      "GR": {
+                        "text": "GR Greece"
+                      },
+                      "GS": {
+                        "text": "GS South Georgia and the South Sandwich Islands"
+                      },
+                      "GT": {
+                        "text": "GT Guatemala"
+                      },
+                      "GU": {
+                        "text": "GU Guam"
+                      },
+                      "GW": {
+                        "text": "GW Guinea-Bissau"
+                      },
+                      "GY": {
+                        "text": "GY Guyana"
+                      },
+                      "GZ": {
+                        "text": "GZ Gaza Strip"
+                      },
+                      "HK": {
+                        "text": "HK Hong Kong"
+                      },
+                      "HM": {
+                        "text": "HM Heard Island and McDonald Islands"
+                      },
+                      "HN": {
+                        "text": "HN Honduras"
+                      },
+                      "HR": {
+                        "text": "HR Croatia"
+                      },
+                      "HT": {
+                        "text": "HT Haiti"
+                      },
+                      "HU": {
+                        "text": "HU Hungary"
+                      },
+                      "ID": {
+                        "text": "ID Indonesia"
+                      },
+                      "IE": {
+                        "text": "IE Ireland"
+                      },
+                      "IL": {
+                        "text": "IL Israel"
+                      },
+                      "IM": {
+                        "text": "IM Isle of Man"
+                      },
+                      "IN": {
+                        "text": "IN India"
+                      },
+                      "IO": {
+                        "text": "IO British Indian Ocean Territory"
+                      },
+                      "IQ": {
+                        "text": "IQ Iraq"
+                      },
+                      "IR": {
+                        "text": "IR Iran"
+                      },
+                      "IS": {
+                        "text": "IS Iceland"
+                      },
+                      "IT": {
+                        "text": "IT Italy"
+                      },
+                      "JE": {
+                        "text": "JE Jersey"
+                      },
+                      "JM": {
+                        "text": "JM Jamaica"
+                      },
+                      "JO": {
+                        "text": "JO Jordan"
+                      },
+                      "JP": {
+                        "text": "JP Japan"
+                      },
+                      "KE": {
+                        "text": "KE Kenya"
+                      },
+                      "KG": {
+                        "text": "KG Kyrgyzstan"
+                      },
+                      "KH": {
+                        "text": "KH Cambodia"
+                      },
+                      "KI": {
+                        "text": "KI Kiribati"
+                      },
+                      "KM": {
+                        "text": "KM Comoros"
+                      },
+                      "KN": {
+                        "text": "KN Saint Kitts and Nevis"
+                      },
+                      "KP": {
+                        "text": "KP North Korea"
+                      },
+                      "KR": {
+                        "text": "KR South Korea"
+                      },
+                      "KW": {
+                        "text": "KW Kuwait"
+                      },
+                      "KY": {
+                        "text": "KY Cayman Islands"
+                      },
+                      "KZ": {
+                        "text": "KZ Kazakhstan"
+                      },
+                      "LA": {
+                        "text": "LA Laos"
+                      },
+                      "LB": {
+                        "text": "LB Lebanon"
+                      },
+                      "LC": {
+                        "text": "LC Saint Lucia"
+                      },
+                      "LI": {
+                        "text": "LI Liechtenstein"
+                      },
+                      "LK": {
+                        "text": "LK Sri Lanka"
+                      },
+                      "LR": {
+                        "text": "LR Liberia"
+                      },
+                      "LS": {
+                        "text": "LS Lesotho"
+                      },
+                      "LT": {
+                        "text": "LT Lithuania"
+                      },
+                      "LU": {
+                        "text": "LU Luxembourg"
+                      },
+                      "LV": {
+                        "text": "LV Latvia"
+                      },
+                      "LY": {
+                        "text": "LY Libya"
+                      },
+                      "MA": {
+                        "text": "MA Morocco"
+                      },
+                      "MC": {
+                        "text": "MC Monaco"
+                      },
+                      "MD": {
+                        "text": "MD Moldova"
+                      },
+                      "ME": {
+                        "text": "ME Montenegro"
+                      },
+                      "MF": {
+                        "text": "MF Saint Martin"
+                      },
+                      "MG": {
+                        "text": "MG Madagascar"
+                      },
+                      "MH": {
+                        "text": "MH Marshall Islands"
+                      },
+                      "MK": {
+                        "text": "MK Macedonia [FYROM]"
+                      },
+                      "ML": {
+                        "text": "ML Mali"
+                      },
+                      "MM": {
+                        "text": "MM Myanmar [Burma]"
+                      },
+                      "MN": {
+                        "text": "MN Mongolia"
+                      },
+                      "MO": {
+                        "text": "MO Macao"
+                      },
+                      "MP": {
+                        "text": "MP Northern Mariana Islands"
+                      },
+                      "MQ": {
+                        "text": "MQ Martinique"
+                      },
+                      "MR": {
+                        "text": "MR Mauritania"
+                      },
+                      "MS": {
+                        "text": "MS Montserrat"
+                      },
+                      "MT": {
+                        "text": "MT Malta"
+                      },
+                      "MU": {
+                        "text": "MU Mauritius"
+                      },
+                      "MV": {
+                        "text": "MV Maldives"
+                      },
+                      "MW": {
+                        "text": "MW Malawi"
+                      },
+                      "MX": {
+                        "text": "MX Mexico"
+                      },
+                      "MY": {
+                        "text": "MY Malaysia"
+                      },
+                      "MZ": {
+                        "text": "MZ Mozambique"
+                      },
+                      "NA": {
+                        "text": "NA Namibia"
+                      },
+                      "NC": {
+                        "text": "NC New Caledonia"
+                      },
+                      "NE": {
+                        "text": "NE Niger"
+                      },
+                      "NF": {
+                        "text": "NF Norfolk Island"
+                      },
+                      "NG": {
+                        "text": "NG Nigeria"
+                      },
+                      "NI": {
+                        "text": "NI Nicaragua"
+                      },
+                      "NL": {
+                        "text": "NL Netherlands"
+                      },
+                      "NO": {
+                        "text": "NO Norway"
+                      },
+                      "NP": {
+                        "text": "NP Nepal"
+                      },
+                      "NR": {
+                        "text": "NR Nauru"
+                      },
+                      "NU": {
+                        "text": "NU Niue"
+                      },
+                      "NZ": {
+                        "text": "NZ New Zealand"
+                      },
+                      "OM": {
+                        "text": "OM Oman"
+                      },
+                      "PA": {
+                        "text": "PA Panama"
+                      },
+                      "PE": {
+                        "text": "PE Peru"
+                      },
+                      "PF": {
+                        "text": "PF French Polynesia"
+                      },
+                      "PG": {
+                        "text": "PG Papua New Guinea"
+                      },
+                      "PH": {
+                        "text": "PH Philippines"
+                      },
+                      "PK": {
+                        "text": "PK Pakistan"
+                      },
+                      "PL": {
+                        "text": "PL Poland"
+                      },
+                      "PM": {
+                        "text": "PM Saint Pierre and Miquelon"
+                      },
+                      "PN": {
+                        "text": "PN Pitcairn Islands"
+                      },
+                      "PR": {
+                        "text": "PR Puerto Rico"
+                      },
+                      "PS": {
+                        "text": "PS Palestinian Territories"
+                      },
+                      "PT": {
+                        "text": "PT Portugal"
+                      },
+                      "PW": {
+                        "text": "PW Palau"
+                      },
+                      "PY": {
+                        "text": "PY Paraguay"
+                      },
+                      "QA": {
+                        "text": "QA Qatar"
+                      },
+                      "RE": {
+                        "text": "RE Réunion"
+                      },
+                      "RO": {
+                        "text": "RO Romania"
+                      },
+                      "RS": {
+                        "text": "RS Serbia"
+                      },
+                      "RU": {
+                        "text": "RU Russia"
+                      },
+                      "RW": {
+                        "text": "RW Rwanda"
+                      },
+                      "SA": {
+                        "text": "SA Saudi Arabia"
+                      },
+                      "SB": {
+                        "text": "SB Solomon Islands"
+                      },
+                      "SC": {
+                        "text": "SC Seychelles"
+                      },
+                      "SD": {
+                        "text": "SD Sudan"
+                      },
+                      "SE": {
+                        "text": "SE Sweden"
+                      },
+                      "SG": {
+                        "text": "SG Singapore"
+                      },
+                      "SH": {
+                        "text": "SH Saint Helena"
+                      },
+                      "SI": {
+                        "text": "SI Slovenia"
+                      },
+                      "SJ": {
+                        "text": "SJ Svalbard and Jan Mayen"
+                      },
+                      "SK": {
+                        "text": "SK Slovakia"
+                      },
+                      "SL": {
+                        "text": "SL Sierra Leone"
+                      },
+                      "SM": {
+                        "text": "SM San Marino"
+                      },
+                      "SN": {
+                        "text": "SN Senegal"
+                      },
+                      "SO": {
+                        "text": "SO Somalia"
+                      },
+                      "SR": {
+                        "text": "SR Suriname"
+                      },
+                      "ST": {
+                        "text": "ST São Tomé and Príncipe"
+                      },
+                      "SV": {
+                        "text": "SV El Salvador"
+                      },
+                      "SX": {
+                        "text": "SX Sint Maarten"
+                      },
+                      "SY": {
+                        "text": "SY Syria"
+                      },
+                      "SZ": {
+                        "text": "SZ Swaziland"
+                      },
+                      "TC": {
+                        "text": "TC Turks and Caicos Islands"
+                      },
+                      "TD": {
+                        "text": "TD Chad"
+                      },
+                      "TF": {
+                        "text": "TF French Southern Territories"
+                      },
+                      "TG": {
+                        "text": "TG Togo"
+                      },
+                      "TH": {
+                        "text": "TH Thailand"
+                      },
+                      "TJ": {
+                        "text": "TJ Tajikistan"
+                      },
+                      "TK": {
+                        "text": "TK Tokelau"
+                      },
+                      "TL": {
+                        "text": "TL Timor-Leste"
+                      },
+                      "TM": {
+                        "text": "TM Turkmenistan"
+                      },
+                      "TN": {
+                        "text": "TN Tunisia"
+                      },
+                      "TO": {
+                        "text": "TO Tonga"
+                      },
+                      "TR": {
+                        "text": "TR Turkey"
+                      },
+                      "TT": {
+                        "text": "TT Trinidad and Tobago"
+                      },
+                      "TV": {
+                        "text": "TV Tuvalu"
+                      },
+                      "TW": {
+                        "text": "TW Taiwan"
+                      },
+                      "TZ": {
+                        "text": "TZ Tanzania"
+                      },
+                      "UA": {
+                        "text": "UA Ukraine"
+                      },
+                      "UG": {
+                        "text": "UG Uganda"
+                      },
+                      "UM": {
+                        "text": "UM U.S. Minor Outlying Islands"
+                      },
+                      "US": {
+                        "text": "US United States"
+                      },
+                      "UY": {
+                        "text": "UY Uruguay"
+                      },
+                      "UZ": {
+                        "text": "UZ Uzbekistan"
+                      },
+                      "VA": {
+                        "text": "VA Vatican City"
+                      },
+                      "VC": {
+                        "text": "VC Saint Vincent and the Grenadines"
+                      },
+                      "VE": {
+                        "text": "VE Venezuela"
+                      },
+                      "VG": {
+                        "text": "VG British Virgin Islands"
+                      },
+                      "VI": {
+                        "text": "VI U.S. Virgin Islands"
+                      },
+                      "VN": {
+                        "text": "VN Vietnam"
+                      },
+                      "VU": {
+                        "text": "VU Vanuatu"
+                      },
+                      "WF": {
+                        "text": "WF Wallis and Futuna"
+                      },
+                      "WS": {
+                        "text": "WS Samoa"
+                      },
+                      "XK": {
+                        "text": "XK Kosovo"
+                      },
+                      "YE": {
+                        "text": "YE Yemen"
+                      },
+                      "YT": {
+                        "text": "YT Mayotte"
+                      },
+                      "ZA": {
+                        "text": "ZA South Africa"
+                      },
+                      "ZM": {
+                        "text": "ZM Zambia"
+                      },
+                      "ZW": {
+                        "text": "ZW Zimbabwe"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Bans per 24h",
+      "description": "Each point is the number of bans in the 24 hours before it. A banned IP that comes back counts again. With several CrowdSec instances, each one is a stacked area and the line is the total.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 24,
+        "h": 8
+      },
+      "interval": "5m",
+      "maxDataPoints": 200,
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (module_id, node_id) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" [24h]))",
+          "queryType": "range",
+          "legendFormat": "{{module_id}} (node {{node_id}})"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" [24h]))",
+          "queryType": "range",
+          "legendFormat": "Total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 35,
+            "showPoints": "never",
+            "axisSoftMin": 0,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Bans over time",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (scenario) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" [$__interval]))",
+          "queryType": "range",
+          "legendFormat": "{{scenario}}"
+        }
+      ],
+      "interval": "5m",
+      "maxDataPoints": 60,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "barAlignment": 0,
+            "showPoints": "never",
+            "axisSoftMin": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "bargauge",
+      "title": "Top providers",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 37,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "topk(10, sum by (asn) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | asn!=\"\" | asn!=\"0\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Value #A",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "valueMode": "text",
+        "showUnfilled": true,
+        "namePlacement": "left",
+        "sizing": "manual",
+        "minVizHeight": 16,
+        "maxVizHeight": 24,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true,
+          "limit": 10
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "displayName": "AS${__data.fields.asn}",
+          "links": [
+            {
+              "title": "Show this provider on bgp.he.net",
+              "url": "https://bgp.he.net/AS${__data.fields.asn}",
+              "targetBlank": true
+            }
+          ]
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 12,
+      "type": "bargauge",
+      "title": "Top scenarios",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 37,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "topk(10, sum by (scenario) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Value #A",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "valueMode": "text",
+        "showUnfilled": true,
+        "namePlacement": "left",
+        "sizing": "manual",
+        "minVizHeight": 16,
+        "maxVizHeight": 24,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true,
+          "limit": 10
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "displayName": "${__data.fields.scenario}"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 13,
+      "type": "table",
+      "title": "Most banned IPs",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 47,
+        "w": 16,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "topk(20, sum by (ip, country, asn) (count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "ip": 0,
+              "Value #A": 1,
+              "country": 2,
+              "asn": 3
+            },
+            "renameByName": {
+              "ip": "IP",
+              "Value #A": "Bans",
+              "country": "Country",
+              "asn": "ASN"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Bans",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "IP"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 260
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Show only this IP",
+                    "url": "/d/crowdsec-bans/crowdsec-bans?${__url_time_range}&${datasource:queryparam}&${crowdsec:queryparam}&${country:queryparam}&var-ip=${__value.raw}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Bans"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge",
+                  "mode": "basic",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-YlRd"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Country"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 180
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "AD": {
+                        "text": "AD Andorra"
+                      },
+                      "AE": {
+                        "text": "AE United Arab Emirates"
+                      },
+                      "AF": {
+                        "text": "AF Afghanistan"
+                      },
+                      "AG": {
+                        "text": "AG Antigua and Barbuda"
+                      },
+                      "AI": {
+                        "text": "AI Anguilla"
+                      },
+                      "AL": {
+                        "text": "AL Albania"
+                      },
+                      "AM": {
+                        "text": "AM Armenia"
+                      },
+                      "AN": {
+                        "text": "AN Netherlands Antilles"
+                      },
+                      "AO": {
+                        "text": "AO Angola"
+                      },
+                      "AQ": {
+                        "text": "AQ Antarctica"
+                      },
+                      "AR": {
+                        "text": "AR Argentina"
+                      },
+                      "AS": {
+                        "text": "AS American Samoa"
+                      },
+                      "AT": {
+                        "text": "AT Austria"
+                      },
+                      "AU": {
+                        "text": "AU Australia"
+                      },
+                      "AW": {
+                        "text": "AW Aruba"
+                      },
+                      "AX": {
+                        "text": "AX Åland"
+                      },
+                      "AZ": {
+                        "text": "AZ Azerbaijan"
+                      },
+                      "BA": {
+                        "text": "BA Bosnia and Herzegovina"
+                      },
+                      "BB": {
+                        "text": "BB Barbados"
+                      },
+                      "BD": {
+                        "text": "BD Bangladesh"
+                      },
+                      "BE": {
+                        "text": "BE Belgium"
+                      },
+                      "BF": {
+                        "text": "BF Burkina Faso"
+                      },
+                      "BG": {
+                        "text": "BG Bulgaria"
+                      },
+                      "BH": {
+                        "text": "BH Bahrain"
+                      },
+                      "BI": {
+                        "text": "BI Burundi"
+                      },
+                      "BJ": {
+                        "text": "BJ Benin"
+                      },
+                      "BL": {
+                        "text": "BL Saint-Barthélemy"
+                      },
+                      "BM": {
+                        "text": "BM Bermuda"
+                      },
+                      "BN": {
+                        "text": "BN Brunei"
+                      },
+                      "BO": {
+                        "text": "BO Bolivia"
+                      },
+                      "BQ": {
+                        "text": "BQ Bonaire, Sint Eustatius, and Saba"
+                      },
+                      "BR": {
+                        "text": "BR Brazil"
+                      },
+                      "BS": {
+                        "text": "BS Bahamas"
+                      },
+                      "BT": {
+                        "text": "BT Bhutan"
+                      },
+                      "BV": {
+                        "text": "BV Bouvet Island"
+                      },
+                      "BW": {
+                        "text": "BW Botswana"
+                      },
+                      "BY": {
+                        "text": "BY Belarus"
+                      },
+                      "BZ": {
+                        "text": "BZ Belize"
+                      },
+                      "CA": {
+                        "text": "CA Canada"
+                      },
+                      "CC": {
+                        "text": "CC Cocos [Keeling] Islands"
+                      },
+                      "CD": {
+                        "text": "CD Congo [DRC]"
+                      },
+                      "CF": {
+                        "text": "CF Central African Republic"
+                      },
+                      "CG": {
+                        "text": "CG Congo [Republic]"
+                      },
+                      "CH": {
+                        "text": "CH Switzerland"
+                      },
+                      "CI": {
+                        "text": "CI Côte d'Ivoire"
+                      },
+                      "CK": {
+                        "text": "CK Cook Islands"
+                      },
+                      "CL": {
+                        "text": "CL Chile"
+                      },
+                      "CM": {
+                        "text": "CM Cameroon"
+                      },
+                      "CN": {
+                        "text": "CN China"
+                      },
+                      "CO": {
+                        "text": "CO Colombia"
+                      },
+                      "CR": {
+                        "text": "CR Costa Rica"
+                      },
+                      "CU": {
+                        "text": "CU Cuba"
+                      },
+                      "CV": {
+                        "text": "CV Cape Verde"
+                      },
+                      "CW": {
+                        "text": "CW Curaçao"
+                      },
+                      "CX": {
+                        "text": "CX Christmas Island"
+                      },
+                      "CY": {
+                        "text": "CY Cyprus"
+                      },
+                      "CZ": {
+                        "text": "CZ Czech Republic"
+                      },
+                      "DE": {
+                        "text": "DE Germany"
+                      },
+                      "DJ": {
+                        "text": "DJ Djibouti"
+                      },
+                      "DK": {
+                        "text": "DK Denmark"
+                      },
+                      "DM": {
+                        "text": "DM Dominica"
+                      },
+                      "DO": {
+                        "text": "DO Dominican Republic"
+                      },
+                      "DZ": {
+                        "text": "DZ Algeria"
+                      },
+                      "EC": {
+                        "text": "EC Ecuador"
+                      },
+                      "EE": {
+                        "text": "EE Estonia"
+                      },
+                      "EG": {
+                        "text": "EG Egypt"
+                      },
+                      "EH": {
+                        "text": "EH Western Sahara"
+                      },
+                      "ER": {
+                        "text": "ER Eritrea"
+                      },
+                      "ES": {
+                        "text": "ES Spain"
+                      },
+                      "ET": {
+                        "text": "ET Ethiopia"
+                      },
+                      "FI": {
+                        "text": "FI Finland"
+                      },
+                      "FJ": {
+                        "text": "FJ Fiji"
+                      },
+                      "FK": {
+                        "text": "FK Falkland Islands [Islas Malvinas]"
+                      },
+                      "FM": {
+                        "text": "FM Micronesia"
+                      },
+                      "FO": {
+                        "text": "FO Faroe Islands"
+                      },
+                      "FR": {
+                        "text": "FR France"
+                      },
+                      "GA": {
+                        "text": "GA Gabon"
+                      },
+                      "GB": {
+                        "text": "GB United Kingdom"
+                      },
+                      "GD": {
+                        "text": "GD Grenada"
+                      },
+                      "GE": {
+                        "text": "GE Georgia"
+                      },
+                      "GF": {
+                        "text": "GF French Guiana"
+                      },
+                      "GG": {
+                        "text": "GG Guernsey"
+                      },
+                      "GH": {
+                        "text": "GH Ghana"
+                      },
+                      "GI": {
+                        "text": "GI Gibraltar"
+                      },
+                      "GL": {
+                        "text": "GL Greenland"
+                      },
+                      "GM": {
+                        "text": "GM Gambia"
+                      },
+                      "GN": {
+                        "text": "GN Guinea"
+                      },
+                      "GP": {
+                        "text": "GP Guadeloupe"
+                      },
+                      "GQ": {
+                        "text": "GQ Equatorial Guinea"
+                      },
+                      "GR": {
+                        "text": "GR Greece"
+                      },
+                      "GS": {
+                        "text": "GS South Georgia and the South Sandwich Islands"
+                      },
+                      "GT": {
+                        "text": "GT Guatemala"
+                      },
+                      "GU": {
+                        "text": "GU Guam"
+                      },
+                      "GW": {
+                        "text": "GW Guinea-Bissau"
+                      },
+                      "GY": {
+                        "text": "GY Guyana"
+                      },
+                      "GZ": {
+                        "text": "GZ Gaza Strip"
+                      },
+                      "HK": {
+                        "text": "HK Hong Kong"
+                      },
+                      "HM": {
+                        "text": "HM Heard Island and McDonald Islands"
+                      },
+                      "HN": {
+                        "text": "HN Honduras"
+                      },
+                      "HR": {
+                        "text": "HR Croatia"
+                      },
+                      "HT": {
+                        "text": "HT Haiti"
+                      },
+                      "HU": {
+                        "text": "HU Hungary"
+                      },
+                      "ID": {
+                        "text": "ID Indonesia"
+                      },
+                      "IE": {
+                        "text": "IE Ireland"
+                      },
+                      "IL": {
+                        "text": "IL Israel"
+                      },
+                      "IM": {
+                        "text": "IM Isle of Man"
+                      },
+                      "IN": {
+                        "text": "IN India"
+                      },
+                      "IO": {
+                        "text": "IO British Indian Ocean Territory"
+                      },
+                      "IQ": {
+                        "text": "IQ Iraq"
+                      },
+                      "IR": {
+                        "text": "IR Iran"
+                      },
+                      "IS": {
+                        "text": "IS Iceland"
+                      },
+                      "IT": {
+                        "text": "IT Italy"
+                      },
+                      "JE": {
+                        "text": "JE Jersey"
+                      },
+                      "JM": {
+                        "text": "JM Jamaica"
+                      },
+                      "JO": {
+                        "text": "JO Jordan"
+                      },
+                      "JP": {
+                        "text": "JP Japan"
+                      },
+                      "KE": {
+                        "text": "KE Kenya"
+                      },
+                      "KG": {
+                        "text": "KG Kyrgyzstan"
+                      },
+                      "KH": {
+                        "text": "KH Cambodia"
+                      },
+                      "KI": {
+                        "text": "KI Kiribati"
+                      },
+                      "KM": {
+                        "text": "KM Comoros"
+                      },
+                      "KN": {
+                        "text": "KN Saint Kitts and Nevis"
+                      },
+                      "KP": {
+                        "text": "KP North Korea"
+                      },
+                      "KR": {
+                        "text": "KR South Korea"
+                      },
+                      "KW": {
+                        "text": "KW Kuwait"
+                      },
+                      "KY": {
+                        "text": "KY Cayman Islands"
+                      },
+                      "KZ": {
+                        "text": "KZ Kazakhstan"
+                      },
+                      "LA": {
+                        "text": "LA Laos"
+                      },
+                      "LB": {
+                        "text": "LB Lebanon"
+                      },
+                      "LC": {
+                        "text": "LC Saint Lucia"
+                      },
+                      "LI": {
+                        "text": "LI Liechtenstein"
+                      },
+                      "LK": {
+                        "text": "LK Sri Lanka"
+                      },
+                      "LR": {
+                        "text": "LR Liberia"
+                      },
+                      "LS": {
+                        "text": "LS Lesotho"
+                      },
+                      "LT": {
+                        "text": "LT Lithuania"
+                      },
+                      "LU": {
+                        "text": "LU Luxembourg"
+                      },
+                      "LV": {
+                        "text": "LV Latvia"
+                      },
+                      "LY": {
+                        "text": "LY Libya"
+                      },
+                      "MA": {
+                        "text": "MA Morocco"
+                      },
+                      "MC": {
+                        "text": "MC Monaco"
+                      },
+                      "MD": {
+                        "text": "MD Moldova"
+                      },
+                      "ME": {
+                        "text": "ME Montenegro"
+                      },
+                      "MF": {
+                        "text": "MF Saint Martin"
+                      },
+                      "MG": {
+                        "text": "MG Madagascar"
+                      },
+                      "MH": {
+                        "text": "MH Marshall Islands"
+                      },
+                      "MK": {
+                        "text": "MK Macedonia [FYROM]"
+                      },
+                      "ML": {
+                        "text": "ML Mali"
+                      },
+                      "MM": {
+                        "text": "MM Myanmar [Burma]"
+                      },
+                      "MN": {
+                        "text": "MN Mongolia"
+                      },
+                      "MO": {
+                        "text": "MO Macao"
+                      },
+                      "MP": {
+                        "text": "MP Northern Mariana Islands"
+                      },
+                      "MQ": {
+                        "text": "MQ Martinique"
+                      },
+                      "MR": {
+                        "text": "MR Mauritania"
+                      },
+                      "MS": {
+                        "text": "MS Montserrat"
+                      },
+                      "MT": {
+                        "text": "MT Malta"
+                      },
+                      "MU": {
+                        "text": "MU Mauritius"
+                      },
+                      "MV": {
+                        "text": "MV Maldives"
+                      },
+                      "MW": {
+                        "text": "MW Malawi"
+                      },
+                      "MX": {
+                        "text": "MX Mexico"
+                      },
+                      "MY": {
+                        "text": "MY Malaysia"
+                      },
+                      "MZ": {
+                        "text": "MZ Mozambique"
+                      },
+                      "NA": {
+                        "text": "NA Namibia"
+                      },
+                      "NC": {
+                        "text": "NC New Caledonia"
+                      },
+                      "NE": {
+                        "text": "NE Niger"
+                      },
+                      "NF": {
+                        "text": "NF Norfolk Island"
+                      },
+                      "NG": {
+                        "text": "NG Nigeria"
+                      },
+                      "NI": {
+                        "text": "NI Nicaragua"
+                      },
+                      "NL": {
+                        "text": "NL Netherlands"
+                      },
+                      "NO": {
+                        "text": "NO Norway"
+                      },
+                      "NP": {
+                        "text": "NP Nepal"
+                      },
+                      "NR": {
+                        "text": "NR Nauru"
+                      },
+                      "NU": {
+                        "text": "NU Niue"
+                      },
+                      "NZ": {
+                        "text": "NZ New Zealand"
+                      },
+                      "OM": {
+                        "text": "OM Oman"
+                      },
+                      "PA": {
+                        "text": "PA Panama"
+                      },
+                      "PE": {
+                        "text": "PE Peru"
+                      },
+                      "PF": {
+                        "text": "PF French Polynesia"
+                      },
+                      "PG": {
+                        "text": "PG Papua New Guinea"
+                      },
+                      "PH": {
+                        "text": "PH Philippines"
+                      },
+                      "PK": {
+                        "text": "PK Pakistan"
+                      },
+                      "PL": {
+                        "text": "PL Poland"
+                      },
+                      "PM": {
+                        "text": "PM Saint Pierre and Miquelon"
+                      },
+                      "PN": {
+                        "text": "PN Pitcairn Islands"
+                      },
+                      "PR": {
+                        "text": "PR Puerto Rico"
+                      },
+                      "PS": {
+                        "text": "PS Palestinian Territories"
+                      },
+                      "PT": {
+                        "text": "PT Portugal"
+                      },
+                      "PW": {
+                        "text": "PW Palau"
+                      },
+                      "PY": {
+                        "text": "PY Paraguay"
+                      },
+                      "QA": {
+                        "text": "QA Qatar"
+                      },
+                      "RE": {
+                        "text": "RE Réunion"
+                      },
+                      "RO": {
+                        "text": "RO Romania"
+                      },
+                      "RS": {
+                        "text": "RS Serbia"
+                      },
+                      "RU": {
+                        "text": "RU Russia"
+                      },
+                      "RW": {
+                        "text": "RW Rwanda"
+                      },
+                      "SA": {
+                        "text": "SA Saudi Arabia"
+                      },
+                      "SB": {
+                        "text": "SB Solomon Islands"
+                      },
+                      "SC": {
+                        "text": "SC Seychelles"
+                      },
+                      "SD": {
+                        "text": "SD Sudan"
+                      },
+                      "SE": {
+                        "text": "SE Sweden"
+                      },
+                      "SG": {
+                        "text": "SG Singapore"
+                      },
+                      "SH": {
+                        "text": "SH Saint Helena"
+                      },
+                      "SI": {
+                        "text": "SI Slovenia"
+                      },
+                      "SJ": {
+                        "text": "SJ Svalbard and Jan Mayen"
+                      },
+                      "SK": {
+                        "text": "SK Slovakia"
+                      },
+                      "SL": {
+                        "text": "SL Sierra Leone"
+                      },
+                      "SM": {
+                        "text": "SM San Marino"
+                      },
+                      "SN": {
+                        "text": "SN Senegal"
+                      },
+                      "SO": {
+                        "text": "SO Somalia"
+                      },
+                      "SR": {
+                        "text": "SR Suriname"
+                      },
+                      "ST": {
+                        "text": "ST São Tomé and Príncipe"
+                      },
+                      "SV": {
+                        "text": "SV El Salvador"
+                      },
+                      "SX": {
+                        "text": "SX Sint Maarten"
+                      },
+                      "SY": {
+                        "text": "SY Syria"
+                      },
+                      "SZ": {
+                        "text": "SZ Swaziland"
+                      },
+                      "TC": {
+                        "text": "TC Turks and Caicos Islands"
+                      },
+                      "TD": {
+                        "text": "TD Chad"
+                      },
+                      "TF": {
+                        "text": "TF French Southern Territories"
+                      },
+                      "TG": {
+                        "text": "TG Togo"
+                      },
+                      "TH": {
+                        "text": "TH Thailand"
+                      },
+                      "TJ": {
+                        "text": "TJ Tajikistan"
+                      },
+                      "TK": {
+                        "text": "TK Tokelau"
+                      },
+                      "TL": {
+                        "text": "TL Timor-Leste"
+                      },
+                      "TM": {
+                        "text": "TM Turkmenistan"
+                      },
+                      "TN": {
+                        "text": "TN Tunisia"
+                      },
+                      "TO": {
+                        "text": "TO Tonga"
+                      },
+                      "TR": {
+                        "text": "TR Turkey"
+                      },
+                      "TT": {
+                        "text": "TT Trinidad and Tobago"
+                      },
+                      "TV": {
+                        "text": "TV Tuvalu"
+                      },
+                      "TW": {
+                        "text": "TW Taiwan"
+                      },
+                      "TZ": {
+                        "text": "TZ Tanzania"
+                      },
+                      "UA": {
+                        "text": "UA Ukraine"
+                      },
+                      "UG": {
+                        "text": "UG Uganda"
+                      },
+                      "UM": {
+                        "text": "UM U.S. Minor Outlying Islands"
+                      },
+                      "US": {
+                        "text": "US United States"
+                      },
+                      "UY": {
+                        "text": "UY Uruguay"
+                      },
+                      "UZ": {
+                        "text": "UZ Uzbekistan"
+                      },
+                      "VA": {
+                        "text": "VA Vatican City"
+                      },
+                      "VC": {
+                        "text": "VC Saint Vincent and the Grenadines"
+                      },
+                      "VE": {
+                        "text": "VE Venezuela"
+                      },
+                      "VG": {
+                        "text": "VG British Virgin Islands"
+                      },
+                      "VI": {
+                        "text": "VI U.S. Virgin Islands"
+                      },
+                      "VN": {
+                        "text": "VN Vietnam"
+                      },
+                      "VU": {
+                        "text": "VU Vanuatu"
+                      },
+                      "WF": {
+                        "text": "WF Wallis and Futuna"
+                      },
+                      "WS": {
+                        "text": "WS Samoa"
+                      },
+                      "XK": {
+                        "text": "XK Kosovo"
+                      },
+                      "YE": {
+                        "text": "YE Yemen"
+                      },
+                      "YT": {
+                        "text": "YT Mayotte"
+                      },
+                      "ZA": {
+                        "text": "ZA South Africa"
+                      },
+                      "ZM": {
+                        "text": "ZM Zambia"
+                      },
+                      "ZW": {
+                        "text": "ZW Zimbabwe"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ASN"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": ""
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 18,
+      "type": "barchart",
+      "title": "Ban durations",
+      "description": "Number of bans for each ban length. With the dynamic ban time, an IP that comes back gets a longer ban.",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 47,
+        "w": 8,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "< 1h",
+          "expr": "sum(count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | duration < 1h [$__range]))"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "1-4h",
+          "expr": "sum(count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | duration >= 1h and duration < 4h [$__range]))"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "4-12h",
+          "expr": "sum(count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | duration >= 4h and duration < 12h [$__range]))"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "12-24h",
+          "expr": "sum(count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | duration >= 12h and duration < 24h [$__range]))"
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "1-7 days",
+          "expr": "sum(count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | duration >= 24h and duration < 168h [$__range]))"
+        },
+        {
+          "refId": "F",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "queryType": "instant",
+          "legendFormat": "> 7 days",
+          "expr": "sum(count_over_time({module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | duration >= 168h [$__range]))"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "lastNotNull"
+            ],
+            "mode": "seriesToRows",
+            "includeTimeField": false
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Field": "Ban length",
+              "Last *": "Bans"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 1
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "Ban length",
+        "orientation": "vertical",
+        "showValue": "auto",
+        "barWidth": 0.8,
+        "xTickLabelRotation": 0,
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "type": "table",
+      "title": "Latest bans",
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 57,
+        "w": 24,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "{module_id=~\"$crowdsec\"} |= \"/crowdsec) \" |= \" ban on \" | json MESSAGE | line_format \"{{.MESSAGE}}\" | regexp `msg=\"\\([^/)]*/crowdsec\\) (?P<scenario>\\S+)(?: for \\d+/\\d+ decisions)? by (?:ip|range) \\S+(?: \\((?P<country>[A-Z]*)(?:/(?P<asn>\\d+))?\\))? : (?P<duration>\\d[\\dhms.]*) ban on (?:Ip|Range) (?P<ip>[^\"\\s]+)\"` | ip!=\"\" | country=~\"$country\" | ip=~\"$ip\" | label_format crowdsec=\"{{.module_id}} (node {{.node_id}})\"",
+          "queryType": "range",
+          "legendFormat": "",
+          "maxLines": 200
+        }
+      ],
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels",
+            "format": "json",
+            "replace": true,
+            "keepTime": true
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "includeByName": {
+              "Time": true,
+              "crowdsec": true,
+              "ip": true,
+              "country": true,
+              "asn": true,
+              "scenario": true,
+              "duration": true
+            },
+            "indexByName": {
+              "Time": 0,
+              "crowdsec": 1,
+              "ip": 2,
+              "country": 3,
+              "asn": 4,
+              "scenario": 5,
+              "duration": 6
+            },
+            "renameByName": {
+              "Time": "Time",
+              "crowdsec": "CrowdSec",
+              "ip": "IP",
+              "country": "Country",
+              "asn": "ASN",
+              "scenario": "Scenario",
+              "duration": "Ban length"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Time",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 190
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CrowdSec"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "IP"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Show only this IP",
+                    "url": "/d/crowdsec-bans/crowdsec-bans?${__url_time_range}&${datasource:queryparam}&${crowdsec:queryparam}&${country:queryparam}&var-ip=${__value.raw}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Country"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 180
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "AD": {
+                        "text": "AD Andorra"
+                      },
+                      "AE": {
+                        "text": "AE United Arab Emirates"
+                      },
+                      "AF": {
+                        "text": "AF Afghanistan"
+                      },
+                      "AG": {
+                        "text": "AG Antigua and Barbuda"
+                      },
+                      "AI": {
+                        "text": "AI Anguilla"
+                      },
+                      "AL": {
+                        "text": "AL Albania"
+                      },
+                      "AM": {
+                        "text": "AM Armenia"
+                      },
+                      "AN": {
+                        "text": "AN Netherlands Antilles"
+                      },
+                      "AO": {
+                        "text": "AO Angola"
+                      },
+                      "AQ": {
+                        "text": "AQ Antarctica"
+                      },
+                      "AR": {
+                        "text": "AR Argentina"
+                      },
+                      "AS": {
+                        "text": "AS American Samoa"
+                      },
+                      "AT": {
+                        "text": "AT Austria"
+                      },
+                      "AU": {
+                        "text": "AU Australia"
+                      },
+                      "AW": {
+                        "text": "AW Aruba"
+                      },
+                      "AX": {
+                        "text": "AX Åland"
+                      },
+                      "AZ": {
+                        "text": "AZ Azerbaijan"
+                      },
+                      "BA": {
+                        "text": "BA Bosnia and Herzegovina"
+                      },
+                      "BB": {
+                        "text": "BB Barbados"
+                      },
+                      "BD": {
+                        "text": "BD Bangladesh"
+                      },
+                      "BE": {
+                        "text": "BE Belgium"
+                      },
+                      "BF": {
+                        "text": "BF Burkina Faso"
+                      },
+                      "BG": {
+                        "text": "BG Bulgaria"
+                      },
+                      "BH": {
+                        "text": "BH Bahrain"
+                      },
+                      "BI": {
+                        "text": "BI Burundi"
+                      },
+                      "BJ": {
+                        "text": "BJ Benin"
+                      },
+                      "BL": {
+                        "text": "BL Saint-Barthélemy"
+                      },
+                      "BM": {
+                        "text": "BM Bermuda"
+                      },
+                      "BN": {
+                        "text": "BN Brunei"
+                      },
+                      "BO": {
+                        "text": "BO Bolivia"
+                      },
+                      "BQ": {
+                        "text": "BQ Bonaire, Sint Eustatius, and Saba"
+                      },
+                      "BR": {
+                        "text": "BR Brazil"
+                      },
+                      "BS": {
+                        "text": "BS Bahamas"
+                      },
+                      "BT": {
+                        "text": "BT Bhutan"
+                      },
+                      "BV": {
+                        "text": "BV Bouvet Island"
+                      },
+                      "BW": {
+                        "text": "BW Botswana"
+                      },
+                      "BY": {
+                        "text": "BY Belarus"
+                      },
+                      "BZ": {
+                        "text": "BZ Belize"
+                      },
+                      "CA": {
+                        "text": "CA Canada"
+                      },
+                      "CC": {
+                        "text": "CC Cocos [Keeling] Islands"
+                      },
+                      "CD": {
+                        "text": "CD Congo [DRC]"
+                      },
+                      "CF": {
+                        "text": "CF Central African Republic"
+                      },
+                      "CG": {
+                        "text": "CG Congo [Republic]"
+                      },
+                      "CH": {
+                        "text": "CH Switzerland"
+                      },
+                      "CI": {
+                        "text": "CI Côte d'Ivoire"
+                      },
+                      "CK": {
+                        "text": "CK Cook Islands"
+                      },
+                      "CL": {
+                        "text": "CL Chile"
+                      },
+                      "CM": {
+                        "text": "CM Cameroon"
+                      },
+                      "CN": {
+                        "text": "CN China"
+                      },
+                      "CO": {
+                        "text": "CO Colombia"
+                      },
+                      "CR": {
+                        "text": "CR Costa Rica"
+                      },
+                      "CU": {
+                        "text": "CU Cuba"
+                      },
+                      "CV": {
+                        "text": "CV Cape Verde"
+                      },
+                      "CW": {
+                        "text": "CW Curaçao"
+                      },
+                      "CX": {
+                        "text": "CX Christmas Island"
+                      },
+                      "CY": {
+                        "text": "CY Cyprus"
+                      },
+                      "CZ": {
+                        "text": "CZ Czech Republic"
+                      },
+                      "DE": {
+                        "text": "DE Germany"
+                      },
+                      "DJ": {
+                        "text": "DJ Djibouti"
+                      },
+                      "DK": {
+                        "text": "DK Denmark"
+                      },
+                      "DM": {
+                        "text": "DM Dominica"
+                      },
+                      "DO": {
+                        "text": "DO Dominican Republic"
+                      },
+                      "DZ": {
+                        "text": "DZ Algeria"
+                      },
+                      "EC": {
+                        "text": "EC Ecuador"
+                      },
+                      "EE": {
+                        "text": "EE Estonia"
+                      },
+                      "EG": {
+                        "text": "EG Egypt"
+                      },
+                      "EH": {
+                        "text": "EH Western Sahara"
+                      },
+                      "ER": {
+                        "text": "ER Eritrea"
+                      },
+                      "ES": {
+                        "text": "ES Spain"
+                      },
+                      "ET": {
+                        "text": "ET Ethiopia"
+                      },
+                      "FI": {
+                        "text": "FI Finland"
+                      },
+                      "FJ": {
+                        "text": "FJ Fiji"
+                      },
+                      "FK": {
+                        "text": "FK Falkland Islands [Islas Malvinas]"
+                      },
+                      "FM": {
+                        "text": "FM Micronesia"
+                      },
+                      "FO": {
+                        "text": "FO Faroe Islands"
+                      },
+                      "FR": {
+                        "text": "FR France"
+                      },
+                      "GA": {
+                        "text": "GA Gabon"
+                      },
+                      "GB": {
+                        "text": "GB United Kingdom"
+                      },
+                      "GD": {
+                        "text": "GD Grenada"
+                      },
+                      "GE": {
+                        "text": "GE Georgia"
+                      },
+                      "GF": {
+                        "text": "GF French Guiana"
+                      },
+                      "GG": {
+                        "text": "GG Guernsey"
+                      },
+                      "GH": {
+                        "text": "GH Ghana"
+                      },
+                      "GI": {
+                        "text": "GI Gibraltar"
+                      },
+                      "GL": {
+                        "text": "GL Greenland"
+                      },
+                      "GM": {
+                        "text": "GM Gambia"
+                      },
+                      "GN": {
+                        "text": "GN Guinea"
+                      },
+                      "GP": {
+                        "text": "GP Guadeloupe"
+                      },
+                      "GQ": {
+                        "text": "GQ Equatorial Guinea"
+                      },
+                      "GR": {
+                        "text": "GR Greece"
+                      },
+                      "GS": {
+                        "text": "GS South Georgia and the South Sandwich Islands"
+                      },
+                      "GT": {
+                        "text": "GT Guatemala"
+                      },
+                      "GU": {
+                        "text": "GU Guam"
+                      },
+                      "GW": {
+                        "text": "GW Guinea-Bissau"
+                      },
+                      "GY": {
+                        "text": "GY Guyana"
+                      },
+                      "GZ": {
+                        "text": "GZ Gaza Strip"
+                      },
+                      "HK": {
+                        "text": "HK Hong Kong"
+                      },
+                      "HM": {
+                        "text": "HM Heard Island and McDonald Islands"
+                      },
+                      "HN": {
+                        "text": "HN Honduras"
+                      },
+                      "HR": {
+                        "text": "HR Croatia"
+                      },
+                      "HT": {
+                        "text": "HT Haiti"
+                      },
+                      "HU": {
+                        "text": "HU Hungary"
+                      },
+                      "ID": {
+                        "text": "ID Indonesia"
+                      },
+                      "IE": {
+                        "text": "IE Ireland"
+                      },
+                      "IL": {
+                        "text": "IL Israel"
+                      },
+                      "IM": {
+                        "text": "IM Isle of Man"
+                      },
+                      "IN": {
+                        "text": "IN India"
+                      },
+                      "IO": {
+                        "text": "IO British Indian Ocean Territory"
+                      },
+                      "IQ": {
+                        "text": "IQ Iraq"
+                      },
+                      "IR": {
+                        "text": "IR Iran"
+                      },
+                      "IS": {
+                        "text": "IS Iceland"
+                      },
+                      "IT": {
+                        "text": "IT Italy"
+                      },
+                      "JE": {
+                        "text": "JE Jersey"
+                      },
+                      "JM": {
+                        "text": "JM Jamaica"
+                      },
+                      "JO": {
+                        "text": "JO Jordan"
+                      },
+                      "JP": {
+                        "text": "JP Japan"
+                      },
+                      "KE": {
+                        "text": "KE Kenya"
+                      },
+                      "KG": {
+                        "text": "KG Kyrgyzstan"
+                      },
+                      "KH": {
+                        "text": "KH Cambodia"
+                      },
+                      "KI": {
+                        "text": "KI Kiribati"
+                      },
+                      "KM": {
+                        "text": "KM Comoros"
+                      },
+                      "KN": {
+                        "text": "KN Saint Kitts and Nevis"
+                      },
+                      "KP": {
+                        "text": "KP North Korea"
+                      },
+                      "KR": {
+                        "text": "KR South Korea"
+                      },
+                      "KW": {
+                        "text": "KW Kuwait"
+                      },
+                      "KY": {
+                        "text": "KY Cayman Islands"
+                      },
+                      "KZ": {
+                        "text": "KZ Kazakhstan"
+                      },
+                      "LA": {
+                        "text": "LA Laos"
+                      },
+                      "LB": {
+                        "text": "LB Lebanon"
+                      },
+                      "LC": {
+                        "text": "LC Saint Lucia"
+                      },
+                      "LI": {
+                        "text": "LI Liechtenstein"
+                      },
+                      "LK": {
+                        "text": "LK Sri Lanka"
+                      },
+                      "LR": {
+                        "text": "LR Liberia"
+                      },
+                      "LS": {
+                        "text": "LS Lesotho"
+                      },
+                      "LT": {
+                        "text": "LT Lithuania"
+                      },
+                      "LU": {
+                        "text": "LU Luxembourg"
+                      },
+                      "LV": {
+                        "text": "LV Latvia"
+                      },
+                      "LY": {
+                        "text": "LY Libya"
+                      },
+                      "MA": {
+                        "text": "MA Morocco"
+                      },
+                      "MC": {
+                        "text": "MC Monaco"
+                      },
+                      "MD": {
+                        "text": "MD Moldova"
+                      },
+                      "ME": {
+                        "text": "ME Montenegro"
+                      },
+                      "MF": {
+                        "text": "MF Saint Martin"
+                      },
+                      "MG": {
+                        "text": "MG Madagascar"
+                      },
+                      "MH": {
+                        "text": "MH Marshall Islands"
+                      },
+                      "MK": {
+                        "text": "MK Macedonia [FYROM]"
+                      },
+                      "ML": {
+                        "text": "ML Mali"
+                      },
+                      "MM": {
+                        "text": "MM Myanmar [Burma]"
+                      },
+                      "MN": {
+                        "text": "MN Mongolia"
+                      },
+                      "MO": {
+                        "text": "MO Macao"
+                      },
+                      "MP": {
+                        "text": "MP Northern Mariana Islands"
+                      },
+                      "MQ": {
+                        "text": "MQ Martinique"
+                      },
+                      "MR": {
+                        "text": "MR Mauritania"
+                      },
+                      "MS": {
+                        "text": "MS Montserrat"
+                      },
+                      "MT": {
+                        "text": "MT Malta"
+                      },
+                      "MU": {
+                        "text": "MU Mauritius"
+                      },
+                      "MV": {
+                        "text": "MV Maldives"
+                      },
+                      "MW": {
+                        "text": "MW Malawi"
+                      },
+                      "MX": {
+                        "text": "MX Mexico"
+                      },
+                      "MY": {
+                        "text": "MY Malaysia"
+                      },
+                      "MZ": {
+                        "text": "MZ Mozambique"
+                      },
+                      "NA": {
+                        "text": "NA Namibia"
+                      },
+                      "NC": {
+                        "text": "NC New Caledonia"
+                      },
+                      "NE": {
+                        "text": "NE Niger"
+                      },
+                      "NF": {
+                        "text": "NF Norfolk Island"
+                      },
+                      "NG": {
+                        "text": "NG Nigeria"
+                      },
+                      "NI": {
+                        "text": "NI Nicaragua"
+                      },
+                      "NL": {
+                        "text": "NL Netherlands"
+                      },
+                      "NO": {
+                        "text": "NO Norway"
+                      },
+                      "NP": {
+                        "text": "NP Nepal"
+                      },
+                      "NR": {
+                        "text": "NR Nauru"
+                      },
+                      "NU": {
+                        "text": "NU Niue"
+                      },
+                      "NZ": {
+                        "text": "NZ New Zealand"
+                      },
+                      "OM": {
+                        "text": "OM Oman"
+                      },
+                      "PA": {
+                        "text": "PA Panama"
+                      },
+                      "PE": {
+                        "text": "PE Peru"
+                      },
+                      "PF": {
+                        "text": "PF French Polynesia"
+                      },
+                      "PG": {
+                        "text": "PG Papua New Guinea"
+                      },
+                      "PH": {
+                        "text": "PH Philippines"
+                      },
+                      "PK": {
+                        "text": "PK Pakistan"
+                      },
+                      "PL": {
+                        "text": "PL Poland"
+                      },
+                      "PM": {
+                        "text": "PM Saint Pierre and Miquelon"
+                      },
+                      "PN": {
+                        "text": "PN Pitcairn Islands"
+                      },
+                      "PR": {
+                        "text": "PR Puerto Rico"
+                      },
+                      "PS": {
+                        "text": "PS Palestinian Territories"
+                      },
+                      "PT": {
+                        "text": "PT Portugal"
+                      },
+                      "PW": {
+                        "text": "PW Palau"
+                      },
+                      "PY": {
+                        "text": "PY Paraguay"
+                      },
+                      "QA": {
+                        "text": "QA Qatar"
+                      },
+                      "RE": {
+                        "text": "RE Réunion"
+                      },
+                      "RO": {
+                        "text": "RO Romania"
+                      },
+                      "RS": {
+                        "text": "RS Serbia"
+                      },
+                      "RU": {
+                        "text": "RU Russia"
+                      },
+                      "RW": {
+                        "text": "RW Rwanda"
+                      },
+                      "SA": {
+                        "text": "SA Saudi Arabia"
+                      },
+                      "SB": {
+                        "text": "SB Solomon Islands"
+                      },
+                      "SC": {
+                        "text": "SC Seychelles"
+                      },
+                      "SD": {
+                        "text": "SD Sudan"
+                      },
+                      "SE": {
+                        "text": "SE Sweden"
+                      },
+                      "SG": {
+                        "text": "SG Singapore"
+                      },
+                      "SH": {
+                        "text": "SH Saint Helena"
+                      },
+                      "SI": {
+                        "text": "SI Slovenia"
+                      },
+                      "SJ": {
+                        "text": "SJ Svalbard and Jan Mayen"
+                      },
+                      "SK": {
+                        "text": "SK Slovakia"
+                      },
+                      "SL": {
+                        "text": "SL Sierra Leone"
+                      },
+                      "SM": {
+                        "text": "SM San Marino"
+                      },
+                      "SN": {
+                        "text": "SN Senegal"
+                      },
+                      "SO": {
+                        "text": "SO Somalia"
+                      },
+                      "SR": {
+                        "text": "SR Suriname"
+                      },
+                      "ST": {
+                        "text": "ST São Tomé and Príncipe"
+                      },
+                      "SV": {
+                        "text": "SV El Salvador"
+                      },
+                      "SX": {
+                        "text": "SX Sint Maarten"
+                      },
+                      "SY": {
+                        "text": "SY Syria"
+                      },
+                      "SZ": {
+                        "text": "SZ Swaziland"
+                      },
+                      "TC": {
+                        "text": "TC Turks and Caicos Islands"
+                      },
+                      "TD": {
+                        "text": "TD Chad"
+                      },
+                      "TF": {
+                        "text": "TF French Southern Territories"
+                      },
+                      "TG": {
+                        "text": "TG Togo"
+                      },
+                      "TH": {
+                        "text": "TH Thailand"
+                      },
+                      "TJ": {
+                        "text": "TJ Tajikistan"
+                      },
+                      "TK": {
+                        "text": "TK Tokelau"
+                      },
+                      "TL": {
+                        "text": "TL Timor-Leste"
+                      },
+                      "TM": {
+                        "text": "TM Turkmenistan"
+                      },
+                      "TN": {
+                        "text": "TN Tunisia"
+                      },
+                      "TO": {
+                        "text": "TO Tonga"
+                      },
+                      "TR": {
+                        "text": "TR Turkey"
+                      },
+                      "TT": {
+                        "text": "TT Trinidad and Tobago"
+                      },
+                      "TV": {
+                        "text": "TV Tuvalu"
+                      },
+                      "TW": {
+                        "text": "TW Taiwan"
+                      },
+                      "TZ": {
+                        "text": "TZ Tanzania"
+                      },
+                      "UA": {
+                        "text": "UA Ukraine"
+                      },
+                      "UG": {
+                        "text": "UG Uganda"
+                      },
+                      "UM": {
+                        "text": "UM U.S. Minor Outlying Islands"
+                      },
+                      "US": {
+                        "text": "US United States"
+                      },
+                      "UY": {
+                        "text": "UY Uruguay"
+                      },
+                      "UZ": {
+                        "text": "UZ Uzbekistan"
+                      },
+                      "VA": {
+                        "text": "VA Vatican City"
+                      },
+                      "VC": {
+                        "text": "VC Saint Vincent and the Grenadines"
+                      },
+                      "VE": {
+                        "text": "VE Venezuela"
+                      },
+                      "VG": {
+                        "text": "VG British Virgin Islands"
+                      },
+                      "VI": {
+                        "text": "VI U.S. Virgin Islands"
+                      },
+                      "VN": {
+                        "text": "VN Vietnam"
+                      },
+                      "VU": {
+                        "text": "VU Vanuatu"
+                      },
+                      "WF": {
+                        "text": "WF Wallis and Futuna"
+                      },
+                      "WS": {
+                        "text": "WS Samoa"
+                      },
+                      "XK": {
+                        "text": "XK Kosovo"
+                      },
+                      "YE": {
+                        "text": "YE Yemen"
+                      },
+                      "YT": {
+                        "text": "YT Mayotte"
+                      },
+                      "ZA": {
+                        "text": "ZA South Africa"
+                      },
+                      "ZM": {
+                        "text": "ZM Zambia"
+                      },
+                      "ZW": {
+                        "text": "ZW Zimbabwe"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ASN"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Service"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ASN"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": ""
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 42,
+  "tags": [
+    "crowdsec"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "Local Loki",
+          "value": "loki"
+        },
+        "label": "Datasource",
+        "name": "datasource",
+        "options": [],
+        "query": "loki",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource",
+        "hide": 0
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${datasource}"
+        },
+        "label": "CrowdSec",
+        "name": "crowdsec",
+        "type": "query",
+        "query": {
+          "type": 1,
+          "label": "module_id",
+          "stream": "{module_id=~\"crowdsec[0-9]+\"}",
+          "refId": "LokiVariableQueryEditor-VariableQuery"
+        },
+        "definition": "label_values({module_id=~\"crowdsec[0-9]+\"},module_id)",
+        "regex": "",
+        "multi": true,
+        "includeAll": true,
+        "allValue": "crowdsec[0-9]+",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "refresh": 2,
+        "sort": 1,
+        "options": []
+      },
+      {
+        "label": "Country (ISO code, regex)",
+        "name": "country",
+        "type": "textbox",
+        "query": ".*",
+        "current": {
+          "text": ".*",
+          "value": ".*"
+        },
+        "options": [
+          {
+            "selected": true,
+            "text": ".*",
+            "value": ".*"
+          }
+        ]
+      },
+      {
+        "label": "IP (regex)",
+        "name": "ip",
+        "type": "textbox",
+        "query": ".*",
+        "current": {
+          "text": ".*",
+          "value": ".*"
+        },
+        "options": [
+          {
+            "selected": true,
+            "text": ".*",
+            "value": ".*"
+          }
+        ]
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "CrowdSec Bans",
+  "uid": "crowdsec-bans",
+  "version": 1
+}
