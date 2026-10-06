@@ -462,6 +462,18 @@
         {
           "id": "merge",
           "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value #A": "Bans",
+              "country": "Country"
+            }
+          }
         }
       ],
       "fieldConfig": {
@@ -499,7 +511,779 @@
             }
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Country"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "AD": {
+                        "text": "AD Andorra"
+                      },
+                      "AE": {
+                        "text": "AE United Arab Emirates"
+                      },
+                      "AF": {
+                        "text": "AF Afghanistan"
+                      },
+                      "AG": {
+                        "text": "AG Antigua and Barbuda"
+                      },
+                      "AI": {
+                        "text": "AI Anguilla"
+                      },
+                      "AL": {
+                        "text": "AL Albania"
+                      },
+                      "AM": {
+                        "text": "AM Armenia"
+                      },
+                      "AN": {
+                        "text": "AN Netherlands Antilles"
+                      },
+                      "AO": {
+                        "text": "AO Angola"
+                      },
+                      "AQ": {
+                        "text": "AQ Antarctica"
+                      },
+                      "AR": {
+                        "text": "AR Argentina"
+                      },
+                      "AS": {
+                        "text": "AS American Samoa"
+                      },
+                      "AT": {
+                        "text": "AT Austria"
+                      },
+                      "AU": {
+                        "text": "AU Australia"
+                      },
+                      "AW": {
+                        "text": "AW Aruba"
+                      },
+                      "AX": {
+                        "text": "AX Åland"
+                      },
+                      "AZ": {
+                        "text": "AZ Azerbaijan"
+                      },
+                      "BA": {
+                        "text": "BA Bosnia and Herzegovina"
+                      },
+                      "BB": {
+                        "text": "BB Barbados"
+                      },
+                      "BD": {
+                        "text": "BD Bangladesh"
+                      },
+                      "BE": {
+                        "text": "BE Belgium"
+                      },
+                      "BF": {
+                        "text": "BF Burkina Faso"
+                      },
+                      "BG": {
+                        "text": "BG Bulgaria"
+                      },
+                      "BH": {
+                        "text": "BH Bahrain"
+                      },
+                      "BI": {
+                        "text": "BI Burundi"
+                      },
+                      "BJ": {
+                        "text": "BJ Benin"
+                      },
+                      "BL": {
+                        "text": "BL Saint-Barthélemy"
+                      },
+                      "BM": {
+                        "text": "BM Bermuda"
+                      },
+                      "BN": {
+                        "text": "BN Brunei"
+                      },
+                      "BO": {
+                        "text": "BO Bolivia"
+                      },
+                      "BQ": {
+                        "text": "BQ Bonaire, Sint Eustatius, and Saba"
+                      },
+                      "BR": {
+                        "text": "BR Brazil"
+                      },
+                      "BS": {
+                        "text": "BS Bahamas"
+                      },
+                      "BT": {
+                        "text": "BT Bhutan"
+                      },
+                      "BV": {
+                        "text": "BV Bouvet Island"
+                      },
+                      "BW": {
+                        "text": "BW Botswana"
+                      },
+                      "BY": {
+                        "text": "BY Belarus"
+                      },
+                      "BZ": {
+                        "text": "BZ Belize"
+                      },
+                      "CA": {
+                        "text": "CA Canada"
+                      },
+                      "CC": {
+                        "text": "CC Cocos [Keeling] Islands"
+                      },
+                      "CD": {
+                        "text": "CD Congo [DRC]"
+                      },
+                      "CF": {
+                        "text": "CF Central African Republic"
+                      },
+                      "CG": {
+                        "text": "CG Congo [Republic]"
+                      },
+                      "CH": {
+                        "text": "CH Switzerland"
+                      },
+                      "CI": {
+                        "text": "CI Côte d'Ivoire"
+                      },
+                      "CK": {
+                        "text": "CK Cook Islands"
+                      },
+                      "CL": {
+                        "text": "CL Chile"
+                      },
+                      "CM": {
+                        "text": "CM Cameroon"
+                      },
+                      "CN": {
+                        "text": "CN China"
+                      },
+                      "CO": {
+                        "text": "CO Colombia"
+                      },
+                      "CR": {
+                        "text": "CR Costa Rica"
+                      },
+                      "CU": {
+                        "text": "CU Cuba"
+                      },
+                      "CV": {
+                        "text": "CV Cape Verde"
+                      },
+                      "CW": {
+                        "text": "CW Curaçao"
+                      },
+                      "CX": {
+                        "text": "CX Christmas Island"
+                      },
+                      "CY": {
+                        "text": "CY Cyprus"
+                      },
+                      "CZ": {
+                        "text": "CZ Czech Republic"
+                      },
+                      "DE": {
+                        "text": "DE Germany"
+                      },
+                      "DJ": {
+                        "text": "DJ Djibouti"
+                      },
+                      "DK": {
+                        "text": "DK Denmark"
+                      },
+                      "DM": {
+                        "text": "DM Dominica"
+                      },
+                      "DO": {
+                        "text": "DO Dominican Republic"
+                      },
+                      "DZ": {
+                        "text": "DZ Algeria"
+                      },
+                      "EC": {
+                        "text": "EC Ecuador"
+                      },
+                      "EE": {
+                        "text": "EE Estonia"
+                      },
+                      "EG": {
+                        "text": "EG Egypt"
+                      },
+                      "EH": {
+                        "text": "EH Western Sahara"
+                      },
+                      "ER": {
+                        "text": "ER Eritrea"
+                      },
+                      "ES": {
+                        "text": "ES Spain"
+                      },
+                      "ET": {
+                        "text": "ET Ethiopia"
+                      },
+                      "FI": {
+                        "text": "FI Finland"
+                      },
+                      "FJ": {
+                        "text": "FJ Fiji"
+                      },
+                      "FK": {
+                        "text": "FK Falkland Islands [Islas Malvinas]"
+                      },
+                      "FM": {
+                        "text": "FM Micronesia"
+                      },
+                      "FO": {
+                        "text": "FO Faroe Islands"
+                      },
+                      "FR": {
+                        "text": "FR France"
+                      },
+                      "GA": {
+                        "text": "GA Gabon"
+                      },
+                      "GB": {
+                        "text": "GB United Kingdom"
+                      },
+                      "GD": {
+                        "text": "GD Grenada"
+                      },
+                      "GE": {
+                        "text": "GE Georgia"
+                      },
+                      "GF": {
+                        "text": "GF French Guiana"
+                      },
+                      "GG": {
+                        "text": "GG Guernsey"
+                      },
+                      "GH": {
+                        "text": "GH Ghana"
+                      },
+                      "GI": {
+                        "text": "GI Gibraltar"
+                      },
+                      "GL": {
+                        "text": "GL Greenland"
+                      },
+                      "GM": {
+                        "text": "GM Gambia"
+                      },
+                      "GN": {
+                        "text": "GN Guinea"
+                      },
+                      "GP": {
+                        "text": "GP Guadeloupe"
+                      },
+                      "GQ": {
+                        "text": "GQ Equatorial Guinea"
+                      },
+                      "GR": {
+                        "text": "GR Greece"
+                      },
+                      "GS": {
+                        "text": "GS South Georgia and the South Sandwich Islands"
+                      },
+                      "GT": {
+                        "text": "GT Guatemala"
+                      },
+                      "GU": {
+                        "text": "GU Guam"
+                      },
+                      "GW": {
+                        "text": "GW Guinea-Bissau"
+                      },
+                      "GY": {
+                        "text": "GY Guyana"
+                      },
+                      "GZ": {
+                        "text": "GZ Gaza Strip"
+                      },
+                      "HK": {
+                        "text": "HK Hong Kong"
+                      },
+                      "HM": {
+                        "text": "HM Heard Island and McDonald Islands"
+                      },
+                      "HN": {
+                        "text": "HN Honduras"
+                      },
+                      "HR": {
+                        "text": "HR Croatia"
+                      },
+                      "HT": {
+                        "text": "HT Haiti"
+                      },
+                      "HU": {
+                        "text": "HU Hungary"
+                      },
+                      "ID": {
+                        "text": "ID Indonesia"
+                      },
+                      "IE": {
+                        "text": "IE Ireland"
+                      },
+                      "IL": {
+                        "text": "IL Israel"
+                      },
+                      "IM": {
+                        "text": "IM Isle of Man"
+                      },
+                      "IN": {
+                        "text": "IN India"
+                      },
+                      "IO": {
+                        "text": "IO British Indian Ocean Territory"
+                      },
+                      "IQ": {
+                        "text": "IQ Iraq"
+                      },
+                      "IR": {
+                        "text": "IR Iran"
+                      },
+                      "IS": {
+                        "text": "IS Iceland"
+                      },
+                      "IT": {
+                        "text": "IT Italy"
+                      },
+                      "JE": {
+                        "text": "JE Jersey"
+                      },
+                      "JM": {
+                        "text": "JM Jamaica"
+                      },
+                      "JO": {
+                        "text": "JO Jordan"
+                      },
+                      "JP": {
+                        "text": "JP Japan"
+                      },
+                      "KE": {
+                        "text": "KE Kenya"
+                      },
+                      "KG": {
+                        "text": "KG Kyrgyzstan"
+                      },
+                      "KH": {
+                        "text": "KH Cambodia"
+                      },
+                      "KI": {
+                        "text": "KI Kiribati"
+                      },
+                      "KM": {
+                        "text": "KM Comoros"
+                      },
+                      "KN": {
+                        "text": "KN Saint Kitts and Nevis"
+                      },
+                      "KP": {
+                        "text": "KP North Korea"
+                      },
+                      "KR": {
+                        "text": "KR South Korea"
+                      },
+                      "KW": {
+                        "text": "KW Kuwait"
+                      },
+                      "KY": {
+                        "text": "KY Cayman Islands"
+                      },
+                      "KZ": {
+                        "text": "KZ Kazakhstan"
+                      },
+                      "LA": {
+                        "text": "LA Laos"
+                      },
+                      "LB": {
+                        "text": "LB Lebanon"
+                      },
+                      "LC": {
+                        "text": "LC Saint Lucia"
+                      },
+                      "LI": {
+                        "text": "LI Liechtenstein"
+                      },
+                      "LK": {
+                        "text": "LK Sri Lanka"
+                      },
+                      "LR": {
+                        "text": "LR Liberia"
+                      },
+                      "LS": {
+                        "text": "LS Lesotho"
+                      },
+                      "LT": {
+                        "text": "LT Lithuania"
+                      },
+                      "LU": {
+                        "text": "LU Luxembourg"
+                      },
+                      "LV": {
+                        "text": "LV Latvia"
+                      },
+                      "LY": {
+                        "text": "LY Libya"
+                      },
+                      "MA": {
+                        "text": "MA Morocco"
+                      },
+                      "MC": {
+                        "text": "MC Monaco"
+                      },
+                      "MD": {
+                        "text": "MD Moldova"
+                      },
+                      "ME": {
+                        "text": "ME Montenegro"
+                      },
+                      "MF": {
+                        "text": "MF Saint Martin"
+                      },
+                      "MG": {
+                        "text": "MG Madagascar"
+                      },
+                      "MH": {
+                        "text": "MH Marshall Islands"
+                      },
+                      "MK": {
+                        "text": "MK Macedonia [FYROM]"
+                      },
+                      "ML": {
+                        "text": "ML Mali"
+                      },
+                      "MM": {
+                        "text": "MM Myanmar [Burma]"
+                      },
+                      "MN": {
+                        "text": "MN Mongolia"
+                      },
+                      "MO": {
+                        "text": "MO Macao"
+                      },
+                      "MP": {
+                        "text": "MP Northern Mariana Islands"
+                      },
+                      "MQ": {
+                        "text": "MQ Martinique"
+                      },
+                      "MR": {
+                        "text": "MR Mauritania"
+                      },
+                      "MS": {
+                        "text": "MS Montserrat"
+                      },
+                      "MT": {
+                        "text": "MT Malta"
+                      },
+                      "MU": {
+                        "text": "MU Mauritius"
+                      },
+                      "MV": {
+                        "text": "MV Maldives"
+                      },
+                      "MW": {
+                        "text": "MW Malawi"
+                      },
+                      "MX": {
+                        "text": "MX Mexico"
+                      },
+                      "MY": {
+                        "text": "MY Malaysia"
+                      },
+                      "MZ": {
+                        "text": "MZ Mozambique"
+                      },
+                      "NA": {
+                        "text": "NA Namibia"
+                      },
+                      "NC": {
+                        "text": "NC New Caledonia"
+                      },
+                      "NE": {
+                        "text": "NE Niger"
+                      },
+                      "NF": {
+                        "text": "NF Norfolk Island"
+                      },
+                      "NG": {
+                        "text": "NG Nigeria"
+                      },
+                      "NI": {
+                        "text": "NI Nicaragua"
+                      },
+                      "NL": {
+                        "text": "NL Netherlands"
+                      },
+                      "NO": {
+                        "text": "NO Norway"
+                      },
+                      "NP": {
+                        "text": "NP Nepal"
+                      },
+                      "NR": {
+                        "text": "NR Nauru"
+                      },
+                      "NU": {
+                        "text": "NU Niue"
+                      },
+                      "NZ": {
+                        "text": "NZ New Zealand"
+                      },
+                      "OM": {
+                        "text": "OM Oman"
+                      },
+                      "PA": {
+                        "text": "PA Panama"
+                      },
+                      "PE": {
+                        "text": "PE Peru"
+                      },
+                      "PF": {
+                        "text": "PF French Polynesia"
+                      },
+                      "PG": {
+                        "text": "PG Papua New Guinea"
+                      },
+                      "PH": {
+                        "text": "PH Philippines"
+                      },
+                      "PK": {
+                        "text": "PK Pakistan"
+                      },
+                      "PL": {
+                        "text": "PL Poland"
+                      },
+                      "PM": {
+                        "text": "PM Saint Pierre and Miquelon"
+                      },
+                      "PN": {
+                        "text": "PN Pitcairn Islands"
+                      },
+                      "PR": {
+                        "text": "PR Puerto Rico"
+                      },
+                      "PS": {
+                        "text": "PS Palestinian Territories"
+                      },
+                      "PT": {
+                        "text": "PT Portugal"
+                      },
+                      "PW": {
+                        "text": "PW Palau"
+                      },
+                      "PY": {
+                        "text": "PY Paraguay"
+                      },
+                      "QA": {
+                        "text": "QA Qatar"
+                      },
+                      "RE": {
+                        "text": "RE Réunion"
+                      },
+                      "RO": {
+                        "text": "RO Romania"
+                      },
+                      "RS": {
+                        "text": "RS Serbia"
+                      },
+                      "RU": {
+                        "text": "RU Russia"
+                      },
+                      "RW": {
+                        "text": "RW Rwanda"
+                      },
+                      "SA": {
+                        "text": "SA Saudi Arabia"
+                      },
+                      "SB": {
+                        "text": "SB Solomon Islands"
+                      },
+                      "SC": {
+                        "text": "SC Seychelles"
+                      },
+                      "SD": {
+                        "text": "SD Sudan"
+                      },
+                      "SE": {
+                        "text": "SE Sweden"
+                      },
+                      "SG": {
+                        "text": "SG Singapore"
+                      },
+                      "SH": {
+                        "text": "SH Saint Helena"
+                      },
+                      "SI": {
+                        "text": "SI Slovenia"
+                      },
+                      "SJ": {
+                        "text": "SJ Svalbard and Jan Mayen"
+                      },
+                      "SK": {
+                        "text": "SK Slovakia"
+                      },
+                      "SL": {
+                        "text": "SL Sierra Leone"
+                      },
+                      "SM": {
+                        "text": "SM San Marino"
+                      },
+                      "SN": {
+                        "text": "SN Senegal"
+                      },
+                      "SO": {
+                        "text": "SO Somalia"
+                      },
+                      "SR": {
+                        "text": "SR Suriname"
+                      },
+                      "ST": {
+                        "text": "ST São Tomé and Príncipe"
+                      },
+                      "SV": {
+                        "text": "SV El Salvador"
+                      },
+                      "SX": {
+                        "text": "SX Sint Maarten"
+                      },
+                      "SY": {
+                        "text": "SY Syria"
+                      },
+                      "SZ": {
+                        "text": "SZ Swaziland"
+                      },
+                      "TC": {
+                        "text": "TC Turks and Caicos Islands"
+                      },
+                      "TD": {
+                        "text": "TD Chad"
+                      },
+                      "TF": {
+                        "text": "TF French Southern Territories"
+                      },
+                      "TG": {
+                        "text": "TG Togo"
+                      },
+                      "TH": {
+                        "text": "TH Thailand"
+                      },
+                      "TJ": {
+                        "text": "TJ Tajikistan"
+                      },
+                      "TK": {
+                        "text": "TK Tokelau"
+                      },
+                      "TL": {
+                        "text": "TL Timor-Leste"
+                      },
+                      "TM": {
+                        "text": "TM Turkmenistan"
+                      },
+                      "TN": {
+                        "text": "TN Tunisia"
+                      },
+                      "TO": {
+                        "text": "TO Tonga"
+                      },
+                      "TR": {
+                        "text": "TR Turkey"
+                      },
+                      "TT": {
+                        "text": "TT Trinidad and Tobago"
+                      },
+                      "TV": {
+                        "text": "TV Tuvalu"
+                      },
+                      "TW": {
+                        "text": "TW Taiwan"
+                      },
+                      "TZ": {
+                        "text": "TZ Tanzania"
+                      },
+                      "UA": {
+                        "text": "UA Ukraine"
+                      },
+                      "UG": {
+                        "text": "UG Uganda"
+                      },
+                      "UM": {
+                        "text": "UM U.S. Minor Outlying Islands"
+                      },
+                      "US": {
+                        "text": "US United States"
+                      },
+                      "UY": {
+                        "text": "UY Uruguay"
+                      },
+                      "UZ": {
+                        "text": "UZ Uzbekistan"
+                      },
+                      "VA": {
+                        "text": "VA Vatican City"
+                      },
+                      "VC": {
+                        "text": "VC Saint Vincent and the Grenadines"
+                      },
+                      "VE": {
+                        "text": "VE Venezuela"
+                      },
+                      "VG": {
+                        "text": "VG British Virgin Islands"
+                      },
+                      "VI": {
+                        "text": "VI U.S. Virgin Islands"
+                      },
+                      "VN": {
+                        "text": "VN Vietnam"
+                      },
+                      "VU": {
+                        "text": "VU Vanuatu"
+                      },
+                      "WF": {
+                        "text": "WF Wallis and Futuna"
+                      },
+                      "WS": {
+                        "text": "WS Samoa"
+                      },
+                      "XK": {
+                        "text": "XK Kosovo"
+                      },
+                      "YE": {
+                        "text": "YE Yemen"
+                      },
+                      "YT": {
+                        "text": "YT Mayotte"
+                      },
+                      "ZA": {
+                        "text": "ZA South Africa"
+                      },
+                      "ZM": {
+                        "text": "ZM Zambia"
+                      },
+                      "ZW": {
+                        "text": "ZW Zimbabwe"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "view": {
@@ -532,19 +1316,19 @@
             "tooltip": true,
             "location": {
               "mode": "lookup",
-              "lookup": "country",
+              "lookup": "Country",
               "gazetteer": "public/gazetteer/countries.json"
             },
             "config": {
               "showLegend": true,
               "style": {
                 "color": {
-                  "field": "Value #A",
+                  "field": "Bans",
                   "fixed": "dark-red"
                 },
                 "opacity": 0.75,
                 "size": {
-                  "field": "Value #A",
+                  "field": "Bans",
                   "fixed": 5,
                   "max": 30,
                   "min": 6
