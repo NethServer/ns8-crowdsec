@@ -3462,6 +3462,37 @@
                 ]
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ASN"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "Unknown"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "empty",
+                      "result": {
+                        "text": "Unknown"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -4553,6 +4584,29 @@
               {
                 "id": "custom.width",
                 "value": 90
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "Unknown"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "empty",
+                      "result": {
+                        "text": "Unknown"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           }
