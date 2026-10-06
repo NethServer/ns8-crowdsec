@@ -2423,6 +2423,18 @@
           "options": {}
         },
         {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "asn",
+                "destinationType": "string"
+              }
+            ],
+            "fields": {}
+          }
+        },
+        {
           "id": "sortBy",
           "options": {
             "sort": [
@@ -2590,6 +2602,18 @@
         {
           "id": "merge",
           "options": {}
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "asn",
+                "destinationType": "string"
+              }
+            ],
+            "fields": {}
+          }
         },
         {
           "id": "organize",
@@ -3659,6 +3683,18 @@
             "format": "json",
             "replace": true,
             "keepTime": true
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "asn",
+                "destinationType": "string"
+              }
+            ],
+            "fields": {}
           }
         },
         {
