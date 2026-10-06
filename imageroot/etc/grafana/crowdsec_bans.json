@@ -3596,6 +3596,19 @@
       ],
       "transformations": [
         {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "< 1h",
+              "Value #B": "1-4h",
+              "Value #C": "4-12h",
+              "Value #D": "12-24h",
+              "Value #E": "1-7 days",
+              "Value #F": "> 7 days"
+            }
+          }
+        },
+        {
           "id": "reduce",
           "options": {
             "reducers": [
@@ -3617,7 +3630,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "unit": "none",
           "decimals": 0,
           "color": {
             "mode": "fixed",
