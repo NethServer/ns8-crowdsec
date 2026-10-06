@@ -83,7 +83,7 @@ Available blocklists:
 | `yoroisusplvl1` | Yoroi suspicious - Level 1 | 10 |
 | `yoroisusplvl2` | Yoroi suspicious - Level 2 | 8 |
 | `nethesislvl3` | Nethesis suspicious - Level 3 | 6 |
-| `nethesis-insights` | Nethesis Insights - Level 2 | 8 |
+| `nethesis-insights` | Nethesis community - Level 2 | 8 |
 
 Confidence goes from 1 to 10; it is not shown for community subscriptions.
 All lists are refreshed every 30 minutes.

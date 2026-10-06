@@ -1,7 +1,7 @@
 {
         "nethesis-insights": {
                 "url_4": "https://insights.nethesis.it/blocklist/v1/feed",
-                "descr": "Nethesis Insights - Level 2"
+                "descr": "Nethesis community - Level 2"
         },
         "yoroimallvl1": {
                 "url_4": "https://__USER__:__PASSWORD__@bl.nethesis.it/plain/__TYPE__/nethesis-blacklists/yoroi_malware_level1.ipset",
