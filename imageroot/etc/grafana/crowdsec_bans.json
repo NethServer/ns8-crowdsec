@@ -2463,8 +2463,8 @@
           "displayName": "${__data.fields.asn}",
           "links": [
             {
-              "title": "Show this provider on bgp.he.net",
-              "url": "https://bgp.he.net/${__data.fields.asn}",
+              "title": "Show this provider on ipinfo.io",
+              "url": "https://ipinfo.io/${__data.fields.asn}",
               "targetBlank": true
             }
           ]
