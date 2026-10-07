@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Send SIGHUP only once crowdsec handles it, then wait for the reload to end.
+# A HUP during the entrypoint hub install kills the container, and a second
+# HUP during a reload crashes crowdsec. systemd queues the next reload job
+# until this one returns.
+
+set -e
+
+for _ in $(seq 60); do
+    podman exec "${MODULE_ID}" cscli lapi status >/dev/null 2>&1 && break
+    sleep 1
+done
+
+cursor=$(journalctl -u "${MODULE_ID}.service" -n 0 --show-cursor -q | sed -n 's/^-- cursor: //p')
+podman kill -s HUP "${MODULE_ID}" >/dev/null
+
+for _ in $(seq 60); do
+    if journalctl -u "${MODULE_ID}.service" --after-cursor="${cursor}" -q -o cat | grep -q "Reload is finished"; then
+        exit 0
+    fi
+    sleep 1
+done
+
+echo "crowdsec did not finish its reload in time" >&2
+exit 1
