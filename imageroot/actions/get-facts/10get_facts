@@ -31,7 +31,7 @@ facts = {
     "pull_community_blocklist": os.getenv("PULL_COMMUNITY_BLOCKLIST", "True") == "True",
     "console_enrolled": bool(os.getenv("ENROLL_INSTANCE", "")),
     "nethvoice_collection": os.getenv("NETHVOICE_COLLECTION_ENABLED", "True") == "True",
-    "email_notifications": has_recipients and bool(smarthost["host"]),
+    "email_notifications": has_recipients and smarthost["enabled"],
     "whitelist_count": count_env_list("WHITELISTS"),
 }
 
