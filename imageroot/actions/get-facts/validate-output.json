@@ -1,0 +1,45 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "get-facts output",
+    "$id": "http://schema.nethserver.org/crowdsec/get-facts-output.json",
+    "description": "Module facts reported to phonehome",
+    "examples": [
+        {
+            "dynamic_bantime": true,
+            "ban_local_network": false,
+            "capi_enabled": true,
+            "pull_community_blocklist": true,
+            "console_enrolled": false,
+            "nethvoice_collection": true,
+            "email_notifications": false,
+            "whitelist_count": 2,
+            "threat_shield_enterprise": 3
+        }
+    ],
+    "type": "object",
+    "required": [
+        "dynamic_bantime",
+        "ban_local_network",
+        "capi_enabled",
+        "pull_community_blocklist",
+        "console_enrolled",
+        "nethvoice_collection",
+        "email_notifications",
+        "whitelist_count"
+    ],
+    "properties": {
+        "dynamic_bantime": { "type": "boolean" },
+        "ban_local_network": { "type": "boolean" },
+        "capi_enabled": { "type": "boolean" },
+        "pull_community_blocklist": { "type": "boolean" },
+        "console_enrolled": { "type": "boolean" },
+        "nethvoice_collection": { "type": "boolean" },
+        "email_notifications": { "type": "boolean" },
+        "whitelist_count": { "type": "integer", "minimum": 0 },
+        "threat_shield_enterprise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of enabled Threat Shield feeds; absent if it could not be read"
+        }
+    }
+}
