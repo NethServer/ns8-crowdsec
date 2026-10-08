@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Node 17+: prefix local build/lint with `NODE_OPTIONS=--openssl-legacy-provider` (`build-images.sh` already does).
 - UI lint/format: `cd ui && yarn lint`, `yarn format`.
 - Full image build (requires `buildah`, network access, root/rootless podman storage): `./build-images.sh`. It also downloads and checksum-verifies the `crowdsec-firewall-bouncer` release tarball against `CHECKSUM` — regenerate that file (`sha256sum crowdsec-firewall-bouncer-linux-amd64.tgz > CHECKSUM`) whenever the bouncer version in `build-images.sh` changes.
-- Integration tests: Robot Framework, `tests/crowdsec.robot`, run via the shared `NethServer/ns8-github-actions` test workflow (`.github/workflows/test-module.yml`) — see that repo's README for running locally. Don't try to invent a local Robot runner setup.
+- Integration tests: Robot Framework, `tests/NN__<area>.robot` (one suite per area, run in name order) sharing keywords from `tests/crowdsec.resource`, run via the shared `NethServer/ns8-github-actions` test workflow (`.github/workflows/test-module.yml`) — see that repo's README for running locally. Don't try to invent a local Robot runner setup.
 - No unit-test harness for the Python/bash backend; don't add one.
 
 ## Architecture
