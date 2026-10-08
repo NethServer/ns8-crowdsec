@@ -22,7 +22,7 @@ def count_env_list(name):
 
 
 has_recipients = count_env_list("RECEIVER_EMAILS") > 0
-smarthost = agent.get_smarthost_settings(agent.redis_connect())
+smarthost = agent.get_smarthost_settings(agent.redis_connect(use_replica=True))
 
 facts = {
     "dynamic_bantime": os.getenv("DYN_BANTIME", "True") == "True",
