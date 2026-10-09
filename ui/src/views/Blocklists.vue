@@ -1028,12 +1028,15 @@ export default {
       );
       this.core.$root.$once(
         `${taskAction}-validation-failed-${eventId}`,
-        (validationErrors) =>
+        (validationErrors) => {
           this.configureModuleValidationFailed(
             "saveCommunityConfig",
             "enroll_instance",
             validationErrors
-          )
+          );
+          // the steps before the enroll check already ran, so CAPI may have changed
+          this.getCapiStatus();
+        }
       );
       this.core.$root.$once(
         `${taskAction}-completed-${eventId}`,
