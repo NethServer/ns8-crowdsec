@@ -999,7 +999,10 @@ export default {
     getConfigurationCompleted(taskContext, taskResult) {
       this.config = taskResult.output;
       this.enable_online_api = this.config.enable_online_api;
-      this.enroll_instance = this.config.enroll_instance;
+      // keep a rejected key in the field, next to its error
+      if (!this.error.enroll_instance) {
+        this.enroll_instance = this.config.enroll_instance;
+      }
       this.pull_community_blocklist =
         this.config.pull_community_blocklist !== undefined
           ? this.config.pull_community_blocklist
@@ -1034,7 +1037,8 @@ export default {
             "enroll_instance",
             validationErrors
           );
-          // the steps before the enroll check already ran, so CAPI may have changed
+          // the steps before the enroll check already saved the other settings
+          this.getConfiguration();
           this.getCapiStatus();
         }
       );
