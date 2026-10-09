@@ -20,7 +20,11 @@ if new_token == token:
     sys.exit(0)
 
 online_api = True if os.getenv("DISABLE_ONLINE_API","False") == "False" else False
-if new_token and online_api:
+if new_token and not online_api:
+    # cscli can't check it offline, and once saved it is never checked again
+    sys.exit(0)
+
+if new_token:
     agent.set_weight(os.path.basename(__file__), 0) # Validation step, no task progress at all
     test = agent.run_helper("cscli", "console", "--name", hostname, "enroll", "--overwrite", new_token)
     if test.returncode !=0 :
