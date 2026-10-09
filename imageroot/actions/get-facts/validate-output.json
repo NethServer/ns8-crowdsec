@@ -13,7 +13,8 @@
             "nethvoice_collection": true,
             "email_notifications": false,
             "whitelist_count": 2,
-            "threat_shield_enterprise": 3
+            "threat_shield_enterprise": 3,
+            "threat_shield_feeds": ["yoroimallvl1", "nethesis-insights", "nethesislvl3"]
         }
     ],
     "type": "object"

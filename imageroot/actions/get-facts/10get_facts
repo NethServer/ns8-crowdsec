@@ -36,8 +36,9 @@ facts = {
 }
 
 try:
-    facts["threat_shield_enterprise"] = len(
-        threat_shield.enabled_feeds(threat_shield.load_catalog()))
+    feeds = threat_shield.enabled_feeds(threat_shield.load_catalog())
+    facts["threat_shield_enterprise"] = len(feeds)
+    facts["threat_shield_feeds"] = feeds
 except Exception as ex:
     # Partial facts beat none: an exception here drops the whole module.
     print(agent.SD_WARNING + f"threat shield facts failed: {ex}", file=sys.stderr)
