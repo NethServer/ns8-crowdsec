@@ -24,12 +24,14 @@ def count_env_list(name):
 has_recipients = count_env_list("RECEIVER_EMAILS") > 0
 smarthost = agent.get_smarthost_settings(agent.redis_connect(use_replica=True))
 
+capi_enabled = os.getenv("DISABLE_ONLINE_API", "False") == "False"
+
 facts = {
     "dynamic_bantime": os.getenv("DYN_BANTIME", "True") == "True",
     "ban_local_network": os.getenv("BAN_LOCAL_NETWORK", "False") == "True",
-    "capi_enabled": os.getenv("DISABLE_ONLINE_API", "False") == "False",
+    "capi_enabled": capi_enabled,
     "pull_community_blocklist": os.getenv("PULL_COMMUNITY_BLOCKLIST", "True") == "True",
-    "console_enrolled": bool(os.getenv("ENROLL_INSTANCE", "")),
+    "console_enrolled": capi_enabled and bool(os.getenv("ENROLL_INSTANCE", "")),
     "nethvoice_collection": os.getenv("NETHVOICE_COLLECTION_ENABLED", "True") == "True",
     "email_notifications": has_recipients and smarthost["enabled"],
     "whitelist_count": count_env_list("WHITELISTS"),

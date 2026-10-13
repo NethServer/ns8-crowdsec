@@ -19,13 +19,19 @@ if new_token == token:
     # we have no need to register again
     sys.exit(0)
 
-# we save enroll_instance
-agent.set_env("ENROLL_INSTANCE",new_token)
-
 online_api = True if os.getenv("DISABLE_ONLINE_API","False") == "False" else False
-if new_token and online_api:
+if new_token and not online_api:
+    # cscli can't check it offline, and once saved it is never checked again
+    sys.exit(0)
+
+if new_token:
     agent.set_weight(os.path.basename(__file__), 0) # Validation step, no task progress at all
     test = agent.run_helper("cscli", "console", "--name", hostname, "enroll", "--overwrite", new_token)
     if test.returncode !=0 :
         agent.set_status('validation-failed')
         json.dump([{'field':'enroll_instance','parameter':'enroll_instance','value':new_token,'error':'token_not_valid'}],fp=sys.stdout)
+        # a saved token is never checked again, so keep the rejected one out
+        sys.exit(2)
+
+# we save enroll_instance
+agent.set_env("ENROLL_INSTANCE",new_token)
