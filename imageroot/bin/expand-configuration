@@ -206,6 +206,7 @@ if whitelists:
 os.makedirs("crowdsec_config/hub/parsers/s01-parse/crowdsecurity", exist_ok=True)
 shutil.copyfile("../tainted/nextcloud-logs.yaml", "crowdsec_config/hub/parsers/s01-parse/crowdsecurity/nextcloud-logs.yaml")
 shutil.copyfile("../tainted/mattermost-whitelist.yaml", "crowdsec_config/parsers/s02-enrich/mattermost-whitelist.yaml")
+shutil.copyfile("../tainted/traefik-escaped-logs.yaml", "crowdsec_config/parsers/s01-parse/traefik-escaped-logs.yaml")
 
 # NethVoice and kamailio parsers/scenarios are exposed as a single fake
 # collection (nethesis/nethvoice) toggleable via toggle-collection.
