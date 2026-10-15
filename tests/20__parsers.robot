@@ -58,6 +58,14 @@ The postfix parser and scenario match an SMTP AUTH failure
     Should Contain    ${output}    evt.Meta.source_ip : 203.0.113.21
     Should Contain    ${output}    🟢 crowdsecurity/postfix-spam
 
+The traefik parser keeps lines with an escaped quote in the User-Agent
+    # traefik writes a quote of the User-Agent as \", the hub parser drops the whole line
+    ${output}=    Explain Log Line    ${SYSLOG_PREFIX} traefik[123]: 203.0.113.30 - - [15/Oct/2026:08:06:16 +0000] "GET /.env HTTP/1.1" 404 19 "-" "x\\" 200 1 \\"-\\" \\"y\\" 7 \\"evil-https@file\\" \\"http://x\\" 1ms" 7 "kuma1-https@file" "http://127.0.0.1:20003" 4ms
+    Should Contain    ${output}    🟢 nethserver/traefik-escaped-logs
+    Should Contain    ${output}    evt.Meta.source_ip : 203.0.113.30
+    Should Contain    ${output}    evt.Meta.traefik_router_name : kuma1-https@file
+    Should Contain    ${output}    🟢 crowdsecurity/http-sensitive-files
+
 The Mattermost whitelist skips ID-ending API calls only
     # real line from a Mattermost node, route name included, only the client IP is changed
     ${output}=    Explain Log Line    ${SYSLOG_PREFIX} traefik[123]: 203.0.113.11 - - [08/Oct/2026:07:41:41 +0000] "GET /api/v4/channels/abcdefghijklmnopqrstuvwxyz HTTP/2.0" 401 186 "-" "-" 9163 "mattermost1-https@file" "http://127.0.0.1:20023" 0ms
