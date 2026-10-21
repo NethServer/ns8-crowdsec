@@ -25,10 +25,19 @@ def get_sender_email():
         sender_email = os.environ['MODULE_ID'] + '@' + domain_part
     return sender_email
 
+def get_leader_hostname(rdb):
+    """Only the leader node serves the cluster-admin UI."""
+    leader_id = rdb.hget("cluster/environment", "NODE_ID")
+    if leader_id == os.environ["NODE_ID"]:
+        return agent.get_hostname()
+    endpoint = rdb.hget(f"node/{leader_id}/vpn", "endpoint") or ""
+    return endpoint.rsplit(":", 1)[0] or agent.get_hostname()
+
 helo_host = os.getenv("HELO_HOST") or agent.get_hostname()
 receiver_emails = os.environ.get("RECEIVER_EMAILS", "")
 
-smtp = agent.get_smarthost_settings(agent.redis_connect(use_replica=True))
+rdb = agent.redis_connect(use_replica=True)
+smtp = agent.get_smarthost_settings(rdb)
 
 files =["crowdsec_config/notifications/email.yaml"]
 for f in files:
@@ -54,6 +63,7 @@ if receiver_emails and smtp['enabled']:
         "auth_type": "login",
         "helo_host": helo_host,
         "fqdn": agent.get_hostname(),
+        "leader_hostname": get_leader_hostname(rdb),
         "module_id": os.environ['MODULE_ID'],
         "group_threshold": os.getenv("GROUP_THRESHOLD", 100),
     }
