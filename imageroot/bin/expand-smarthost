@@ -28,6 +28,8 @@ def get_sender_email():
 def get_leader_hostname(rdb):
     """Only the leader node serves the cluster-admin UI."""
     leader_id = rdb.hget("cluster/environment", "NODE_ID")
+    if leader_id == os.environ["NODE_ID"]:
+        return agent.get_hostname()
     endpoint = rdb.hget(f"node/{leader_id}/vpn", "endpoint") or ""
     return endpoint.rsplit(":", 1)[0] or agent.get_hostname()
 
