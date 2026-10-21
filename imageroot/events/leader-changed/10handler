@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import json
+import os
+import subprocess
+import sys
+import time
+
+import agent
+
+# The event is published before switch-leader updates cluster/environment,
+# so wait for the replica to see the new leader before rendering the email link.
+node_id = str(json.load(sys.stdin)["node_id"])
+rdb = agent.redis_connect(use_replica=True)
+for _ in range(60):
+    if rdb.hget("cluster/environment", "NODE_ID") == node_id:
+        break
+    time.sleep(1)
+else:
+    print(f"Leader is not node {node_id} yet, the email link may be stale", file=sys.stderr)
+
+subprocess.run(["systemctl", "try-reload-or-restart", f"{os.environ['MODULE_ID']}.service"], check=True)
