@@ -1,0 +1,47 @@
+name: nethserver/traefik-escaped-logs
+description: "Parse Traefik CLF access lines whose User-Agent or Referer contains an escaped quote"
+# crowdsecurity/traefik-logs 1.5 reads these fields with NOTDQUOTE and drops the whole line,
+# so this copy of its CLF node runs only on the lines it cannot parse
+filter: 'evt.Parsed.program startsWith "traefik" && evt.Parsed.message contains "\\\""'
+onsuccess: next_stage
+pattern_syntax:
+  NS_TRAEFIK_ROUTER: '(%{USER}@%{URIHOST}|\-)'
+  NS_TRAEFIK_SERVER_URL: '(%{URI}|\-)'
+  NS_NUMBER_MINUS: '[0-9-]+'
+  NS_NGCUSTOMUSER: '[a-zA-Z0-9\.\@\-\+_%]+'
+  NS_ESCAPED_DQ: '(?:[^"\\]|\\.)*'
+nodes:
+  - grok:
+      pattern: '%{IPORHOST:remote_addr} - %{NS_NGCUSTOMUSER:remote_user} \[%{HTTPDATE:time_local}\] "%{WORD:verb} %{DATA:request} HTTP/%{NUMBER:http_version}" %{NS_NUMBER_MINUS:status} %{NS_NUMBER_MINUS:body_bytes_sent} "%{NS_ESCAPED_DQ:http_referer}" "%{NS_ESCAPED_DQ:http_user_agent}" %{NUMBER:number_of_requests_received_since_traefik_started} "%{DATA:traefik_router_name}" "%{NS_TRAEFIK_SERVER_URL:traefik_server_url}" %{NUMBER:request_duration_in_ms}ms'
+      apply_on: message
+    nodes:
+      - grok:
+          pattern: '^%{NS_TRAEFIK_ROUTER:traefik_router_name_root}(?: -> (?:%{DATA:traefik_router_intermediate} -> )?%{NS_TRAEFIK_ROUTER:traefik_router_leaf})?$'
+          expression: evt.Parsed.traefik_router_name
+statics:
+  - meta: service
+    value: http
+  - meta: http_status
+    expression: "evt.Parsed.status"
+  - meta: http_path
+    expression: "evt.Parsed.request"
+  - meta: user
+    expression: "evt.Parsed.remote_user"
+  - meta: source_ip
+    expression: "evt.Parsed.remote_addr"
+  - meta: http_user_agent
+    expression: "evt.Parsed.http_user_agent"
+  - meta: log_type
+    value: http_access-log
+  - target: evt.StrTime
+    expression: "evt.Parsed.time_local"
+  - meta: traefik_router_name_root
+    expression: "evt.Parsed.traefik_router_leaf != '' ? evt.Parsed.traefik_router_name_root : ''"
+  - meta: traefik_router_name_intermediate
+    expression: "evt.Parsed.traefik_router_intermediate"
+  - meta: traefik_router_name_leaf
+    expression: "evt.Parsed.traefik_router_leaf"
+  - meta: traefik_router_name
+    expression: "evt.Parsed.traefik_router_name"
+  - meta: http_verb
+    expression: "evt.Parsed.verb"
