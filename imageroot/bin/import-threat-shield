@@ -13,6 +13,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
 
@@ -41,6 +42,11 @@ NFT_SETS = {
     4: "ip crowdsec crowdsec-blacklists-cscli-import",
     6: "ip6 crowdsec6 crowdsec6-blacklists-cscli-import",
 }
+
+COUNT_TABLE = threat_shield.COUNT_TABLE
+
+# Before the bouncer chains (priority -10), which drop the packet.
+COUNT_PRIORITY = -20
 
 
 def cscli(*args, stdin=None):
@@ -144,9 +150,82 @@ def feed_alerts():
     return alerts
 
 
+def nft(script):
+    """Run an nft script as one transaction; False when the table is missing."""
+    try:
+        subprocess.run(["nft", "-f", "-"], input=script, text=True,
+                       check=True, capture_output=True)
+    except (OSError, subprocess.CalledProcessError) as err:
+        if "No such file or directory" not in (getattr(err, "stderr", None) or ""):
+            raise
+        return False
+    return True
+
+
+def record_blocked(blocked):
+    """Append this run's counts to the 24-hour history; old slots age out."""
+    slots = threat_shield.read_blocked_slots()
+    blocked = {key: packets for key, packets in blocked.items() if packets}
+    if blocked:
+        slots.append({"time": int(time.time()), "feeds": blocked})
+    temp = threat_shield.BLOCKED_FILE + ".tmp"
+    with open(temp, "w") as fp:
+        json.dump({"slots": slots}, fp)
+    os.replace(temp, threat_shield.BLOCKED_FILE)
+
+
+def remove_counting():
+    # add+delete: delete alone fails when the table is missing.
+    try:
+        nft(f"add table {COUNT_TABLE}\ndelete table {COUNT_TABLE}\n")
+    except (OSError, subprocess.CalledProcessError) as err:
+        print(agent.SD_WARNING + f"threat-shield cannot remove {COUNT_TABLE}: "
+              f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
+
+
+def refresh_counting(members):
+    """Rebuild the count-only rules. members maps the feeds fetched by this run
+    to their banned addresses; the other enabled feeds keep their sets."""
+    script = [f"add table {COUNT_TABLE}"]
+    for hook in ("input", "forward"):
+        script += [f"add chain {COUNT_TABLE} {hook} {{ type filter hook {hook} "
+                   f"priority {COUNT_PRIORITY}; policy accept; }}",
+                   f"flush chain {COUNT_TABLE} {hook}"]
+    # Highest confidence first: `return` credits a packet to one feed only.
+    ranked = sorted(enabled, key=lambda key: -threat_shield.get_confidence(key, True))
+    for key in catalog:
+        sets = {4: f"{COUNT_TABLE} {key}-v4", 6: f"{COUNT_TABLE} {key}-v6"}
+        script += [f"add counter {COUNT_TABLE} {key}",
+                   f"add set {sets[4]} {{ type ipv4_addr; flags timeout; }}",
+                   f"add set {sets[6]} {{ type ipv6_addr; flags timeout; }}"]
+        if key not in enabled:
+            script += [f"delete set {sets[4]}", f"delete set {sets[6]}",
+                       f"delete counter {COUNT_TABLE} {key}"]
+            continue
+        if key not in members:
+            continue
+        for version, target in sets.items():
+            values = sorted(value for value in members[key]
+                            if ipaddress.ip_address(value).version == version)
+            script.append(f"flush set {target}")
+            script += [f"add element {target} {{ "
+                       + ", ".join(f"{value} timeout {DECISION_DURATION}" for value in values[start:start + 1000])
+                       + " }" for start in range(0, len(values), 1000)]
+    for key in ranked:
+        for hook in ("input", "forward"):
+            script += [f'add rule {COUNT_TABLE} {hook} ip saddr @{key}-v4 counter name "{key}" return',
+                       f'add rule {COUNT_TABLE} {hook} ip6 saddr @{key}-v6 counter name "{key}" return']
+    try:
+        nft("\n".join(script) + "\n")
+    except (OSError, subprocess.CalledProcessError) as err:
+        print(agent.SD_WARNING + f"threat-shield cannot refresh {COUNT_TABLE}: "
+              f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
+
+
 def refresh_firewall():
     """Rewrite the bouncer's cscli-import sets from the active bans: the bouncer
-    adds an address once and never renews its timeout."""
+    adds an address once and never renews its timeout. Returns the banned
+    addresses, or None when they cannot be listed."""
     try:
         # Filtered in Python: --origin/--type make cscli take tens of seconds.
         result = cscli("decisions", "list", "--limit", "0", "--output", "json")
@@ -154,7 +233,7 @@ def refresh_firewall():
     except (subprocess.CalledProcessError, ValueError) as err:
         print(agent.SD_WARNING + f"threat-shield cannot list the decisions, firewall "
               f"not refreshed: {getattr(err, 'stderr', None) or err}", file=sys.stderr)
-        return
+        return None
     addresses = {4: set(), 6: set()}
     for row in rows:
         for decision in row.get("decisions") or []:
@@ -177,13 +256,12 @@ def refresh_firewall():
             + ", ".join(f"{value} timeout {DECISION_DURATION}" for value in values[start:start + 1000])
             + " }\n" for start in range(0, len(values), 1000))
         try:
-            subprocess.run(["nft", "-f", "-"], input=script, text=True,
-                           check=True, capture_output=True)
-        except (OSError, subprocess.CalledProcessError) as err:
             # A missing set is created by the bouncer with its first import decision.
-            if "No such file or directory" not in (getattr(err, "stderr", None) or ""):
-                print(agent.SD_WARNING + f"threat-shield could not refresh {target}: "
-                      f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
+            nft(script)
+        except (OSError, subprocess.CalledProcessError) as err:
+            print(agent.SD_WARNING + f"threat-shield could not refresh {target}: "
+                  f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
+    return addresses[4] | addresses[6]
 
 
 def drop_all_feed_decisions():
@@ -198,6 +276,9 @@ def drop_all_feed_decisions():
 catalog = threat_shield.load_catalog()
 enabled = threat_shield.enabled_feeds(catalog)
 
+# Before any early exit, which may remove the counters.
+record_blocked(threat_shield.read_counters(reset=True))
+
 # Refresh the entitlement cache on every run, before any early exit.
 probe = threat_shield.probe_status()
 
@@ -207,6 +288,7 @@ if not system_id or not auth_token:
           "skipping the Threat Shield import", file=sys.stderr)
     cleanup(catalog, error="no_subscription" if enabled else None)
     refresh_firewall()
+    remove_counting()
     sys.exit(0)
 
 # Without entitlement the probe finds no type: use the provider's guess.
@@ -241,6 +323,7 @@ if not enabled or not probe["entitled"]:
               "skipping the premium blocklists import", file=sys.stderr)
     drop_all_feed_decisions()
     refresh_firewall()
+    remove_counting()
     write_status({})
     sys.exit(0)
 
@@ -270,6 +353,7 @@ except (subprocess.CalledProcessError, ValueError, KeyError) as err:
     old_alerts = {}
 
 status = {}
+fetched = {}
 for key in enabled:
     url = threat_shield.feed_url(catalog[key], subscription_type)
     try:
@@ -309,7 +393,12 @@ for key in enabled:
                   f"of feed {key}: {err.stderr}", file=sys.stderr)
 
     status[key] = {"success": True, "entries": len(values), "error": None}
+    fetched[key] = values
 
-refresh_firewall()
+banned = refresh_firewall()
+if banned is not None:
+    # Allowlisted addresses have no ban: do not count them.
+    refresh_counting({key: [value for value in values if value in banned]
+                      for key, values in fetched.items()})
 
 write_status(status)

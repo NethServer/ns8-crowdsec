@@ -113,6 +113,12 @@ Show the imported blocklist entries enforced by the firewall:
 
     nft list set crowdsec crowdsec-blacklists-cscli-import
 
+The "Blocked" column counts the packets the firewall dropped from each list's
+addresses in the last 24 hours. An address on several lists is counted for the
+one with the highest confidence. Counters not yet saved by the import:
+
+    nft list counters table inet threat_shield
+
 Known limitation: the firewall bouncer, in nftables mode, cannot enforce
 network (CIDR) entries: it would block only the first address of each network
 ([cs-firewall-bouncer#396](https://github.com/crowdsecurity/cs-firewall-bouncer/issues/396)).

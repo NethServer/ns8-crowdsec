@@ -49,6 +49,7 @@ def decision_counts():
 catalog = threat_shield.load_catalog()
 enabled = set(threat_shield.enabled_feeds(catalog))
 counts = decision_counts()
+blocked = threat_shield.blocked_last_24h()
 
 system_id, auth_token = threat_shield.identity()
 has_subscription = bool(system_id) and bool(auth_token)
@@ -65,6 +66,7 @@ feeds = [
         "description": entry.get("descr", key),
         "enabled": key in enabled,
         "count": counts.get(key, 0),
+        "blocked_24h": blocked.get(key, 0),
         "confidence": threat_shield.get_confidence(key, enterprise),
     }
     for key, entry in catalog.items()

@@ -14,6 +14,7 @@
                     "description": "Yoroi malware - Level 1",
                     "enabled": true,
                     "count": 4213,
+                    "blocked_24h": 1602,
                     "confidence": 10
                 },
                 {
@@ -21,6 +22,7 @@
                     "description": "Nethesis community - Level 2",
                     "enabled": true,
                     "count": 33,
+                    "blocked_24h": 12,
                     "confidence": 8
                 }
             ],
@@ -74,7 +76,7 @@
             "description": "The feed catalog",
             "items": {
                 "type": "object",
-                "required": ["key", "description", "enabled", "count", "confidence"],
+                "required": ["key", "description", "enabled", "count", "blocked_24h", "confidence"],
                 "properties": {
                     "key": {
                         "type": "string",
@@ -96,6 +98,12 @@
                         "minimum": 0,
                         "title": "count",
                         "description": "Active decisions currently held by this feed"
+                    },
+                    "blocked_24h": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "blocked_24h",
+                        "description": "Packets from this feed's addresses blocked by the firewall in the last 24 hours; an address on several feeds is credited to the highest-confidence one"
                     },
                     "confidence": {
                         "type": "integer",
