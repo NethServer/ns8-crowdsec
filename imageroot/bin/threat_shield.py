@@ -10,6 +10,8 @@
 import base64
 import json
 import os
+import subprocess
+import sys
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit, urlunsplit
@@ -46,6 +48,13 @@ INSIGHTS_FEED_KEY = "nethesis-insights"
 
 # Its key has no level suffix, so it is rated like a level 2 feed.
 INSIGHTS_CONFIDENCE = 8
+
+# Count-only nft table: one counter per feed, never blocks.
+COUNT_TABLE = "inet threat_shield"
+
+# Blocked packets per import run, last 24 hours only; not backed up.
+BLOCKED_FILE = "threat_shield_blocked.json"
+BLOCKED_WINDOW = 24 * 3600
 
 
 def load_catalog():
@@ -210,3 +219,40 @@ def get_confidence(key, enterprise=False):
     if key.endswith(("lvl4", "level4")):
         return 5
     return -1
+
+
+def read_counters(reset=False):
+    """Blocked packets per feed from the count-only table: {key: packets}.
+    reset reads and zeroes them in one step. Missing table: {}."""
+    command = ["nft", "-j", "reset" if reset else "list", "counters", "table", *COUNT_TABLE.split()]
+    try:
+        result = subprocess.run(command, text=True, check=True, capture_output=True)
+        items = json.loads(result.stdout or "null")["nftables"]
+    except (OSError, subprocess.CalledProcessError, ValueError, KeyError, TypeError) as err:
+        if "No such file or directory" not in (getattr(err, "stderr", None) or ""):
+            print(agent.SD_WARNING + f"threat-shield cannot read the block counters: "
+                  f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
+        return {}
+    return {item["counter"]["name"]: item["counter"]["packets"]
+            for item in items if "counter" in item}
+
+
+def read_blocked_slots():
+    """Recorded slots of the last 24 hours: [{time, feeds}]."""
+    try:
+        with open(BLOCKED_FILE) as fp:
+            slots = json.load(fp)["slots"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return []
+    now = time.time()
+    return [slot for slot in slots if now - slot.get("time", 0) < BLOCKED_WINDOW]
+
+
+def blocked_last_24h():
+    """Blocked packets per feed in the last 24 hours, counters not yet
+    recorded included."""
+    totals = {}
+    for slot in read_blocked_slots() + [{"feeds": read_counters()}]:
+        for key, packets in (slot.get("feeds") or {}).items():
+            totals[key] = totals.get(key, 0) + packets
+    return totals

@@ -68,9 +68,9 @@ Nethesis **Threat Shield** blocklists, imported as CrowdSec decisions and
 enforced by the firewall bouncer.
 
 - **Subscription**: this node sends its own bans to Nethesis Insights and
-  receives the Nethesis global allowlist. The push is always on while the
-  cluster has a subscription, even with no blocklist enabled, and cannot be
-  turned off.
+  receives the Nethesis global allowlist. The push is on by default while the
+  cluster has a subscription, even with no blocklist enabled; see below to
+  turn it off.
 - **Threat Shield entitlement**: required to download the blocklists. Without
   it, previously imported entries are removed and the UI page is disabled.
 
@@ -113,6 +113,17 @@ Show the imported blocklist entries enforced by the firewall:
 
     nft list set crowdsec crowdsec-blacklists-cscli-import
 
+The "Blocked" column counts the packets the firewall dropped from each list's
+addresses in the last 24 hours. An address on several lists is counted for the
+one with the highest confidence. Show the counts of the last 24 hours:
+
+    api-cli run module/crowdsec1/list-threat-shield | jq '.feeds[] | {key, blocked_24h}'
+
+Show the firewall counters not yet saved by the import (it saves and resets
+them every 30 minutes):
+
+    nft list counters table inet threat_shield
+
 Known limitation: the firewall bouncer, in nftables mode, cannot enforce
 network (CIDR) entries: it would block only the first address of each network
 ([cs-firewall-bouncer#396](https://github.com/crowdsecurity/cs-firewall-bouncer/issues/396)).
@@ -124,6 +135,15 @@ about 3,000 networks that are not imported.
 Show the Nethesis global allowlist:
 
     runagent -m crowdsec1 cscli allowlists inspect nethesis_threat_shield
+
+Stop sending this node's bans to Nethesis Insights (command line only):
+
+    runagent -m crowdsec1 sh -c 'echo NETHESIS_INSIGHTS_PUSH=False >> "$AGENT_STATE_DIR/environment"'
+    systemctl reload crowdsec1
+
+All blocklists, `nethesis-insights` included, and the global allowlist keep
+working. To send bans again, remove that line from
+`/var/lib/nethserver/crowdsec1/state/environment` and reload the service.
 
 Test servers only: change the `nethesis-insights` URL in
 `/var/lib/nethserver/crowdsec1/etc/threat-shield-feeds.json`, then run
