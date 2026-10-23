@@ -68,9 +68,9 @@ Nethesis **Threat Shield** blocklists, imported as CrowdSec decisions and
 enforced by the firewall bouncer.
 
 - **Subscription**: this node sends its own bans to Nethesis Insights and
-  receives the Nethesis global allowlist. The push is always on while the
-  cluster has a subscription, even with no blocklist enabled, and cannot be
-  turned off.
+  receives the Nethesis global allowlist. The push is on by default while the
+  cluster has a subscription, even with no blocklist enabled; see below to
+  turn it off.
 - **Threat Shield entitlement**: required to download the blocklists. Without
   it, previously imported entries are removed and the UI page is disabled.
 
@@ -124,6 +124,15 @@ about 3,000 networks that are not imported.
 Show the Nethesis global allowlist:
 
     runagent -m crowdsec1 cscli allowlists inspect nethesis_threat_shield
+
+Stop sending this node's bans to Nethesis Insights (command line only):
+
+    runagent -m crowdsec1 sh -c 'echo NETHESIS_INSIGHTS_PUSH=False >> "$AGENT_STATE_DIR/environment"'
+    systemctl reload crowdsec1
+
+All blocklists, `nethesis-insights` included, and the global allowlist keep
+working. To send bans again, remove that line from
+`/var/lib/nethserver/crowdsec1/state/environment` and reload the service.
 
 Test servers only: change the `nethesis-insights` URL in
 `/var/lib/nethserver/crowdsec1/etc/threat-shield-feeds.json`, then run

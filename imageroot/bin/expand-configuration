@@ -94,8 +94,10 @@ if True:
         f.write(output)
 
 # expand notifications/nethesis-insights.yaml: any subscribed node pushes
-# its bans; credentials are read from cluster/subscription at every render.
+# its bans unless NETHESIS_INSIGHTS_PUSH=False; credentials are read from
+# cluster/subscription at every render.
 insights_url = threat_shield.insights_url()
+insights_push = os.environ.get('NETHESIS_INSIGHTS_PUSH', 'True') == 'True'
 
 files = ["crowdsec_config/notifications/nethesis-insights.yaml"]
 for f in files:
@@ -108,7 +110,11 @@ nethesis_insights_notification = False
 subscription = agent.redis_connect().hgetall('cluster/subscription')
 system_id = subscription.get('system_id')
 auth_token = subscription.get('auth_token')
-if not system_id or not auth_token:
+if not insights_push:
+    print(agent.SD_NOTICE + "NETHESIS_INSIGHTS_PUSH is False, "
+          "the insights webhook is disabled",
+          file=sys.stderr)
+elif not system_id or not auth_token:
     print(agent.SD_NOTICE + "cluster/subscription has no identity, "
           "the insights webhook is not configured",
           file=sys.stderr)
