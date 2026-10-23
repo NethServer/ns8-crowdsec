@@ -115,7 +115,12 @@ Show the imported blocklist entries enforced by the firewall:
 
 The "Blocked" column counts the packets the firewall dropped from each list's
 addresses in the last 24 hours. An address on several lists is counted for the
-one with the highest confidence. Counters not yet saved by the import:
+one with the highest confidence. Show the counts of the last 24 hours:
+
+    api-cli run module/crowdsec1/list-threat-shield | jq '.feeds[] | {key, blocked_24h}'
+
+Show the firewall counters not yet saved by the import (it saves and resets
+them every 30 minutes):
 
     nft list counters table inet threat_shield
 
