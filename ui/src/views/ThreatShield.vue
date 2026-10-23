@@ -61,6 +61,27 @@
               :errorDescription="error.listThreatShield"
               @updatePage="tablePage = $event"
             >
+              <template slot="headings">
+                <cv-data-table-heading
+                  v-for="(column, index) in i18nTableColumns"
+                  :key="index"
+                  :heading="column"
+                >
+                  <span v-if="tableColumns[index] === 'blocked'">
+                    {{ column }}
+                    <cv-interactive-tooltip
+                      alignment="center"
+                      direction="bottom"
+                      class="info"
+                    >
+                      <template slot="content">
+                        {{ $t("threat_shield.blocked_tooltip") }}
+                      </template>
+                    </cv-interactive-tooltip>
+                  </span>
+                  <template v-else>{{ column }}</template>
+                </cv-data-table-heading>
+              </template>
               <template slot="empty-state">
                 <NsEmptyState :title="$t('threat_shield.no_blocklists')" />
               </template>
@@ -128,6 +149,9 @@
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     {{ importResult(feed) ? importResult(feed).entries : "-" }}
+                  </cv-data-table-cell>
+                  <cv-data-table-cell>
+                    {{ feed.enabled ? feed.blocked_24h : "-" }}
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     {{
@@ -268,6 +292,7 @@ export default {
         "enabled",
         "confidence",
         "entries",
+        "blocked",
         "last_update",
       ],
       urlCheckInterval: null,
@@ -308,6 +333,7 @@ export default {
         this.$t("threat_shield.col_status"),
         this.$t("threat_shield.col_confidence"),
         this.$t("threat_shield.col_entries"),
+        this.$t("threat_shield.col_blocked"),
         this.$t("threat_shield.col_last_update"),
       ];
     },
