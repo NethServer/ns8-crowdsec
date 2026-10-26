@@ -162,6 +162,13 @@ def nft(script):
     return True
 
 
+def add_elements(target, values):
+    """nft lines adding values to the set target, 1000 per line."""
+    return [f"add element {target} {{ "
+            + ", ".join(f"{value} timeout {DECISION_DURATION}" for value in values[start:start + 1000])
+            + " }" for start in range(0, len(values), 1000)]
+
+
 def record_blocked(blocked):
     """Append this run's counts to the 24-hour history; old slots age out.
     True when there were counts to save."""
@@ -185,9 +192,26 @@ def remove_counting():
               f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
 
 
+def counted_addresses(key):
+    """Addresses now in the counting sets of feed key."""
+    values = set()
+    for version in (4, 6):
+        try:
+            result = subprocess.run(["nft", "-j", "list", "set", *COUNT_TABLE.split(), f"{key}-v{version}"],
+                                    text=True, check=True, capture_output=True)
+            items = json.loads(result.stdout or "null")["nftables"]
+        except (OSError, subprocess.CalledProcessError, ValueError, KeyError, TypeError):
+            continue
+        for item in items:
+            for elem in (item.get("set") or {}).get("elem") or []:
+                # Elements with a timeout are objects, plain ones strings.
+                values.add(elem["elem"]["val"] if isinstance(elem, dict) else elem)
+    return values
+
+
 def refresh_counting(members):
     """Rebuild the count-only rules. members maps the feeds fetched by this run
-    to their banned addresses; the other enabled feeds keep their sets."""
+    to {IP version: banned addresses}; the other enabled feeds keep their sets."""
     script = [f"add table {COUNT_TABLE}"]
     for hook in ("input", "forward"):
         script += [f"add chain {COUNT_TABLE} {hook} {{ type filter hook {hook} "
@@ -207,12 +231,7 @@ def refresh_counting(members):
         if key not in members:
             continue
         for version, target in sets.items():
-            values = sorted(value for value in members[key]
-                            if ipaddress.ip_address(value).version == version)
-            script.append(f"flush set {target}")
-            script += [f"add element {target} {{ "
-                       + ", ".join(f"{value} timeout {DECISION_DURATION}" for value in values[start:start + 1000])
-                       + " }" for start in range(0, len(values), 1000)]
+            script += [f"flush set {target}"] + add_elements(target, members[key][version])
     for key in ranked:
         for hook in ("input", "forward"):
             script += [f'add rule {COUNT_TABLE} {hook} ip saddr @{key}-v4 counter name "{key}" return',
@@ -226,8 +245,8 @@ def refresh_counting(members):
 
 def refresh_firewall():
     """Rewrite the bouncer's cscli-import sets from the active bans: the bouncer
-    adds an address once and never renews its timeout. Returns the banned
-    addresses, or None when they cannot be listed."""
+    adds an address once and never renews its timeout. Returns the addresses
+    now in the bouncer sets by IP version, or None when the bans cannot be listed."""
     try:
         # Filtered in Python: --origin/--type make cscli take tens of seconds.
         result = cscli("decisions", "list", "--limit", "0", "--output", "json")
@@ -250,20 +269,20 @@ def refresh_firewall():
             except ValueError:
                 continue  # ranges are dropped at import
             addresses[address.version].add(str(address))
+    enforced = {4: set(), 6: set()}
     for version, target in NFT_SETS.items():
         values = sorted(addresses[version])
         # One file is one transaction: no address is ever unblocked.
-        script = f"flush set {target}\n" + "".join(
-            f"add element {target} {{ "
-            + ", ".join(f"{value} timeout {DECISION_DURATION}" for value in values[start:start + 1000])
-            + " }\n" for start in range(0, len(values), 1000))
+        script = "\n".join([f"flush set {target}"] + add_elements(target, values)) + "\n"
         try:
             # A missing set is created by the bouncer with its first import decision.
-            nft(script)
+            if nft(script):
+                enforced[version] = addresses[version]
         except (OSError, subprocess.CalledProcessError) as err:
             print(agent.SD_WARNING + f"threat-shield could not refresh {target}: "
                   f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
-    return addresses[4] | addresses[6]
+    # Missing sets (e.g. the bouncer is stopped) block nothing: count nothing.
+    return enforced
 
 
 def drop_all_feed_decisions():
@@ -407,8 +426,13 @@ for key in enabled:
 
 banned = refresh_firewall()
 if banned is not None:
-    # Allowlisted addresses have no ban: do not count them.
-    refresh_counting({key: [value for value in values if value in banned]
+    # A feed that failed keeps its last list, minus newly allowlisted addresses.
+    for key in enabled:
+        if key not in fetched:
+            fetched[key] = counted_addresses(key)
+    # Count only what the bouncer blocks: allowlisted addresses have no ban.
+    refresh_counting({key: {version: sorted(banned[version].intersection(values))
+                            for version in banned}
                       for key, values in fetched.items()})
 
 write_status(status)
