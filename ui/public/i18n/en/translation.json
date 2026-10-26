@@ -215,7 +215,7 @@
         "col_confidence": "Confidence",
         "col_entries": "Entries",
         "col_blocked": "Blocked",
-        "blocked_tooltip": "Connection attempts from this list's addresses blocked by the firewall in the last 24 hours. An address on several lists is counted for the one with the highest confidence.",
+        "blocked_tooltip": "Network packets from this list's addresses blocked by the firewall in the last 24 hours. An address on several lists is counted for the one with the highest confidence.",
         "col_last_update": "Last update",
         "no_blocklists": "No blocklists available",
         "insights_tooltip": "Built from attacks blocked across NethServer and NethSecurity installations. When enough servers report the same IP, it is added to this list and distributed to every server with Threat Shield add-on.",
