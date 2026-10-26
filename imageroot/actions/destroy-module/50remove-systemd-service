@@ -20,10 +20,10 @@ rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.timer
 
 # remove the blocklist import timer
 systemctl disable --now "${MODULE_ID}-threat-shield.timer" || :
+# stop a running import, which would create the count-only table again
+systemctl stop "${MODULE_ID}-threat-shield.service" || :
 rm -vf /etc/systemd/system/${MODULE_ID}-threat-shield.service
 rm -vf /etc/systemd/system/${MODULE_ID}-threat-shield.timer
-# remove the count-only table; add first, delete fails when missing
-nft add table inet threat_shield && nft delete table inet threat_shield || :
 
 # remove the bouncer service
 systemctl disable --now "${MODULE_ID}-firewall-bouncer.service"

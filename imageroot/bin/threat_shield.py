@@ -221,17 +221,39 @@ def get_confidence(key, enterprise=False):
     return -1
 
 
+def nft(script, *args):
+    """Run nft, by default the script as one transaction. Returns its output,
+    or None when the table is missing."""
+    try:
+        result = subprocess.run(["nft", *(args or ("-f", "-"))], input=script,
+                                text=True, check=True, capture_output=True)
+    except (OSError, subprocess.CalledProcessError) as err:
+        if "No such file or directory" not in (getattr(err, "stderr", None) or ""):
+            raise
+        return None
+    return result.stdout
+
+
+def remove_counting():
+    # add+delete: delete alone fails when the table is missing.
+    try:
+        nft(f"add table {COUNT_TABLE}\ndelete table {COUNT_TABLE}\n")
+    except (OSError, subprocess.CalledProcessError) as err:
+        print(agent.SD_WARNING + f"threat-shield cannot remove {COUNT_TABLE}: "
+              f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
+
+
 def read_counters():
     """Blocked packets per feed from the count-only table: {key: packets}.
     Missing table or read error: {}."""
-    command = ["nft", "-j", "list", "counters", "table", *COUNT_TABLE.split()]
     try:
-        result = subprocess.run(command, text=True, check=True, capture_output=True)
-        items = json.loads(result.stdout or "null")["nftables"]
+        output = nft(None, "-j", "list", "counters", "table", *COUNT_TABLE.split())
+        if output is None:
+            return {}
+        items = json.loads(output or "null")["nftables"]
     except (OSError, subprocess.CalledProcessError, ValueError, KeyError, TypeError) as err:
-        if "No such file or directory" not in (getattr(err, "stderr", None) or ""):
-            print(agent.SD_WARNING + f"threat-shield cannot read the block counters: "
-                  f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
+        print(agent.SD_WARNING + f"threat-shield cannot read the block counters: "
+              f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
         return {}
     return {item["counter"]["name"]: item["counter"]["packets"]
             for item in items if "counter" in item}
