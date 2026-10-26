@@ -34,7 +34,7 @@ basic_auth = base64.b64encode(f"{system_id}:{auth_token}".encode()).decode()
 
 body = json.dumps({"cidr": request["cidr"], "reason": request["reason"]}).encode()
 http_request = Request(
-    f"{insights_url}/blocklist/v1/allowlist-requests",
+    f"{insights_url}/blocklist/crowdsec/v1/allowlist-requests",
     data=body,
     method="POST",
     headers={

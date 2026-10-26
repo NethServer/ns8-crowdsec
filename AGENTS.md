@@ -53,7 +53,7 @@ This module has no MariaDB/PostgreSQL component — don't apply the DB dump/rest
 - Allowlist: its own `cscli allowlists` entry `nethesis_threat_shield`, separate from `nethserver_whitelist`; updated add-before-remove, an empty download is a failure.
 - Status in `threat_shield_last_import.json` (not backed up); `list-threat-shield` is the only UI source, `get-configuration` has no Threat Shield data.
 - Push: `templates/nethesis-insights.yaml` via `notification-http`, rendered by `expand-configuration` whenever there is an identity, unless `NETHESIS_INSIGHTS_PUSH=False` (CLI-only opt-out, default on). Deliberately not gated on the feed selection or the entitlement.
-- `request-allowlist`: thin relay to Insights `POST /blocklist/v1/allowlist-requests`, gated on the cached entitlement. CLI only, no UI.
+- `request-allowlist`: thin relay to Insights `POST /blocklist/crowdsec/v1/allowlist-requests`, gated on the cached entitlement. CLI only, no UI.
 
 ## UI structure
 
