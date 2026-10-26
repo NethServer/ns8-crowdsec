@@ -221,10 +221,10 @@ def get_confidence(key, enterprise=False):
     return -1
 
 
-def read_counters(reset=False):
+def read_counters():
     """Blocked packets per feed from the count-only table: {key: packets}.
-    reset reads and zeroes them in one step. Missing table: {}."""
-    command = ["nft", "-j", "reset" if reset else "list", "counters", "table", *COUNT_TABLE.split()]
+    Missing table or read error: {}."""
+    command = ["nft", "-j", "list", "counters", "table", *COUNT_TABLE.split()]
     try:
         result = subprocess.run(command, text=True, check=True, capture_output=True)
         items = json.loads(result.stdout or "null")["nftables"]

@@ -163,7 +163,8 @@ def nft(script):
 
 
 def record_blocked(blocked):
-    """Append this run's counts to the 24-hour history; old slots age out."""
+    """Append this run's counts to the 24-hour history; old slots age out.
+    True when there were counts to save."""
     slots = threat_shield.read_blocked_slots()
     blocked = {key: packets for key, packets in blocked.items() if packets}
     if blocked:
@@ -172,6 +173,7 @@ def record_blocked(blocked):
     with open(temp, "w") as fp:
         json.dump({"slots": slots}, fp)
     os.replace(temp, threat_shield.BLOCKED_FILE)
+    return bool(blocked)
 
 
 def remove_counting():
@@ -277,7 +279,15 @@ catalog = threat_shield.load_catalog()
 enabled = threat_shield.enabled_feeds(catalog)
 
 # Before any early exit, which may remove the counters.
-record_blocked(threat_shield.read_counters(reset=True))
+try:
+    # Reset only once saved: after a failed read or write the next run saves them.
+    if record_blocked(threat_shield.read_counters()):
+        subprocess.run(["nft", "reset", "counters", "table", *COUNT_TABLE.split()],
+                       check=True, capture_output=True, text=True)
+except (OSError, subprocess.CalledProcessError) as err:
+    # The counts must not stop the import.
+    print(agent.SD_WARNING + f"threat-shield cannot save the blocked counts: "
+          f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
 
 # Refresh the entitlement cache on every run, before any early exit.
 probe = threat_shield.probe_status()
