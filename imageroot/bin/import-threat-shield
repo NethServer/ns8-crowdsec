@@ -150,18 +150,6 @@ def feed_alerts():
     return alerts
 
 
-def nft(script):
-    """Run an nft script as one transaction; False when the table is missing."""
-    try:
-        subprocess.run(["nft", "-f", "-"], input=script, text=True,
-                       check=True, capture_output=True)
-    except (OSError, subprocess.CalledProcessError) as err:
-        if "No such file or directory" not in (getattr(err, "stderr", None) or ""):
-            raise
-        return False
-    return True
-
-
 def add_elements(target, values):
     """nft lines adding values to the set target, 1000 per line."""
     return [f"add element {target} {{ "
@@ -183,23 +171,13 @@ def record_blocked(blocked):
     return bool(blocked)
 
 
-def remove_counting():
-    # add+delete: delete alone fails when the table is missing.
-    try:
-        nft(f"add table {COUNT_TABLE}\ndelete table {COUNT_TABLE}\n")
-    except (OSError, subprocess.CalledProcessError) as err:
-        print(agent.SD_WARNING + f"threat-shield cannot remove {COUNT_TABLE}: "
-              f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
-
-
 def counted_addresses(key):
     """Addresses now in the counting sets of feed key."""
     values = set()
     for version in (4, 6):
         try:
-            result = subprocess.run(["nft", "-j", "list", "set", *COUNT_TABLE.split(), f"{key}-v{version}"],
-                                    text=True, check=True, capture_output=True)
-            items = json.loads(result.stdout or "null")["nftables"]
+            output = threat_shield.nft(None, "-j", "list", "set", *COUNT_TABLE.split(), f"{key}-v{version}")
+            items = json.loads(output or "null")["nftables"] if output else []
         except (OSError, subprocess.CalledProcessError, ValueError, KeyError, TypeError):
             continue
         for item in items:
@@ -237,7 +215,7 @@ def refresh_counting(members):
             script += [f'add rule {COUNT_TABLE} {hook} ip saddr @{key}-v4 counter name "{key}" return',
                        f'add rule {COUNT_TABLE} {hook} ip6 saddr @{key}-v6 counter name "{key}" return']
     try:
-        nft("\n".join(script) + "\n")
+        threat_shield.nft("\n".join(script) + "\n")
     except (OSError, subprocess.CalledProcessError) as err:
         print(agent.SD_WARNING + f"threat-shield cannot refresh {COUNT_TABLE}: "
               f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
@@ -276,7 +254,7 @@ def refresh_firewall():
         script = "\n".join([f"flush set {target}"] + add_elements(target, values)) + "\n"
         try:
             # A missing set is created by the bouncer with its first import decision.
-            if nft(script):
+            if threat_shield.nft(script) is not None:
                 enforced[version] = addresses[version]
         except (OSError, subprocess.CalledProcessError) as err:
             print(agent.SD_WARNING + f"threat-shield could not refresh {target}: "
@@ -301,8 +279,7 @@ enabled = threat_shield.enabled_feeds(catalog)
 try:
     # Reset only once saved: after a failed read or write the next run saves them.
     if record_blocked(threat_shield.read_counters()):
-        subprocess.run(["nft", "reset", "counters", "table", *COUNT_TABLE.split()],
-                       check=True, capture_output=True, text=True)
+        threat_shield.nft(None, "reset", "counters", "table", *COUNT_TABLE.split())
 except (OSError, subprocess.CalledProcessError) as err:
     # The counts must not stop the import.
     print(agent.SD_WARNING + f"threat-shield cannot save the blocked counts: "
@@ -317,7 +294,7 @@ if not system_id or not auth_token:
           "skipping the Threat Shield import", file=sys.stderr)
     cleanup(catalog, error="no_subscription" if enabled else None)
     refresh_firewall()
-    remove_counting()
+    threat_shield.remove_counting()
     sys.exit(0)
 
 # Without entitlement the probe finds no type: use the provider's guess.
@@ -352,7 +329,7 @@ if not enabled or not probe["entitled"]:
               "skipping the premium blocklists import", file=sys.stderr)
     drop_all_feed_decisions()
     refresh_firewall()
-    remove_counting()
+    threat_shield.remove_counting()
     write_status({})
     sys.exit(0)
 
