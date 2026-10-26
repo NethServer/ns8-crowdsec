@@ -7,7 +7,7 @@ group_wait: 30s
 group_threshold: 100
 timeout: 10s
 
-url: {{ insights_url }}/blocklist/v1/events
+url: {{ insights_url }}/blocklist/crowdsec/v1/events
 method: POST
 
 headers:

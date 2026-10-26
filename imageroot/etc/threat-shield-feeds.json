@@ -1,6 +1,6 @@
 {
         "nethesis-insights": {
-                "url_4": "https://insights.nethesis.it/blocklist/v1/feed",
+                "url_4": "https://insights.nethesis.it/blocklist/crowdsec/v1/feed",
                 "descr": "Nethesis collective defense - Level 2"
         },
         "yoroimallvl1": {
