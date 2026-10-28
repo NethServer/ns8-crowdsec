@@ -32,11 +32,11 @@ except ValueError:
     }], fp=sys.stdout)
     sys.exit(3)
 
-# One listing filtered here: the default listing skips CAPI decisions,
-# which keeps it fast. --limit 0 lifts the 100-row cap.
+# Alerts, not decisions: "decisions list" shows an address once, under one
+# feed. --ip also returns alerts that don't cover it, so match below.
 result = subprocess.run(
-    ["podman", "exec", os.environ["MODULE_ID"], "cscli", "decisions", "list",
-     "--limit", "0", "--output", "json"],
+    ["podman", "exec", os.environ["MODULE_ID"], "cscli", "alerts", "list",
+     "--ip", str(needle), "--limit", "0", "--output", "json"],
     check=True, capture_output=True, text=True,
 )
 
@@ -47,10 +47,12 @@ except ValueError:
 
 matches = []
 for row in listed:
-    # Decisions come either grouped under alerts or flat.
-    for decision in (row.get("decisions") or [row]):
+    for decision in (row.get("decisions") or []):
         scenario = decision.get("scenario", "")
         if not scenario.startswith(threat_shield.SCENARIO_PREFIX):
+            continue
+        # Deleted or expired decisions stay in the alert with a negative duration.
+        if (decision.get("duration") or "").startswith("-"):
             continue
         try:
             network = ipaddress.ip_network(decision.get("value", ""), strict=False)
