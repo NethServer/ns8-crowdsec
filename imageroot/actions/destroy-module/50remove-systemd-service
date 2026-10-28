@@ -11,12 +11,6 @@ set -e
 #
 # We must stop and clean up what we installed in the "create-module" action
 #
-systemctl disable --now "${MODULE_ID}.service"
-rm -vf "/etc/systemd/system/${MODULE_ID}.service"
-# remove the timer
-systemctl disable --now "${MODULE_ID}-upgrade-hub.timer"
-rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.service
-rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.timer
 
 # remove the blocklist import timer
 systemctl disable --now "${MODULE_ID}-threat-shield.timer" || :
@@ -25,8 +19,22 @@ systemctl stop "${MODULE_ID}-threat-shield.service" || :
 rm -vf /etc/systemd/system/${MODULE_ID}-threat-shield.service
 rm -vf /etc/systemd/system/${MODULE_ID}-threat-shield.timer
 
-# remove the bouncer service
+# remove the bouncer service while its LAPI still runs
 systemctl disable --now "${MODULE_ID}-firewall-bouncer.service"
 rm -vf "/etc/systemd/system/${MODULE_ID}-firewall-bouncer.service"
+# a killed bouncer leaves its tables behind: one CrowdSec per node, they are ours
+nft -f - <<'EOF' || :
+add table ip crowdsec
+delete table ip crowdsec
+add table ip6 crowdsec6
+delete table ip6 crowdsec6
+EOF
+
+systemctl disable --now "${MODULE_ID}.service"
+rm -vf "/etc/systemd/system/${MODULE_ID}.service"
+# remove the timer
+systemctl disable --now "${MODULE_ID}-upgrade-hub.timer"
+rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.service
+rm -vf /etc/systemd/system/${MODULE_ID}-upgrade-hub.timer
 
 systemctl daemon-reload
