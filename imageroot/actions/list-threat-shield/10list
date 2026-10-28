@@ -17,12 +17,12 @@ import threat_shield
 
 
 def decision_counts():
-    """Active decisions per feed, from one listing filtered here: the default
-    listing skips CAPI, which keeps it fast. --limit 0 lifts the 100-row cap."""
+    """Active decisions per feed, from the alerts: "decisions list" shows an
+    address once, under one feed. --limit 0 lifts the 50-row cap."""
     counts = {}
     try:
         result = subprocess.run(
-            ["podman", "exec", os.environ["MODULE_ID"], "cscli", "decisions", "list",
+            ["podman", "exec", os.environ["MODULE_ID"], "cscli", "alerts", "list",
              "--limit", "0", "--output", "json"],
             check=True, capture_output=True, text=True,
         )
@@ -37,10 +37,11 @@ def decision_counts():
         return counts
 
     for row in listed:
-        # Decisions come either grouped under alerts or flat.
-        for decision in (row.get("decisions") or [row]):
+        for decision in (row.get("decisions") or []):
             scenario = decision.get("scenario", "")
-            if scenario.startswith(threat_shield.SCENARIO_PREFIX):
+            # Deleted or expired decisions stay in the alert with a negative duration.
+            if scenario.startswith(threat_shield.SCENARIO_PREFIX) and \
+                    not (decision.get("duration") or "").startswith("-"):
                 key = scenario[len(threat_shield.SCENARIO_PREFIX):]
                 counts[key] = counts.get(key, 0) + 1
     return counts

@@ -46,3 +46,16 @@ Enabling a Threat Shield feed without a subscription creates no decisions
 An unknown Threat Shield feed is rejected
     ${output}    ${rc}=    Run Module Action    set-threat-shield    {"feeds": ["nosuchfeed"]}
     Should Not Be Equal As Integers    ${rc}    0
+
+An address on two Threat Shield feeds is found in both
+    FOR    ${feed}    IN    nethesislvl3    nethesis-insights
+        ${rc}=    Execute Command    echo 192.0.2.80 | runagent -m ${module_id} cscli decisions import -i - --format values -d 10m -R threat-shield/${feed}    return_rc=True    return_stdout=False
+        Should Be Equal As Integers    ${rc}    0
+    END
+    ${feeds}=    Execute Command    echo '{"ip": "192.0.2.80"}' | api-cli run search-threat-shield-decision --agent module/${module_id} --data - | jq -r '[.decisions[].scenario] | sort | join(",")'
+    Should Be Equal    ${feeds}    threat-shield/nethesis-insights,threat-shield/nethesislvl3
+    # deleted decisions stay in the alerts as expired rows: they must not be found
+    Execute Command    runagent -m ${module_id} cscli decisions delete -i 192.0.2.80
+    ${found}=    Execute Command    echo '{"ip": "192.0.2.80"}' | api-cli run search-threat-shield-decision --agent module/${module_id} --data - | jq -r '.found'
+    Should Be Equal    ${found}    false
+    [Teardown]    Execute Command    runagent -m ${module_id} cscli decisions delete -i 192.0.2.80
