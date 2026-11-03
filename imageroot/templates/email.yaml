@@ -108,7 +108,7 @@ format: |
         
         <div class="actions">
           <h3>Quick Actions</h3>
-          <a href="https://{% endraw %}{{ fqdn }}{% raw %}/cluster-admin/#/apps/{% endraw %}{{ module_id }}{% raw %}?page=unban">
+          <a href="https://{% endraw %}{{ leader_hostname }}{% raw %}/cluster-admin/#/apps/{% endraw %}{{ module_id }}{% raw %}?page=blocklists">
             View Active Decisions
           </a>
         </div>
