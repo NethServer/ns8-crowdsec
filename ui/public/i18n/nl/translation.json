@@ -275,6 +275,8 @@
         "title": "Threat Shield",
         "col_blocklist": "Blocklist",
         "search_placeholder": "Enter an IP address",
-        "last_import_failure": "Update failed"
+        "last_import_failure": "Update failed",
+        "col_blocked": "Blocked",
+        "blocked_tooltip": "Network packets from this list's addresses blocked by the firewall in the last 24 hours. An address on several lists is counted for the one with the highest confidence."
     }
 }
