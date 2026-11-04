@@ -1,0 +1,23 @@
+name: nethserver/webtop-logs
+description: "Parse WebTop authentication events"
+# Apache only sees the Traefik address and answers 200 on failure: this line carries the real client
+# The webtop-auth: prefix is set by ns8-webtop's logback override, the container name is not stable
+filter: "evt.Parsed.message startsWith 'webtop-auth:'"
+onsuccess: next_stage
+nodes:
+  - grok:
+      # The username is typed by the client and may hold spaces or be empty: match it greedily up to the last action=
+      pattern: 'webtop-auth: \[%{DATA}\]\[%{DATA}\] %{NOTSPACE:session}: client=%{IP:client_ip} profile=%{GREEDYDATA:profile} action=%{WORD:action}$'
+      apply_on: message
+      statics:
+        - meta: log_type
+          value: webtop_auth
+        - meta: source_ip
+          expression: evt.Parsed.client_ip
+        - meta: target_user
+          expression: evt.Parsed.profile
+        - meta: auth_action
+          expression: evt.Parsed.action
+statics:
+  - meta: service
+    value: webtop
