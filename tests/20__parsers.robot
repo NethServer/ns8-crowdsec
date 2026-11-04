@@ -50,6 +50,7 @@ The WebTop parser and scenario match a failed login only
     Should Contain    ${output}    🟢 nethserver/webtop-logs
     Should Contain    ${output}    evt.Meta.source_ip : 203.0.113.16
     Should Contain    ${output}    🟢 nethserver/webtop-bf
+    Should Contain    ${output}    🟢 nethserver/webtop-bf_user-enum
     ${output}=    Explain Log Line    ${SYSLOG_PREFIX} webapp[123]: webtop-auth: [webtop][webtop:core] 4D20EFB0BAF087CBD7E40B3742FCC95F: client=203.0.113.17 profile=bob@NethServer action=LOGIN_SUCCESS
     Should Contain    ${output}    🟢 nethserver/webtop-logs
     Should Not Contain    ${output}    🟢 nethserver/webtop-bf

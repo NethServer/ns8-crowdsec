@@ -1,17 +1,39 @@
+# Tuned like the hub crowdsecurity/nextcloud-bf scenarios
 type: leaky
 name: nethserver/webtop-bf
 description: "Detect login brute force against WebTop"
 filter: "evt.Meta.log_type == 'webtop_auth' && evt.Meta.auth_action == 'LOGIN_FAILURE'"
 groupby: evt.Meta.source_ip
-capacity: 8
-leakspeed: "10m"
-blackhole: "15m"
+leakspeed: "1m"
+capacity: 5
+blackhole: 5m
+reprocess: true
 labels:
-  confidence: 2
+  remediation: true
+  confidence: 3
   spoofable: 0
   classification:
     - attack.T1110
   behavior: "http:bruteforce"
   label: "WebTop brute force"
   service: webtop
+---
+type: leaky
+name: nethserver/webtop-bf_user-enum
+description: "Detect user enumeration against WebTop"
+filter: "evt.Meta.log_type == 'webtop_auth' && evt.Meta.auth_action == 'LOGIN_FAILURE'"
+groupby: evt.Meta.source_ip
+distinct: evt.Meta.target_user
+leakspeed: "1m"
+capacity: 5
+blackhole: 5m
+reprocess: true
+labels:
   remediation: true
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1110
+  behavior: "http:bruteforce"
+  label: "WebTop user enumeration"
+  service: webtop

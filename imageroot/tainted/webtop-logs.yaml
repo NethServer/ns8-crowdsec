@@ -14,7 +14,7 @@ nodes:
           value: webtop_auth
         - meta: source_ip
           expression: evt.Parsed.client_ip
-        - meta: username
+        - meta: target_user
           expression: evt.Parsed.profile
         - meta: auth_action
           expression: evt.Parsed.action
