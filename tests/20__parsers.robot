@@ -44,6 +44,16 @@ The Nextcloud parser matches a brute force warning
     Should Contain    ${output}    evt.Meta.source_ip : 203.0.113.15
     Should Contain    ${output}    🟢 crowdsecurity/nextcloud-bf
 
+The WebTop parser and scenario match a failed login only
+    # real line logged by WebTop, only the client IP and the user are changed
+    ${output}=    Explain Log Line    ${SYSLOG_PREFIX} webapp[123]: webtop-auth: [webtop][webtop:core] null: client=203.0.113.16 profile=bob@? action=LOGIN_FAILURE
+    Should Contain    ${output}    🟢 nethserver/webtop-logs
+    Should Contain    ${output}    evt.Meta.source_ip : 203.0.113.16
+    Should Contain    ${output}    🟢 nethserver/webtop-bf
+    ${output}=    Explain Log Line    ${SYSLOG_PREFIX} webapp[123]: webtop-auth: [webtop][webtop:core] 4D20EFB0BAF087CBD7E40B3742FCC95F: client=203.0.113.17 profile=bob@NethServer action=LOGIN_SUCCESS
+    Should Contain    ${output}    🟢 nethserver/webtop-logs
+    Should Not Contain    ${output}    🟢 nethserver/webtop-bf
+
 The dovecot parser and scenario match an IMAP login failure
     # real line from the NS8 mail module, only the remote IP is changed
     ${output}=    Explain Log Line    ${SYSLOG_PREFIX} dovecot[3457027]: imap-login: Disconnected: Aborted login by logging out (auth failed, 1 attempts in 2 secs): user=<robot-test-user>, method=PLAIN, rip=203.0.113.20, lip=127.0.0.1, TLS, session=<10//zk9d/KZ/AAAB>

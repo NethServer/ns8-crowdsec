@@ -211,6 +211,10 @@ Then run the tool as
 - inspect a scenario: `cscli scenarios inspect crowdsecurity/ssh-bf`
 - inspect a parser: `cscli parsers inspect crowdsecurity/sshd-logs`
 
+## WebTop scenario
+
+ns8-crowdsec ships a custom parser and scenario that ban an IP after repeated failed WebTop logins. They read the `webtop-auth` lines logged by WebTop, which carry the real client IP. This protection is always enabled.
+
 ## NethVoice / Kamailio scenarios
 
 Besides the CrowdSec hub collections, ns8-crowdsec ships custom parsers/scenarios to detect:

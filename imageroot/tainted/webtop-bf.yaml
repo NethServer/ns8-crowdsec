@@ -1,0 +1,17 @@
+type: leaky
+name: nethserver/webtop-bf
+description: "Detect login brute force against WebTop"
+filter: "evt.Meta.log_type == 'webtop_auth' && evt.Meta.auth_action == 'LOGIN_FAILURE'"
+groupby: evt.Meta.source_ip
+capacity: 8
+leakspeed: "10m"
+blackhole: "15m"
+labels:
+  confidence: 2
+  spoofable: 0
+  classification:
+    - attack.T1110
+  behavior: "http:bruteforce"
+  label: "WebTop brute force"
+  service: webtop
+  remediation: true
