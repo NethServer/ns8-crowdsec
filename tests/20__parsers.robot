@@ -54,6 +54,14 @@ The WebTop parser and scenario match a failed login only
     Should Contain    ${output}    🟢 nethserver/webtop-logs
     Should Not Contain    ${output}    🟢 nethserver/webtop-bf
 
+The WebTop parser counts failures with a spaced or empty username
+    ${output}=    Explain Log Line    ${SYSLOG_PREFIX} webapp[123]: webtop-auth: [webtop][webtop:core] null: client=203.0.113.18 profile=bob x@? action=LOGIN_FAILURE
+    Should Contain    ${output}    evt.Meta.source_ip : 203.0.113.18
+    Should Contain    ${output}    🟢 nethserver/webtop-bf
+    ${output}=    Explain Log Line    ${SYSLOG_PREFIX} webapp[123]: webtop-auth: [webtop][webtop:core] null: client=203.0.113.19 profile=@? action=LOGIN_FAILURE
+    Should Contain    ${output}    evt.Meta.source_ip : 203.0.113.19
+    Should Contain    ${output}    🟢 nethserver/webtop-bf
+
 The dovecot parser and scenario match an IMAP login failure
     # real line from the NS8 mail module, only the remote IP is changed
     ${output}=    Explain Log Line    ${SYSLOG_PREFIX} dovecot[3457027]: imap-login: Disconnected: Aborted login by logging out (auth failed, 1 attempts in 2 secs): user=<robot-test-user>, method=PLAIN, rip=203.0.113.20, lip=127.0.0.1, TLS, session=<10//zk9d/KZ/AAAB>
