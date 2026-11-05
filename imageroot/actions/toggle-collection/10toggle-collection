@@ -11,12 +11,17 @@ input=$(cat)
 name=$(echo "$input" | jq -r '.name')
 action=$(echo "$input" | jq -r '.action')
 
-# nethesis/nethvoice is a fake collection bundling NethVoice and Kamailio
-# custom parsers/scenarios, toggled via an env flag instead of cscli
+# nethesis/nethvoice (NethVoice and Kamailio) and nethesis/webtop are fake
+# collections of custom parsers/scenarios, toggled via an env flag instead of cscli
 case "$name" in
     nethesis/nethvoice)
         value=$([[ "$action" == "install" ]] && echo True || echo False)
         python3 -c "import agent; agent.set_env('NETHVOICE_COLLECTION_ENABLED', '$value')"
+        systemctl reload "${MODULE_ID}.service"
+        ;;
+    nethesis/webtop)
+        value=$([[ "$action" == "install" ]] && echo True || echo False)
+        python3 -c "import agent; agent.set_env('WEBTOP_COLLECTION_ENABLED', '$value')"
         systemctl reload "${MODULE_ID}.service"
         ;;
     *)

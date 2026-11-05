@@ -11,6 +11,7 @@
             "pull_community_blocklist": true,
             "console_enrolled": false,
             "nethvoice_collection": true,
+            "webtop_collection": true,
             "email_notifications": false,
             "whitelist_count": 2,
             "threat_shield_enterprise": 3,

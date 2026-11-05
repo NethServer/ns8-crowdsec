@@ -16,3 +16,4 @@ else:
 
 agent.set_env("DISABLE_ONLINE_API", False)
 agent.set_env("NETHVOICE_COLLECTION_ENABLED", True)
+agent.set_env("WEBTOP_COLLECTION_ENABLED", True)

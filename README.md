@@ -213,7 +213,14 @@ Then run the tool as
 
 ## WebTop scenario
 
-ns8-crowdsec ships a custom parser and scenario that ban an IP after repeated failed WebTop logins. They read the `webtop-auth` lines logged by WebTop, which carry the real client IP. This protection is always enabled.
+ns8-crowdsec ships a custom parser and scenario that ban an IP after repeated failed WebTop logins. They read the `webtop-auth` lines logged by WebTop, which carry the real client IP.
+
+The parser and scenario are exposed as the `nethesis/webtop` collection. It is enabled by default, for new and existing installations, and can be disabled from the Web interface.
+
+From CLI, set the `WEBTOP_COLLECTION_ENABLED` variable, then restart the module:
+
+    runagent -m crowdsec1 python3 -c 'import agent ; agent.set_env("WEBTOP_COLLECTION_ENABLED", "False")'
+    systemctl restart crowdsec1
 
 ## NethVoice / Kamailio scenarios
 

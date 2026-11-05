@@ -122,6 +122,14 @@ Enable NethVoice Collection
     Run Module Action    toggle-collection    {"name": "nethesis/nethvoice", "action": "install"}
     Wait Until Keyword Succeeds    24x    5s    CrowdSec Is Ready
 
+Enable WebTop Collection
+    Wait Until Keyword Succeeds    24x    5s    CrowdSec Is Ready
+    ${status}=    Collection Status    nethesis/webtop
+    Return From Keyword If    '${status}' == 'enabled'
+    Sleep    15s
+    Run Module Action    toggle-collection    {"name": "nethesis/webtop", "action": "install"}
+    Wait Until Keyword Succeeds    24x    5s    CrowdSec Is Ready
+
 Reset Update Seed
     Return From Keyword If    '${SCENARIO}' != 'update'
     Execute Command    runagent -m ${module_id} cscli decisions delete -i 192.0.2.200
