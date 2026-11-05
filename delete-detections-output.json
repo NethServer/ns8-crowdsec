@@ -1,0 +1,1 @@
+{"$schema":"http://json-schema.org/draft-07/schema#","title":"delete-detections output","$id":"http://schema.nethserver.org/crowdsec/delete-detections-output.json","description":"Result of flushing all CrowdSec alerts","examples":[{}],"type":"object"}
