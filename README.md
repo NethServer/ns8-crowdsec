@@ -31,6 +31,10 @@ First of all, you need to set the smarthost credentials in the `Settings > Smart
 
 then trigger the action configure-module (see below)
 
+The "View Active Decisions" link in the email points to the cluster-admin UI of the leader node. The leader hostname is read when the service starts. After a leader switch, restart the module to update the link:
+
+    systemctl restart crowdsec1
+
 ## Configure
 
 Let's assume that the crowdsec instance is named `crowdsec1`. Once installed the container is up, nothing is needed, customisation can be done :
