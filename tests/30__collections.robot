@@ -41,3 +41,23 @@ Toggle the nethesis/nethvoice collection
     Should Be Equal As Integers    ${count}    9
     # the end to end suite needs the kamailio rules back even if a check above failed
     [Teardown]    Enable NethVoice Collection
+
+Toggle the nethesis/webtop collection
+    Sleep    15s
+    ${out}    ${rc}=    Run Module Action    toggle-collection    {"name": "nethesis/webtop", "action": "remove"}
+    Should Be Equal As Integers    ${rc}    0
+    ${status}=    Collection Status    nethesis/webtop
+    Should Be Equal    ${status}    disabled
+    ${rc}=    Execute Command    runagent -m ${module_id} test -e crowdsec_config/scenarios/webtop-bf.yaml    return_rc=True    return_stdout=False
+    Should Not Be Equal As Integers    ${rc}    0
+    ${output}=    Explain Log Line    ${SYSLOG_PREFIX} webapp[123]: webtop-auth: [webtop][webtop:core] null: client=203.0.113.16 profile=bob@? action=LOGIN_FAILURE
+    Should Not Contain    ${output}    nethserver/webtop-logs
+    Should Not Contain    ${output}    nethserver/webtop-bf
+    Sleep    15s
+    ${out}    ${rc}=    Run Module Action    toggle-collection    {"name": "nethesis/webtop", "action": "install"}
+    Should Be Equal As Integers    ${rc}    0
+    ${status}=    Collection Status    nethesis/webtop
+    Should Be Equal    ${status}    enabled
+    ${count}=    Execute Command    runagent -m ${module_id} ls crowdsec_config/scenarios crowdsec_config/parsers/s01-parse | grep -c webtop
+    Should Be Equal As Integers    ${count}    2
+    [Teardown]    Enable WebTop Collection

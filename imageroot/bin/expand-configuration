@@ -212,10 +212,25 @@ if whitelists:
 os.makedirs("crowdsec_config/hub/parsers/s01-parse/crowdsecurity", exist_ok=True)
 shutil.copyfile("../tainted/nextcloud-logs.yaml", "crowdsec_config/hub/parsers/s01-parse/crowdsecurity/nextcloud-logs.yaml")
 shutil.copyfile("../tainted/mattermost-whitelist.yaml", "crowdsec_config/parsers/s02-enrich/mattermost-whitelist.yaml")
-os.makedirs("crowdsec_config/parsers/s01-parse", exist_ok=True)
-os.makedirs("crowdsec_config/scenarios", exist_ok=True)
-shutil.copyfile("../tainted/webtop-logs.yaml", "crowdsec_config/parsers/s01-parse/webtop-logs.yaml")
-shutil.copyfile("../tainted/webtop-bf.yaml", "crowdsec_config/scenarios/webtop-bf.yaml")
+
+# WebTop parser/scenario are exposed as a fake collection (nethesis/webtop)
+# toggleable via toggle-collection.
+webtop_enabled = os.environ.get("WEBTOP_COLLECTION_ENABLED", "True") == "True"
+
+webtop_files = [
+    ("../tainted/webtop-logs.yaml", "crowdsec_config/parsers/s01-parse/webtop-logs.yaml"),
+    ("../tainted/webtop-bf.yaml", "crowdsec_config/scenarios/webtop-bf.yaml"),
+]
+
+for src, dest in webtop_files:
+    if webtop_enabled:
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        shutil.copyfile(src, dest)
+    else:
+        try:
+            os.remove(dest)
+        except FileNotFoundError:
+            pass
 
 # NethVoice and kamailio parsers/scenarios are exposed as a single fake
 # collection (nethesis/nethvoice) toggleable via toggle-collection.
