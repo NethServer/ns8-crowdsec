@@ -11,7 +11,3 @@ import os
 # Set NETHVOICE_COLLECTION_ENABLED to False only if not already set
 if "NETHVOICE_COLLECTION_ENABLED" not in os.environ:
     agent.set_env("NETHVOICE_COLLECTION_ENABLED", False)
-
-# WebTop detection was always on before it became a collection: keep it on
-if "WEBTOP_COLLECTION_ENABLED" not in os.environ:
-    agent.set_env("WEBTOP_COLLECTION_ENABLED", True)

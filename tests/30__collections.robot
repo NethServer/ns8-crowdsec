@@ -52,6 +52,7 @@ Toggle the nethesis/webtop collection
     Should Not Be Equal As Integers    ${rc}    0
     ${output}=    Explain Log Line    ${SYSLOG_PREFIX} webapp[123]: webtop-auth: [webtop][webtop:core] null: client=203.0.113.16 profile=bob@? action=LOGIN_FAILURE
     Should Not Contain    ${output}    nethserver/webtop-logs
+    Should Not Contain    ${output}    nethserver/webtop-bf
     Sleep    15s
     ${out}    ${rc}=    Run Module Action    toggle-collection    {"name": "nethesis/webtop", "action": "install"}
     Should Be Equal As Integers    ${rc}    0

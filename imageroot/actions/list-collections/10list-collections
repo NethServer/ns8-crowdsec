@@ -16,7 +16,7 @@ else
 fi
 
 # nethesis/nethvoice is not a real CrowdSec hub collection: it bundles the
-# always-installed NethVoice and Kamailio custom parsers/scenarios, exposed
+# NethVoice and Kamailio custom parsers/scenarios, exposed
 # here as a single fake collection so it can be listed/toggled like the real
 # ones.
 # nethesis/webtop does the same for the WebTop login parser/scenario.
