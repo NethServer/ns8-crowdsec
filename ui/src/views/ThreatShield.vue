@@ -513,7 +513,6 @@
             ref="listUrl"
           />
           <NsToggle
-            v-if="listModal.kind === 'allowlist'"
             :label="$t('threat_shield.col_status')"
             value="enabled"
             v-model="listModal.enabled"
@@ -822,7 +821,11 @@ export default {
         name: row ? this.listName(row) : "",
         url: row ? row.url : "",
         description: row ? row.description || "" : "",
-        enabled: row ? !!this.allowlistSelected[row.name] : true,
+        enabled: !row
+          ? true
+          : kind === "allowlist"
+          ? !!this.allowlistSelected[row.name]
+          : !!this.selected[row.key],
       };
     },
     showDeleteModal(kind, row) {
@@ -908,9 +911,11 @@ export default {
         m.kind === "allowlist" ? "custom_allowlists" : "custom_blocklists";
       if (m.kind === "allowlist") {
         item.enabled = m.enabled;
-      } else if (!m.isEdit) {
-        // A new custom blocklist starts enabled.
-        data.feeds.push(`custom-${m.name}`);
+      } else {
+        // A custom blocklist is enabled by its "custom-<name>" feed key.
+        const key = `custom-${m.name}`;
+        data.feeds = data.feeds.filter((k) => k !== key);
+        if (m.enabled) data.feeds.push(key);
       }
       const rows = data[field];
       const i = rows.findIndex((row) => row.name === m.name);
