@@ -294,7 +294,11 @@
                 >
                   <cv-data-table-cell>
                     <span class="feed-name">
-                      {{ allowlistTitle(row) }}
+                      {{
+                        row.builtin
+                          ? $t("threat_shield.nethesis_allowlist")
+                          : row.name
+                      }}
                       <cv-interactive-tooltip
                         v-if="row.builtin"
                         alignment="center"
@@ -306,9 +310,9 @@
                         </template>
                       </cv-interactive-tooltip>
                     </span>
-                    <div v-if="!row.builtin" class="list-url">
-                      {{ row.url }}
-                    </div>
+                  </cv-data-table-cell>
+                  <cv-data-table-cell>
+                    {{ row.builtin ? "" : row.description || "-" }}
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     <NsToggle
@@ -493,6 +497,13 @@
             ref="listName"
           />
           <NsTextInput
+            v-model.trim="listModal.description"
+            :label="$t('threat_shield.list_description')"
+            :invalid-message="error.listDescription"
+            :disabled="loading.setThreatShield"
+            ref="listDescription"
+          />
+          <NsTextInput
             v-model.trim="listModal.url"
             :label="$t('threat_shield.url')"
             placeholder="https://"
@@ -500,13 +511,6 @@
             :invalid-message="error.listUrl"
             :disabled="loading.setThreatShield"
             ref="listUrl"
-          />
-          <NsTextInput
-            v-model.trim="listModal.description"
-            :label="$t('threat_shield.list_description')"
-            :invalid-message="error.listDescription"
-            :disabled="loading.setThreatShield"
-            ref="listDescription"
           />
           <NsToggle
             v-if="listModal.kind === 'allowlist'"
@@ -610,6 +614,7 @@ export default {
       ],
       allowlistColumns: [
         "name",
+        "description",
         "enabled",
         "entries",
         "last_update",
@@ -678,7 +683,8 @@ export default {
     },
     i18nAllowlistColumns() {
       return [
-        this.$t("threat_shield.col_allowlist"),
+        this.$t("threat_shield.name"),
+        this.$t("threat_shield.col_description"),
         this.$t("threat_shield.col_status"),
         this.$t("threat_shield.col_entries"),
         this.$t("threat_shield.col_last_update"),
@@ -857,7 +863,7 @@ export default {
           "threat_shield.invalid_description"
         );
       }
-      const invalid = ["listName", "listUrl", "listDescription"].find(
+      const invalid = ["listName", "listDescription", "listUrl"].find(
         (key) => this.error[key]
       );
       if (invalid) {
