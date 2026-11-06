@@ -8,8 +8,10 @@
 """Shared helpers for the Threat Shield blocklists."""
 
 import base64
+import http.client
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -56,6 +58,24 @@ COUNT_TABLE = "inet threat_shield"
 BLOCKED_FILE = "threat_shield_blocked.json"
 BLOCKED_WINDOW = 24 * 3600
 
+# Custom allowlists and blocklists, written by set-threat-shield; backed up.
+LISTS_FILE = "threat_shield_lists.json"
+
+# Feed key prefix of the custom blocklists.
+CUSTOM_PREFIX = "custom-"
+
+# Custom list names end up in cscli allowlist names and nft set names.
+NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]{0,19}")
+# Same as the set-threat-shield schema: http(s), no credentials.
+URL_RE = re.compile(r"https?://[^/?#@\s]+([/?#]\S*)?")
+
+# The Nethesis global allowlist and the prefix of the custom ones in cscli.
+NETHESIS_ALLOWLIST = "nethesis_threat_shield"
+CUSTOM_ALLOWLIST_PREFIX = "threat_shield_"
+
+# Larger bodies are refused, not truncated: a cut line could be another address.
+MAX_BODY = 64 * 1024 * 1024
+
 
 def load_catalog():
     """Return the feed catalog as an ordered {key: {url_4, descr}} dict."""
@@ -100,12 +120,23 @@ def allowlist_url(catalog, subscription_type):
     return first.rsplit("/", 1)[0] + "/whitelist.global"
 
 
-def fetch(url, system_id, auth_token, timeout=HTTP_TIMEOUT):
-    """GET url with HTTP Basic credentials. Returns the decoded body."""
-    basic_auth = base64.b64encode(f"{system_id}:{auth_token}".encode()).decode()
-    request = Request(url, headers={"Authorization": f"Basic {basic_auth}"})
-    with urlopen(request, timeout=timeout) as response:
-        return response.read().decode(errors="replace")
+def fetch(url, system_id=None, auth_token=None, timeout=HTTP_TIMEOUT):
+    """GET url, with HTTP Basic credentials only when given: never pass them
+    for a custom URL. Returns the decoded body."""
+    request = Request(url)
+    if system_id and auth_token:
+        basic_auth = base64.b64encode(f"{system_id}:{auth_token}".encode()).decode()
+        # Not sent again after a redirect.
+        request.add_unredirected_header("Authorization", f"Basic {basic_auth}")
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            body = response.read(MAX_BODY + 1)
+    except http.client.HTTPException as err:
+        # e.g. InvalidURL, BadStatusLine, IncompleteRead: callers catch URLError.
+        raise URLError(err) from err
+    if len(body) > MAX_BODY:
+        raise ValueError(f"the list is larger than {MAX_BODY} bytes")
+    return body.decode(errors="replace")
 
 
 def _probe(system_id, auth_token):
@@ -197,6 +228,42 @@ def enabled_feeds(catalog):
     return [key for key in _selected_keys() if key in catalog]
 
 
+def valid_row(row):
+    """True if a custom list row has a safe name and an http(s) URL."""
+    return (isinstance(row, dict) and isinstance(row.get("name"), str)
+            and isinstance(row.get("url"), str)
+            and NAME_RE.fullmatch(row["name"]) is not None
+            and URL_RE.fullmatch(row["url"]) is not None and len(row["url"]) <= 512)
+
+
+def load_lists():
+    """Custom lists, {"allowlists": [rows], "blocklists": [rows]}; invalid
+    rows are dropped. Empty if the file is missing, ValueError if it is broken."""
+    try:
+        with open(LISTS_FILE) as fp:
+            data = json.load(fp)
+    except FileNotFoundError:
+        data = {}
+    if not isinstance(data, dict):
+        raise ValueError(f"{LISTS_FILE} is not a JSON object")
+    return {kind: [row for row in (data.get(kind) or []) if valid_row(row)]
+            for kind in ("allowlists", "blocklists")}
+
+
+def all_feeds(catalog, lists):
+    """The catalog followed by the custom blocklists, as {key: {url_4, descr, custom}}."""
+    feeds = dict(catalog)
+    for row in lists["blocklists"]:
+        feeds[CUSTOM_PREFIX + row["name"]] = {"url_4": row["url"], "custom": True,
+                                              "descr": row.get("description", "")}
+    return feeds
+
+
+def nethesis_allowlist_enabled():
+    """The Nethesis global allowlist toggle, on unless set to False."""
+    return os.environ.get("THREAT_SHIELD_NETHESIS_ALLOWLIST", "True") != "False"
+
+
 def insights_url():
     """Base URL of the Nethesis Insights server, from its catalog entry."""
     parts = urlsplit(load_catalog()[INSIGHTS_FEED_KEY]["url_4"])
@@ -206,7 +273,7 @@ def insights_url():
 def get_confidence(key, enterprise=False):
     """Feed confidence, 1-10, or -1 when not rated.
     Same ratings as NethSecurity."""
-    if not enterprise:
+    if not enterprise or key.startswith(CUSTOM_PREFIX):
         return -1
     if key == INSIGHTS_FEED_KEY:
         return INSIGHTS_CONFIDENCE

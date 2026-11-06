@@ -6,7 +6,7 @@
 #
 
 """Enable the Threat Shield import timer only when the subscription has an
-identity: without it there is no allowlist nor blocklist to import."""
+identity or a custom list exists: otherwise there is nothing to import."""
 
 import os
 import subprocess
@@ -19,7 +19,14 @@ import threat_shield
 system_id, auth_token = threat_shield.identity()
 timer = f"{os.environ['MODULE_ID']}-threat-shield.timer"
 
-if system_id and auth_token:
+try:
+    lists = threat_shield.load_lists()
+    has_lists = bool(lists["allowlists"] or lists["blocklists"])
+except ValueError:
+    # Broken file: keep the timer, the import reports it.
+    has_lists = True
+
+if (system_id and auth_token) or has_lists:
     subprocess.run(["systemctl", "enable", "--now", timer], check=True)
 else:
     # A running import keeps going; the subscription-changed restart cleans up.
