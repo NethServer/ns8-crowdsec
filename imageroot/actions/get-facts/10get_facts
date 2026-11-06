@@ -42,6 +42,13 @@ try:
     feeds = threat_shield.enabled_feeds(threat_shield.load_catalog())
     facts["threat_shield_enterprise"] = len(feeds)
     facts["threat_shield_feeds"] = feeds
+    # Effective state: the Nethesis allowlist needs a subscription identity.
+    system_id, auth_token = threat_shield.identity()
+    facts["threat_shield_nethesis_allowlist"] = bool(system_id and auth_token) and \
+        threat_shield.nethesis_allowlist_enabled()
+    lists = threat_shield.load_lists()
+    facts["threat_shield_custom_allowlists"] = len(lists["allowlists"])
+    facts["threat_shield_custom_blocklists"] = len(lists["blocklists"])
 except Exception as ex:
     # Partial facts beat none: an exception here drops the whole module.
     print(agent.SD_WARNING + f"threat shield facts failed: {ex}", file=sys.stderr)

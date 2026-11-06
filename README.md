@@ -75,8 +75,9 @@ enforced by the firewall bouncer.
   receives the Nethesis global allowlist. The push is on by default while the
   cluster has a subscription, even with no blocklist enabled; see below to
   turn it off.
-- **Threat Shield entitlement**: required to download the blocklists. Without
-  it, previously imported entries are removed and the UI page is disabled.
+- **Threat Shield entitlement**: required to download the blocklists below.
+  Without it, their previously imported entries are removed.
+- Custom allowlists and blocklists need neither, see below.
 
 Available blocklists:
 
@@ -140,6 +141,12 @@ Show the Nethesis global allowlist:
 
     runagent -m crowdsec1 cscli allowlists inspect nethesis_threat_shield
 
+Turn the Nethesis global allowlist off (on by default) and remove it:
+
+    api-cli run module/crowdsec1/set-threat-shield --data '{"feeds": [], "nethesis_allowlist": false}'
+
+`feeds` is required: pass the current selection to keep it.
+
 Stop sending this node's bans to Nethesis Insights (command line only):
 
     runagent -m crowdsec1 sh -c 'echo NETHESIS_INSIGHTS_PUSH=False >> "$AGENT_STATE_DIR/environment"'
@@ -153,6 +160,36 @@ Test servers only: change the `nethesis-insights` URL in
 `/var/lib/nethserver/crowdsec1/etc/threat-shield-feeds.json`, then run
 `systemctl reload crowdsec1`. The server certificate must be trusted, and
 module updates restore the file.
+
+### Custom allowlists and blocklists
+
+Plain lists, one IP address or CIDR per line, downloaded over `http` or
+`https` every 30 minutes. They work without a subscription and are never
+sent the subscription credentials.
+
+    api-cli run module/crowdsec1/set-threat-shield --data '{
+      "feeds": ["yoroimallvl1", "custom-mylist"],
+      "custom_allowlists": [{"name": "office", "url": "https://example.org/allow.txt", "description": "Office IPs", "enabled": true}],
+      "custom_blocklists": [{"name": "mylist", "url": "https://example.org/block.txt", "description": "My list"}]
+    }'
+
+- `name`: lowercase letters, digits and `-`, at most 20 characters, unique
+  per kind; `nethesis` is reserved for allowlists.
+- A missing `custom_allowlists` or `custom_blocklists` keeps the current
+  rows; an empty array removes them all.
+- Each enabled allowlist is the cscli allowlist `threat_shield_<name>`. If
+  a download fails, the last good copy stays.
+- A custom blocklist is the feed `custom-<name>`: enable it in `feeds`.
+  Its confidence is not rated and it is ranked after the catalog feeds.
+  Networks wider than one address are skipped, see the known limitation
+  above.
+- At most 100,000 entries per list are imported; the rest is reported
+  under `last_import` in `list-threat-shield`.
+- A custom allowlist that was never downloaded only reports its error;
+  blocklists are still imported.
+- URLs with credentials (`https://user:pass@...`) are not supported.
+
+The lists are saved in `threat_shield_lists.json`, included in the backup.
 
 ### Request an allowlist exception
 

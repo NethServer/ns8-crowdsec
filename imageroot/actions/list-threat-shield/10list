@@ -47,7 +47,11 @@ def decision_counts():
     return counts
 
 
-catalog = threat_shield.load_catalog()
+try:
+    lists = threat_shield.load_lists()
+except ValueError:
+    lists = {"allowlists": [], "blocklists": []}
+catalog = threat_shield.all_feeds(threat_shield.load_catalog(), lists)
 enabled = set(threat_shield.enabled_feeds(catalog))
 counts = decision_counts()
 blocked = threat_shield.blocked_last_24h()
@@ -69,16 +73,11 @@ feeds = [
         "count": counts.get(key, 0),
         "blocked_24h": blocked.get(key, 0),
         "confidence": threat_shield.get_confidence(key, enterprise),
+        "custom": bool(entry.get("custom")),
+        "url": entry["url_4"] if entry.get("custom") else "",
     }
     for key, entry in catalog.items()
 ]
-
-output = {
-    "subscription": has_subscription,
-    "entitled": bool(probe.get("entitled")),
-    "type": probe.get("type") or "",
-    "feeds": feeds,
-}
 
 # Missing until the timer has run once. Each feed is stamped with the run
 # timestamp, as the UI reads it per feed.
@@ -88,6 +87,21 @@ try:
 except (FileNotFoundError, ValueError):
     status = None
 
+allowlist_status = (status or {}).get("allowlists") or {}
+rows = [{"name": "nethesis", "url": "", "description": "Nethesis global allowlist",
+         "enabled": threat_shield.nethesis_allowlist_enabled(), "builtin": True}] if has_subscription else []
+rows += [{"name": row["name"], "url": row["url"], "description": row.get("description", ""),
+          "enabled": row.get("enabled", True), "builtin": False}
+         for row in lists["allowlists"]]
+
+output = {
+    "subscription": has_subscription,
+    "entitled": bool(probe.get("entitled")),
+    "type": probe.get("type") or "",
+    "feeds": feeds,
+    "allowlists": rows,
+}
+
 if status is not None:
     timestamp = status.get("timestamp")
     output["last_import"] = {
@@ -96,6 +110,10 @@ if status is not None:
         "feeds": {
             key: dict(feed, timestamp=timestamp)
             for key, feed in (status.get("feeds") or {}).items()
+        },
+        "allowlists": {
+            key: dict(entry, timestamp=timestamp)
+            for key, entry in allowlist_status.items()
         },
     }
 

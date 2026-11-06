@@ -15,7 +15,10 @@
             "email_notifications": false,
             "whitelist_count": 2,
             "threat_shield_enterprise": 3,
-            "threat_shield_feeds": ["yoroimallvl1", "nethesis-insights", "nethesislvl3"]
+            "threat_shield_feeds": ["yoroimallvl1", "nethesis-insights", "nethesislvl3"],
+            "threat_shield_nethesis_allowlist": true,
+            "threat_shield_custom_allowlists": 1,
+            "threat_shield_custom_blocklists": 2
         }
     ],
     "type": "object"
