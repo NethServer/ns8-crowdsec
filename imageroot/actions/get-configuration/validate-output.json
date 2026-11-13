@@ -110,6 +110,12 @@
             "title": "whitelists",
             "description": "Whitelists array of IP, network or hostname"
         },
+        "local_blocklist": {
+            "type": "array",
+            "title": "local_blocklist",
+            "description": "Addresses banned permanently, set by set-local-blocklist",
+            "items": {"type": "string"}
+        },
         "enroll_instance": {
             "type": "string",
             "title": "enroll_instance",

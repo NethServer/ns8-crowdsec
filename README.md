@@ -75,8 +75,9 @@ enforced by the firewall bouncer.
   receives the Nethesis global allowlist. The push is on by default while the
   cluster has a subscription, even with no blocklist enabled; see below to
   turn it off.
-- **Threat Shield entitlement**: required to download the blocklists. Without
-  it, previously imported entries are removed and the UI page is disabled.
+- **Threat Shield entitlement**: required to download the blocklists below.
+  Without it, their previously imported entries are removed.
+- Custom allowlists and blocklists need neither, see below.
 
 Available blocklists:
 
@@ -92,7 +93,7 @@ Available blocklists:
 Confidence goes from 1 to 10; it is not shown for community subscriptions.
 All lists are refreshed every 30 minutes.
 
-Enable blocklists from the **Threat Shield** page of the UI, or with:
+Enable blocklists from the **Threat Shield IP** page of the UI, or with:
 
     api-cli run module/crowdsec1/set-threat-shield --data '{
       "feeds": ["yoroimallvl1", "nethesislvl3", "nethesis-insights"]
@@ -140,6 +141,9 @@ Show the Nethesis global allowlist:
 
     runagent -m crowdsec1 cscli allowlists inspect nethesis_threat_shield
 
+The Nethesis global allowlist is always imported while the cluster has a
+subscription: it can't be turned off.
+
 Stop sending this node's bans to Nethesis Insights (command line only):
 
     runagent -m crowdsec1 sh -c 'echo NETHESIS_INSIGHTS_PUSH=False >> "$AGENT_STATE_DIR/environment"'
@@ -153,6 +157,41 @@ Test servers only: change the `nethesis-insights` URL in
 `/var/lib/nethserver/crowdsec1/etc/threat-shield-feeds.json`, then run
 `systemctl reload crowdsec1`. The server certificate must be trusted, and
 module updates restore the file.
+
+### Custom allowlists and blocklists
+
+Plain lists, one IP address or CIDR per line, downloaded over `http` or
+`https` every 30 minutes. They work without a subscription and are never
+sent the subscription credentials.
+
+    api-cli run module/crowdsec1/set-threat-shield --data '{
+      "feeds": ["yoroimallvl1", "custom-mylist"],
+      "custom_allowlists": [{"name": "office", "url": "https://example.org/allow.txt", "description": "Office IPs", "enabled": true}],
+      "custom_blocklists": [{"name": "mylist", "url": "https://example.org/block.txt", "description": "My list"}]
+    }'
+
+- `name`: 3 to 16 lowercase letters and digits, starting with a letter,
+  unique per kind; names starting with `nethesis`, `yoroi` or `crowdsec`
+  are reserved.
+- A missing `custom_allowlists` or `custom_blocklists` keeps the current
+  rows; an empty array removes them all.
+- Each enabled allowlist is the cscli allowlist `threat_shield_<name>`. If
+  a download fails, the last good copy stays.
+- A custom blocklist is the feed `custom-<name>`: enable it in `feeds`.
+  Its confidence is not rated and it is ranked after the catalog feeds.
+  Networks wider than one address are skipped, see the known limitation
+  above.
+  Loopback, link-local, multicast and reserved addresses are skipped too,
+  and private ones unless Local network blocking is enabled in Settings.
+- At most 100,000 entries per list are imported; the rest is reported
+  under `last_import` in `list-threat-shield`.
+- A custom allowlist that was never downloaded only reports its error;
+  blocklists are still imported.
+- A URL can hold credentials (`https://user:pass@...`, `@` and `:` in them
+  percent-encoded): they are sent as HTTP Basic authentication, never after
+  a redirect. They are stored in plain text, backups included.
+
+The lists are saved in `threat_shield_lists.json`, included in the backup.
 
 ### Request an allowlist exception
 
@@ -171,6 +210,29 @@ Returns `{"accepted": true, "requests": N}`, where `N` is how many systems
 have asked for the same address. Repeating a request has no effect. Requires
 the Threat Shield entitlement; if the server rejects the request, the task
 fails with the server's error.
+
+## Permanent bans (local blocklist)
+
+The Local blocklist of the Threat Shield IP page holds addresses banned
+permanently. CrowdSec has no endless decision: each address gets a ban of
+`876000h` (~100 years) with reason `permanent: local blocklist`.
+
+    api-cli run module/crowdsec1/set-local-blocklist --data '{"local_blocklist": ["203.0.113.7", "2001:db8::7"]}'
+
+- `local_blocklist`: the whole list, single IPv4 or IPv6 addresses (networks
+  are refused, at most 1000); it replaces the previous one.
+- An invalid line fails with `not_valid`, an allowlisted address with
+  `ip_allowlisted`.
+- The list is saved in `LOCAL_BLOCKLIST` (backed up) and applied again at
+  every service start and after deleting all detections: removed addresses
+  are unbanned, missing ones are banned again.
+- `get-configuration` returns it as `local_blocklist`.
+
+Temporary bans are unbanned from the Activity page. `unban-ip` with
+`"action": "unban"` deletes the temporary bans of one address, never the
+permanent and Threat Shield ones; `"unban_all"` keeps them too:
+
+    api-cli run module/crowdsec1/unban-ip --data '{"action": "unban", "ip": "203.0.113.7"}'
 
 ## get-configuration
 

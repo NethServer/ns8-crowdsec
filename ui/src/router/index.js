@@ -22,23 +22,15 @@ const routes = [
     component: Settings,
   },
   {
-    path: "/detections",
-    name: "Detections",
+    path: "/activity",
+    name: "Activity",
     component: () =>
-      import(/* webpackChunkName: "detections" */ "../views/Detections.vue"),
+      import(/* webpackChunkName: "activity" */ "../views/Activity.vue"),
   },
-  {
-    path: "/collections",
-    name: "Collections",
-    component: () =>
-      import(/* webpackChunkName: "collections" */ "../views/Collections.vue"),
-  },
-  {
-    path: "/blocklists",
-    name: "Blocklists",
-    component: () =>
-      import(/* webpackChunkName: "blocklists" */ "../views/Blocklists.vue"),
-  },
+  // Renamed to Activity.
+  { path: "/detections", redirect: "/activity" },
+  // Its tabs are now in Threat Shield IP.
+  { path: "/blocklists", redirect: "/threat-shield" },
   {
     path: "/threat-shield",
     name: "ThreatShield",

@@ -1,12 +1,16 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "unban-ip input",
-    "$id": "http://schema.nethserver.org/mail/unban-ip.json",
-    "description": "flush the postfix queue email",
+    "$id": "http://schema.nethserver.org/crowdsec/unban-ip.json",
+    "description": "Unban an IP address, or every ban except permanent and Threat Shield ones",
     "examples": [
         {
-            "queue": "1.2.3.4",
+            "ip": "1.2.3.4",
             "action": "unban"
+        },
+        {
+            "ip": "0.0.0.0",
+            "action": "unban_all"
         }
     ],
     "type": "object",
@@ -19,7 +23,7 @@
         "ip": {
             "type": "string",
             "title": "IP",
-            "description": "IP to unban",
+            "description": "IP to unban, ignored by unban_all",
             "minLength": 1
         },
         "action": {
@@ -27,7 +31,7 @@
             "format": "regex",
             "pattern": "^(unban|unban_all)$",
             "title": "Unban action",
-            "description": "Manage to unban IP"
+            "description": "unban: the temporary bans of one IP; unban_all: every ban except permanent and Threat Shield ones"
         }
     }
 }

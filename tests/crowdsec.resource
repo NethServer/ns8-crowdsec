@@ -74,6 +74,12 @@ Decision Count
     ${count}=    Execute Command    runagent -m ${module_id} cscli decisions list -i ${ip} -o json | jq '[.[]?.decisions[]?] | length'
     RETURN    ${count}
 
+Active Scenarios
+    # alerts list shows every active decision, decisions list only the newest one per address
+    [Arguments]    ${ip}
+    ${output}=    Execute Command    runagent -m ${module_id} cscli alerts list --ip ${ip} --limit 0 -o json | jq -r '[.[]?.decisions[]? | select(.value == "${ip}" and (.duration | startswith("-") | not)) | .scenario] | join(",")'
+    RETURN    ${output}
+
 Ban Has Scenario
     [Arguments]    ${ip}    ${scenario}
     ${output}=    Execute Command    runagent -m ${module_id} cscli decisions list -i ${ip} -o json | jq -r '[.[]?.decisions[]?.scenario] | join(",")'
