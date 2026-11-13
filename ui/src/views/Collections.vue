@@ -54,7 +54,7 @@
               :isLoading="loading.listCollections || loading.toggleCollection"
               :skeletonRows="5"
               :isErrorShown="!!error.listCollections"
-              :errorTitle="$t('action.list-collections')"
+              :errorTitle="$t('error_title.list-collections')"
               :errorDescription="error.listCollections"
               :itemsPerPageLabel="core.$t('pagination.items_per_page')"
               :rangeOfTotalItemsLabel="

@@ -13,7 +13,7 @@
       <cv-column>
         <NsInlineNotification
           kind="error"
-          :title="$t('action.get-configuration')"
+          :title="$t('error_title.get-configuration')"
           :description="error.getConfiguration"
           :showCloseButton="false"
         />
@@ -195,7 +195,7 @@
               <cv-column>
                 <NsInlineNotification
                   kind="error"
-                  :title="$t('action.configure-module')"
+                  :title="$t('error_title.configure-module')"
                   :description="error.configureModule"
                   :showCloseButton="false"
                 />

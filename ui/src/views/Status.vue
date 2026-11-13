@@ -13,7 +13,7 @@
       <cv-column>
         <NsInlineNotification
           kind="error"
-          :title="$t('action.get-status')"
+          :title="$t('error_title.get-status')"
           :description="error.getStatus"
           :showCloseButton="false"
         />
@@ -23,7 +23,7 @@
       <cv-column>
         <NsInlineNotification
           kind="error"
-          :title="$t('action.list-backup-repositories')"
+          :title="$t('error_title.list-backup-repositories')"
           :description="error.listBackupRepositories"
           :showCloseButton="false"
         />
@@ -33,7 +33,7 @@
       <cv-column>
         <NsInlineNotification
           kind="error"
-          :title="$t('action.list-backups')"
+          :title="$t('error_title.list-backups')"
           :description="error.listBackups"
           :showCloseButton="false"
         />
