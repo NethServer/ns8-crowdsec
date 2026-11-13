@@ -41,6 +41,7 @@ ExecStart=/usr/bin/podman run \
     --volume ${CROWDSEC_JOURNAL}:/run/log/journal \
     ${CROWDSEC_IMAGE}
 ExecStartPost=/usr/local/bin/runagent -m %N whitelist_ips
+ExecStartPost=-/usr/local/bin/runagent -m %N sync-local-blocklist
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%N.cid -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%N.cid
 ExecReload=/usr/local/bin/runagent -m %N expand-configuration

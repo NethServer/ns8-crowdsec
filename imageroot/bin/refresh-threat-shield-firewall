@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+"""Drop unbanned addresses from the bouncer's cscli-import sets. The import
+copies every active ban there for 65 minutes, so an unbanned address would
+stay blocked until the next run. Run after unban-ip and sync-local-blocklist."""
+
+import os
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
+
+import agent
+import threat_shield
+
+timer = f"{os.environ['MODULE_ID']}-threat-shield.timer"
+if subprocess.run(["systemctl", "-q", "is-enabled", timer]).returncode == 0:
+    threat_shield.refresh_firewall()
+else:
+    # No import runs: the sets hold only leftover copies.
+    for target in threat_shield.NFT_SETS.values():
+        try:
+            threat_shield.nft(f"flush set {target}\n")
+        except (OSError, subprocess.CalledProcessError) as err:
+            print(agent.SD_WARNING + f"cannot flush {target}: {getattr(err, 'stderr', None) or err}",
+                  file=sys.stderr)

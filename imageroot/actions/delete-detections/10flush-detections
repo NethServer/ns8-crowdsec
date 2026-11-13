@@ -9,6 +9,9 @@ set -e
 
 podman exec "$MODULE_ID" cscli alerts delete --all
 
+# The flush drops the permanent bans too: ban the local blocklist again.
+sync-local-blocklist 1>&2 || :
+
 # --all also drops the Threat Shield imports: bring them back now, not in 30 minutes.
 if systemctl -q is-enabled "${MODULE_ID}-threat-shield.timer"; then
     systemctl restart "${MODULE_ID}-threat-shield.service" 1>&2 || :

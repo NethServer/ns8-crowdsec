@@ -7,7 +7,7 @@
     <cv-grid fullWidth>
       <cv-row>
         <cv-column class="page-title">
-          <h2>{{ $t("detections.title") }}</h2>
+          <h2>{{ $t("activity.title") }}</h2>
         </cv-column>
       </cv-row>
       <cv-row>
@@ -22,33 +22,40 @@
       </cv-row>
       <cv-row>
         <cv-column>
-          <p class="page-description mg-bottom">
-            {{ $t("detections.page_description") }}
-          </p>
-        </cv-column>
-      </cv-row>
-      <cv-row>
-        <cv-column>
+          <p class="mg-bottom">{{ $t("detections.page_description") }}</p>
           <cv-tile light>
             <div class="toolbar">
               <NsButton
                 kind="secondary"
-                :icon="Restart20"
-                @click="listAlerts"
-                :disabled="loading.listAlerts || loading.deleteAlerts"
-                >{{ $t("detections.reload_alerts") }}
+                :icon="Unlocked20"
+                @click="isShownConfirmUnbanAll = true"
+                :disabled="busy || !alerts.some(isBlocked)"
+                >{{ $t("unban.delete_all") }}
               </NsButton>
               <NsButton
                 kind="tertiary"
                 :icon="TrashCan20"
                 class="mg-left-sm"
                 @click="showConfirmDelete"
-                :disabled="
-                  loading.listAlerts || loading.deleteAlerts || !alerts.length
-                "
+                :disabled="busy || !alerts.length"
                 >{{ $t("detections.delete_alerts") }}
               </NsButton>
+              <NsButton
+                kind="ghost"
+                :icon="Restart20"
+                class="mg-left-sm"
+                @click="listAlerts"
+                :disabled="busy"
+                >{{ $t("detections.reload_alerts") }}
+              </NsButton>
             </div>
+            <NsInlineNotification
+              v-if="error.unban"
+              kind="error"
+              :title="$t('error_title.unban-ip')"
+              :description="error.unban"
+              :showCloseButton="false"
+            />
             <div class="data-table-filters">
               <div style="flex: 2">
                 <cv-search
@@ -57,6 +64,25 @@
                   :label="$t('detections.search_alerts')"
                   :clear-aria-label="core.$t('common.clear_search')"
                 ></cv-search>
+              </div>
+              <div style="flex: 1; min-width: 220px">
+                <cv-select
+                  v-model="actionFilter"
+                  :label="$t('activity.action_label')"
+                >
+                  <cv-select-option value="all">{{
+                    $t("activity.action_all")
+                  }}</cv-select-option>
+                  <cv-select-option value="none">{{
+                    $t("activity.action_none")
+                  }}</cv-select-option>
+                  <cv-select-option value="banned">{{
+                    $t("activity.action_banned")
+                  }}</cv-select-option>
+                  <cv-select-option value="expired">{{
+                    $t("activity.action_expired")
+                  }}</cv-select-option>
+                </cv-select>
               </div>
               <div style="flex: 1; min-width: 220px">
                 <cv-select
@@ -84,10 +110,10 @@
               :noSearchResultsDescription="
                 core.$t('common.no_search_results_description')
               "
-              :isLoading="loading.listAlerts"
+              :isLoading="loading.listAlerts || loading.unban"
               :skeletonRows="5"
               :isErrorShown="!!error.listAlerts"
-              :errorTitle="$t('action.list-detections')"
+              :errorTitle="$t('error_title.list-detections')"
               :errorDescription="error.listAlerts"
               :itemsPerPageLabel="core.$t('pagination.items_per_page')"
               :rangeOfTotalItemsLabel="
@@ -101,7 +127,7 @@
             >
               <template slot="empty-state">
                 <NsEmptyState
-                  v-if="alertsSearchFilter.trim()"
+                  v-if="alertsSearchFilter.trim() || actionFilter !== 'all'"
                   :title="$t('detections.no_alerts_filtered')"
                   :animationData="GhostLottie"
                   animationTitle="ghost"
@@ -111,6 +137,13 @@
                     <div>
                       {{ $t("detections.no_alerts_filtered_description") }}
                     </div>
+                    <NsButton
+                      kind="ghost"
+                      :icon="Reset20"
+                      class="mg-top-sm"
+                      @click="resetFilters"
+                      >{{ $t("activity.reset_filters") }}
+                    </NsButton>
                   </template>
                 </NsEmptyState>
                 <NsEmptyState v-else :title="$t('detections.no_alerts')">
@@ -129,9 +162,7 @@
                   :value="`${rowIndex}`"
                 >
                   <cv-data-table-cell>
-                    <div>
-                      {{ formatDateTime(row.created_at) }}
-                    </div>
+                    {{ formatDateTime(row.created_at) }}
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     {{ row.scenario }}
@@ -144,28 +175,43 @@
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     <NsTag
-                      v-if="row.decision_types && !row.decision_expired"
+                      v-if="isBlocked(row)"
                       kind="red"
                       :label="$t('detections.decision_ban')"
                     />
                     <NsTag
-                      v-if="row.decision_expired"
+                      v-else-if="row.decision_expired"
                       kind="blue"
                       :label="$t('detections.inspect_block_expired')"
                     />
-                    <span v-if="!row.decision_types">-</span>
+                    <span v-else>-</span>
                   </cv-data-table-cell>
                   <cv-data-table-cell>
                     {{ row.events_count }}
                   </cv-data-table-cell>
                   <cv-data-table-cell class="table-overflow-menu-cell">
-                    <NsButton
-                      kind="ghost"
-                      size="small"
-                      @click="inspectAlert(row)"
-                      :data-test-id="row.id + '-inspect'"
-                      >{{ $t("detections.inspect_details") }}
-                    </NsButton>
+                    <div class="row-actions">
+                      <NsButton
+                        v-if="isBlocked(row)"
+                        kind="ghost"
+                        size="small"
+                        :disabled="busy"
+                        @click="showConfirmUnban(row.source_ip)"
+                        :data-test-id="row.id + '-unban'"
+                        >{{ $t("unban.delete") }}
+                      </NsButton>
+                      <cv-overflow-menu flip-menu class="row-menu">
+                        <cv-overflow-menu-item
+                          @click="inspectAlert(row)"
+                          :data-test-id="row.id + '-inspect'"
+                        >
+                          <NsMenuItem
+                            :icon="ZoomIn20"
+                            :label="$t('detections.inspect_details')"
+                          />
+                        </cv-overflow-menu-item>
+                      </cv-overflow-menu>
+                    </div>
                   </cv-data-table-cell>
                 </cv-data-table-row>
               </template>
@@ -180,12 +226,27 @@
       @hide="hideConfirmDelete"
       @confirm="setDeleteAlerts"
     />
+    <ConfirmUnbanIpModal
+      :isShown="isShownConfirmUnban"
+      :ban="currentBan"
+      :core="core"
+      @hide="isShownConfirmUnban = false"
+      @confirm="unban"
+    />
+    <ConfirmUnbanAllIpsModal
+      :isShown="isShownConfirmUnbanAll"
+      :isLoading="loading.unbanAll"
+      :core="core"
+      @hide="isShownConfirmUnbanAll = false"
+      @confirm="unbanAll"
+    />
     <InspectDetectionModal
       :isShown="isShownInspectAlert"
       :alert="currentAlertDetail"
       :core="core"
       @hide="hideInspectAlert"
       @after-hide="clearAlertDetail"
+      @unban="unbanFromDetails"
     />
   </div>
 </template>
@@ -194,48 +255,58 @@
 import { mapState } from "vuex";
 import {
   QueryParamService,
+  PageTitleService,
   UtilService,
   IconService,
   TaskService,
   DateTimeService,
-  PageTitleService,
   LottieService,
 } from "@nethserver/ns8-ui-lib";
 import to from "await-to-js";
 import ConfirmDeleteDetectionsModal from "@/components/ConfirmDeleteDetectionsModal.vue";
 import InspectDetectionModal from "@/components/InspectDetectionModal.vue";
+import ConfirmUnbanIpModal from "@/components/ConfirmUnbanIpModal.vue";
+import ConfirmUnbanAllIpsModal from "@/components/ConfirmUnbanAllIpsModal.vue";
 import { formatCountry } from "@/lib/country";
 import Restart20 from "@carbon/icons-vue/es/restart/20";
+import Reset20 from "@carbon/icons-vue/es/reset/20";
 import TrashCan20 from "@carbon/icons-vue/es/trash-can/20";
+import Unlocked20 from "@carbon/icons-vue/es/unlocked/20";
 
 export default {
-  name: "Detections",
+  name: "Activity",
   components: {
     ConfirmDeleteDetectionsModal,
     InspectDetectionModal,
+    ConfirmUnbanIpModal,
+    ConfirmUnbanAllIpsModal,
   },
   mixins: [
     QueryParamService,
+    PageTitleService,
     UtilService,
     IconService,
     TaskService,
     DateTimeService,
-    PageTitleService,
     LottieService,
   ],
   pageTitle() {
-    return this.$t("detections.title") + " - " + this.appName;
+    return this.$t("activity.title") + " - " + this.appName;
   },
   data() {
     return {
       q: {
-        page: "detections",
+        page: "activity",
       },
-      Restart20,
-      TrashCan20,
       urlCheckInterval: null,
+      Restart20,
+      Reset20,
+      TrashCan20,
+      Unlocked20,
       alertsLimit: "500",
       alertsSearchFilter: "",
+      // "all", "none" (no ban), "banned" (ban still active) or "expired" (ban over)
+      actionFilter: "all",
       tablePage: [],
       tableColumns: [
         "created_at",
@@ -248,21 +319,35 @@ export default {
       alerts: [],
       isShownConfirmDelete: false,
       isShownInspectAlert: false,
+      isShownConfirmUnban: false,
+      isShownConfirmUnbanAll: false,
       currentAlertDetail: null,
+      currentBan: { value: "" },
       loading: {
         listAlerts: false,
         deleteAlerts: false,
         inspectAlert: false,
+        unban: false,
+        unbanAll: false,
       },
       error: {
         listAlerts: "",
         deleteAlerts: "",
         inspectAlert: "",
+        unban: "",
       },
     };
   },
   computed: {
     ...mapState(["instanceName", "core", "appName"]),
+    busy() {
+      return (
+        this.loading.listAlerts ||
+        this.loading.deleteAlerts ||
+        this.loading.unban ||
+        this.loading.unbanAll
+      );
+    },
     i18nTableColumns() {
       return this.tableColumns.map((column) => {
         return this.$t("detections.col_" + column);
@@ -270,8 +355,16 @@ export default {
     },
     filteredAlerts() {
       const q = this.alertsSearchFilter.trim().toLowerCase();
-      if (!q) return this.alerts;
-      return this.alerts.filter((a) => this.alertSearchText(a).includes(q));
+      const rows =
+        this.actionFilter === "banned"
+          ? this.alerts.filter(this.isBlocked)
+          : this.actionFilter === "expired"
+          ? this.alerts.filter((a) => a.decision_expired)
+          : this.actionFilter === "none"
+          ? this.alerts.filter((a) => !a.decision_types)
+          : this.alerts;
+      if (!q) return rows;
+      return rows.filter((a) => this.alertSearchText(a).includes(q));
     },
     alertsLimitOptions() {
       return [
@@ -306,6 +399,10 @@ export default {
   },
   beforeRouteEnter(to, from, next) {
     next((vm) => {
+      // An old "page=detections" link: point the URL at this page first
+      if (vm.getPage() === "detections") {
+        vm.dataToQueryParams(vm);
+      }
       vm.watchQueryData(vm);
       vm.urlCheckInterval = vm.initUrlBindingForApp(vm, vm.q.page);
     });
@@ -332,12 +429,69 @@ export default {
         a.source_cn,
         a.events_count,
       ];
-      if (a.decision_expired) {
-        parts.push(this.$t("detections.inspect_block_expired"));
-      } else if (a.decision_types) {
+      if (this.isBlocked(a)) {
         parts.push(this.$t("detections.decision_ban"));
+      } else if (a.decision_expired) {
+        parts.push(this.$t("detections.inspect_block_expired"));
       }
       return parts.filter(Boolean).join(" ").toLowerCase();
+    },
+    isBlocked(row) {
+      return !!row.decision_types && !row.decision_expired;
+    },
+    resetFilters() {
+      this.alertsSearchFilter = "";
+      this.actionFilter = "all";
+      this.alertsLimit = "500";
+    },
+    showConfirmUnban(ip) {
+      this.currentBan = { value: ip };
+      this.isShownConfirmUnban = true;
+    },
+    unbanFromDetails() {
+      const ip = this.currentAlertDetail.source.ip;
+      this.hideInspectAlert();
+      this.showConfirmUnban(ip);
+    },
+    unban() {
+      this.isShownConfirmUnban = false;
+      // temporary bans only: permanent and Threat Shield ones stay
+      this.runUnban("unban", { ip: this.currentBan.value });
+    },
+    unbanAll() {
+      this.runUnban("unbanAll", { action: "unban_all", ip: "0.0.0.0" });
+    },
+    async runUnban(loadingKey, data) {
+      this.loading[loadingKey] = true;
+      this.error.unban = "";
+      const taskAction = "unban-ip";
+      const eventId = this.getUuid();
+      this.core.$root.$once(`${taskAction}-aborted-${eventId}`, () => {
+        this.error.unban = this.$t("error.generic_error");
+        this.loading[loadingKey] = false;
+        this.isShownConfirmUnbanAll = false;
+      });
+      this.core.$root.$once(`${taskAction}-completed-${eventId}`, () => {
+        this.loading[loadingKey] = false;
+        this.isShownConfirmUnbanAll = false;
+        this.listAlerts();
+      });
+      const res = await to(
+        this.createModuleTaskForApp(this.instanceName, {
+          action: taskAction,
+          data: { action: "unban", ...data },
+          extra: {
+            title: this.$t("action." + taskAction),
+            isNotificationHidden: true,
+            eventId,
+          },
+        })
+      );
+      if (res[0]) {
+        console.error(`error creating task ${taskAction}`, res[0]);
+        this.error.unban = this.getErrorMessage(res[0]);
+        this.loading[loadingKey] = false;
+      }
     },
     async listAlerts() {
       this.alerts = [];
@@ -502,10 +656,19 @@ export default {
 <style scoped lang="scss">
 @import "../styles/carbon-utils";
 
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
 .toolbar {
   display: flex;
   align-items: center;
   margin-bottom: $spacing-05;
+}
+
+.mg-top-sm {
+  margin-top: $spacing-05;
 }
 .mg-bottom {
   margin-bottom: $spacing-06;

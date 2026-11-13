@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+"""Make the permanent bans match LOCAL_BLOCKLIST: add the missing addresses,
+delete the bans of the removed ones. Run by set-local-blocklist, at service
+start and after delete-detections, which flushes them."""
+
+import json
+import os
+import subprocess
+import sys
+import time
+
+import agent
+
+# Scenario prefix of a permanent ban: unban-ip, list-banned-ip and list-detections match it.
+PREFIX = "permanent:"
+REASON = PREFIX + " local blocklist"
+# CrowdSec has no endless decision: ~100 years.
+DURATION = "876000h"
+
+
+def cscli(*args):
+    return subprocess.run(["podman", "exec", os.environ["MODULE_ID"], "cscli", *args],
+                          check=True, stdout=subprocess.PIPE, stderr=sys.stderr, text=True).stdout
+
+
+def wanted():
+    return {ip for ip in os.environ.get("LOCAL_BLOCKLIST", "").split(",") if ip}
+
+
+def current():
+    """{address: [decision ids]} of the active permanent bans."""
+    # cscli decisions list shows an address once, under its newest alert:
+    # read the manual alerts instead, or a newer ban could hide a permanent one.
+    alerts = json.loads(cscli("alerts", "list", "--origin", "cscli", "--limit", "0",
+                              "--output", "json") or "null") or []
+    bans = {}
+    for alert in alerts:
+        for decision in alert.get("decisions") or []:
+            if ((decision.get("scenario") or "").startswith(PREFIX)
+                    and not (decision.get("duration") or "-").startswith("-")):
+                bans.setdefault(decision["value"], []).append(decision["id"])
+    return bans
+
+
+def in_firewall():
+    """Addresses held by the bouncer's own nft sets, not by the cscli-import
+    ones: the Threat Shield import refreshes those, the bouncer never clears them."""
+    found = set()
+    for table in (["ip", "crowdsec"], ["ip6", "crowdsec6"]):
+        result = subprocess.run(["nft", "-j", "list", "table", *table], capture_output=True, text=True)
+        if result.returncode != 0:
+            continue
+        for item in json.loads(result.stdout).get("nftables", []):
+            if item.get("set", {}).get("name", "").endswith("-cscli-import"):
+                continue
+            for elem in item.get("set", {}).get("elem", []):
+                value = elem.get("elem", {}).get("val") if isinstance(elem, dict) else elem
+                if isinstance(value, str):
+                    found.add(value)
+    return found
+
+
+want = wanted()
+have = current()
+
+removed = sorted(set(have) - want)
+for ip in removed:
+    for decision_id in have[ip]:
+        cscli("decisions", "delete", "--id", str(decision_id))
+if removed:
+    # The Threat Shield import keeps a copy of every ban: drop the removed ones now.
+    subprocess.run(["refresh-threat-shield-firewall"], stdout=sys.stderr)
+
+add = sorted(want - set(have))
+# cscli refuses an allowlisted address: skip it, set-local-blocklist rejects it on save.
+for ip in list(add):
+    if " is allowlisted by " in cscli("allowlists", "check", ip):
+        print(agent.SD_WARNING + f"{ip} is allowlisted, not banned", file=sys.stderr)
+        add.remove(ip)
+
+if add:
+    # The bouncer skips an address already in its sets, and the LAPI hides the
+    # deletion behind any longer ban: drop every ban of the addresses (Threat
+    # Shield imports them again) and wait for the bouncer to clear them.
+    for ip in add:
+        cscli("decisions", "delete", "--ip", ip, "--contained")
+    for _ in range(15):
+        if not set(add) & in_firewall():
+            break
+        time.sleep(2)
+    else:
+        print(agent.SD_WARNING + "some addresses are still in the firewall sets, "
+              "their permanent ban may not be enforced", file=sys.stderr)
+    for ip in add:
+        cscli("decisions", "add", "--ip", ip, "--type", "ban", "--duration", DURATION,
+              "--reason", REASON)

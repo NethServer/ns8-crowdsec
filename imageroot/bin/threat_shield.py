@@ -8,13 +8,16 @@
 """Shared helpers for the Threat Shield blocklists."""
 
 import base64
+import http.client
+import ipaddress
 import json
 import os
+import re
 import subprocess
 import sys
 import time
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import unquote, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 import agent
@@ -55,6 +58,35 @@ COUNT_TABLE = "inet threat_shield"
 # Blocked packets per import run, last 24 hours only; not backed up.
 BLOCKED_FILE = "threat_shield_blocked.json"
 BLOCKED_WINDOW = 24 * 3600
+
+# Custom allowlists and blocklists, written by set-threat-shield; backed up.
+LISTS_FILE = "threat_shield_lists.json"
+
+# Feed key prefix of the custom blocklists.
+CUSTOM_PREFIX = "custom-"
+
+# Custom list names end up in cscli allowlist names and nft set names.
+NAME_RE = re.compile(r"[a-z][a-z0-9]{2,15}")
+# Custom list names can't start with these.
+RESERVED_PREFIXES = ("nethesis", "yoroi", "crowdsec")
+# Same as the set-threat-shield schema: http(s), optional user:pass@.
+URL_RE = re.compile(r"https?://([^/?#@\s]+@)?[^/?#@\s]+([/?#]\S*)?")
+
+# The Nethesis global allowlist and the prefix of the custom ones in cscli.
+NETHESIS_ALLOWLIST = "nethesis_threat_shield"
+CUSTOM_ALLOWLIST_PREFIX = "threat_shield_"
+
+# About twice the 30-minute timer interval, so one failed run keeps the bans.
+DECISION_DURATION = "65m"
+
+# Bouncer sets holding the cscli-import decisions, by IP version.
+NFT_SETS = {
+    4: "ip crowdsec crowdsec-blacklists-cscli-import",
+    6: "ip6 crowdsec6 crowdsec6-blacklists-cscli-import",
+}
+
+# Larger bodies are refused, not truncated: a cut line could be another address.
+MAX_BODY = 64 * 1024 * 1024
 
 
 def load_catalog():
@@ -100,12 +132,36 @@ def allowlist_url(catalog, subscription_type):
     return first.rsplit("/", 1)[0] + "/whitelist.global"
 
 
-def fetch(url, system_id, auth_token, timeout=HTTP_TIMEOUT):
-    """GET url with HTTP Basic credentials. Returns the decoded body."""
-    basic_auth = base64.b64encode(f"{system_id}:{auth_token}".encode()).decode()
-    request = Request(url, headers={"Authorization": f"Basic {basic_auth}"})
-    with urlopen(request, timeout=timeout) as response:
-        return response.read().decode(errors="replace")
+def split_credentials(url):
+    """(url without user:pass@, (user, password) or None)."""
+    parts = urlsplit(url)
+    if parts.username is None:
+        return url, None
+    host = parts.netloc.rpartition("@")[2]
+    return (urlunsplit(parts._replace(netloc=host)),
+            (unquote(parts.username), unquote(parts.password or "")))
+
+
+def fetch(url, system_id=None, auth_token=None, timeout=HTTP_TIMEOUT):
+    """GET url with HTTP Basic credentials, given or from its user:pass@;
+    never pass the subscription ones for a custom URL. Returns the decoded body."""
+    url, credentials = split_credentials(url)
+    if system_id and auth_token:
+        credentials = (system_id, auth_token)
+    request = Request(url)
+    if credentials:
+        basic_auth = base64.b64encode(":".join(credentials).encode()).decode()
+        # Not sent again after a redirect.
+        request.add_unredirected_header("Authorization", f"Basic {basic_auth}")
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            body = response.read(MAX_BODY + 1)
+    except http.client.HTTPException as err:
+        # e.g. InvalidURL, BadStatusLine, IncompleteRead: callers catch URLError.
+        raise URLError(err) from err
+    if len(body) > MAX_BODY:
+        raise ValueError(f"the list is larger than {MAX_BODY} bytes")
+    return body.decode(errors="replace")
 
 
 def _probe(system_id, auth_token):
@@ -197,6 +253,45 @@ def enabled_feeds(catalog):
     return [key for key in _selected_keys() if key in catalog]
 
 
+def valid_row(row):
+    """True if a custom list row has a safe name and an http(s) URL."""
+    return (isinstance(row, dict) and isinstance(row.get("name"), str)
+            and isinstance(row.get("url"), str)
+            and NAME_RE.fullmatch(row["name"]) is not None
+            and URL_RE.fullmatch(row["url"]) is not None and len(row["url"]) <= 512)
+
+
+def load_lists():
+    """Custom lists, {"allowlists": [rows], "blocklists": [rows]}; invalid
+    rows are dropped. Empty if the file is missing, ValueError if it is broken."""
+    try:
+        with open(LISTS_FILE) as fp:
+            data = json.load(fp)
+    except FileNotFoundError:
+        data = {}
+    if not isinstance(data, dict):
+        raise ValueError(f"{LISTS_FILE} is not a JSON object")
+    return {kind: [row for row in (data.get(kind) or []) if valid_row(row)]
+            for kind in ("allowlists", "blocklists")}
+
+
+def try_load_lists():
+    """(load_lists(), None), or (empty lists, the ValueError) if the file is broken."""
+    try:
+        return load_lists(), None
+    except ValueError as err:
+        return {"allowlists": [], "blocklists": []}, err
+
+
+def all_feeds(catalog, lists):
+    """The catalog followed by the custom blocklists, as {key: {url_4, descr, custom}}."""
+    feeds = dict(catalog)
+    for row in lists["blocklists"]:
+        feeds[CUSTOM_PREFIX + row["name"]] = {"url_4": row["url"], "custom": True,
+                                              "descr": row.get("description", "")}
+    return feeds
+
+
 def insights_url():
     """Base URL of the Nethesis Insights server, from its catalog entry."""
     parts = urlsplit(load_catalog()[INSIGHTS_FEED_KEY]["url_4"])
@@ -206,7 +301,7 @@ def insights_url():
 def get_confidence(key, enterprise=False):
     """Feed confidence, 1-10, or -1 when not rated.
     Same ratings as NethSecurity."""
-    if not enterprise:
+    if not enterprise or key.startswith(CUSTOM_PREFIX):
         return -1
     if key == INSIGHTS_FEED_KEY:
         return INSIGHTS_CONFIDENCE
@@ -232,6 +327,57 @@ def nft(script, *args):
             raise
         return None
     return result.stdout
+
+
+def add_elements(target, values):
+    """nft lines adding values to the set target, 1000 per line."""
+    return [f"add element {target} {{ "
+            + ", ".join(f"{value} timeout {DECISION_DURATION}" for value in values[start:start + 1000])
+            + " }" for start in range(0, len(values), 1000)]
+
+
+def refresh_firewall():
+    """Rewrite the bouncer's cscli-import sets from the active bans: the bouncer
+    adds an address once and never renews its timeout. Returns the addresses
+    now in the bouncer sets by IP version, or None when the bans cannot be listed."""
+    try:
+        # Filtered in Python: --origin/--type make cscli take tens of seconds.
+        result = subprocess.run(["podman", "exec", os.environ["MODULE_ID"], "cscli", "decisions",
+                                 "list", "--limit", "0", "--output", "json"],
+                                text=True, check=True, capture_output=True)
+        rows = json.loads(result.stdout or "null") or []
+    except (subprocess.CalledProcessError, ValueError) as err:
+        print(agent.SD_WARNING + f"threat-shield cannot list the decisions, firewall "
+              f"not refreshed: {getattr(err, 'stderr', None) or err}", file=sys.stderr)
+        return None
+    addresses = {4: set(), 6: set()}
+    for row in rows:
+        for decision in row.get("decisions") or []:
+            # cscli lists an address once, under its newest ban: take any origin.
+            if decision.get("type") != "ban" or decision.get("simulated"):
+                continue
+            # Expired siblings of an active decision in the same alert, e.g. an unbanned IP.
+            if (decision.get("duration") or "").startswith("-"):
+                continue
+            try:
+                address = ipaddress.ip_address(decision.get("value", ""))
+            except ValueError:
+                continue  # ranges are dropped at import
+            addresses[address.version].add(str(address))
+    enforced = {4: set(), 6: set()}
+    for version, target in NFT_SETS.items():
+        values = sorted(addresses[version])
+        # One file is one transaction: no address is ever unblocked.
+        script = "\n".join([f"flush set {target}"] + add_elements(target, values)) + "\n"
+        try:
+            # A missing set is created by the bouncer with its first import decision.
+            if nft(script) is not None:
+                enforced[version] = addresses[version]
+        except (OSError, subprocess.CalledProcessError) as err:
+            print(agent.SD_WARNING + f"threat-shield could not refresh {target}: "
+                  f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
+    # Missing sets (e.g. the bouncer is stopped) block nothing: count nothing.
+    return enforced
 
 
 def remove_counting():

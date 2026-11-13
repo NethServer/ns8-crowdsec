@@ -7,7 +7,7 @@
     size="default"
     :visible="isShown"
     @modal-hidden="onModalHidden"
-    @primary-click="onModalHidden"
+    @primary-click="isBanned ? $emit('unban') : onModalHidden()"
   >
     <template slot="title">{{ $t("detections.inspect_title") }}</template>
     <template slot="content">
@@ -123,7 +123,12 @@
         </div>
       </div>
     </template>
-    <template slot="primary-button">{{ core.$t("common.close") }}</template>
+    <template v-if="isBanned" slot="secondary-button">{{
+      core.$t("common.close")
+    }}</template>
+    <template slot="primary-button">{{
+      isBanned ? $t("unban.delete") : core.$t("common.close")
+    }}</template>
   </NsModal>
 </template>
 
@@ -149,6 +154,11 @@ export default {
     };
   },
   computed: {
+    // A ban still in place, that the primary button can lift.
+    isBanned() {
+      const decisions = (this.alert && this.alert.decisions) || [];
+      return !!decisions.length && !this.isBanExpired(decisions[0].duration);
+    },
     eventsI18nColumns() {
       return this.eventsColumns.map((column) =>
         this.$t("detections.inspect_" + column)

@@ -15,7 +15,9 @@
                     "enabled": true,
                     "count": 4213,
                     "blocked_24h": 1602,
-                    "confidence": 10
+                    "confidence": 10,
+                    "custom": false,
+                    "url": ""
                 },
                 {
                     "key": "nethesis-insights",
@@ -23,7 +25,35 @@
                     "enabled": true,
                     "count": 33,
                     "blocked_24h": 12,
-                    "confidence": 8
+                    "confidence": 8,
+                    "custom": false,
+                    "url": ""
+                },
+                {
+                    "key": "custom-mylist",
+                    "description": "My list",
+                    "enabled": true,
+                    "count": 120,
+                    "blocked_24h": 3,
+                    "confidence": -1,
+                    "custom": true,
+                    "url": "https://example.org/block.txt"
+                }
+            ],
+            "allowlists": [
+                {
+                    "name": "nethesis",
+                    "url": "",
+                    "description": "Nethesis global allowlist",
+                    "enabled": true,
+                    "builtin": true
+                },
+                {
+                    "name": "office",
+                    "url": "https://example.org/allow.txt",
+                    "description": "Office IPs",
+                    "enabled": true,
+                    "builtin": false
                 }
             ],
             "last_import": {
@@ -42,6 +72,20 @@
                         "error": null,
                         "timestamp": "2026-09-09T06:58:44Z"
                     }
+                },
+                "allowlists": {
+                    "nethesis": {
+                        "success": true,
+                        "entries": 52,
+                        "error": null,
+                        "timestamp": "2026-09-09T06:58:44Z"
+                    },
+                    "office": {
+                        "success": true,
+                        "entries": 4,
+                        "error": null,
+                        "timestamp": "2026-09-09T06:58:44Z"
+                    }
                 }
             }
         },
@@ -49,11 +93,12 @@
             "subscription": false,
             "entitled": false,
             "type": "",
-            "feeds": []
+            "feeds": [],
+            "allowlists": []
         }
     ],
     "type": "object",
-    "required": ["subscription", "entitled", "type", "feeds"],
+    "required": ["subscription", "entitled", "type", "feeds", "allowlists"],
     "properties": {
         "subscription": {
             "type": "boolean",
@@ -76,17 +121,17 @@
             "description": "The feed catalog",
             "items": {
                 "type": "object",
-                "required": ["key", "description", "enabled", "count", "blocked_24h", "confidence"],
+                "required": ["key", "description", "enabled", "count", "blocked_24h", "confidence", "custom", "url"],
                 "properties": {
                     "key": {
                         "type": "string",
                         "title": "key",
-                        "description": "Catalog key of the feed, or \"nethesis-insights\" for the virtual fleet-consensus feed"
+                        "description": "Catalog key of the feed, \"nethesis-insights\" for the virtual fleet-consensus feed, or custom-<name> for a custom blocklist"
                     },
                     "description": {
                         "type": "string",
                         "title": "description",
-                        "description": "Human readable feed name"
+                        "description": "Human readable feed name; for a custom blocklist its description as entered, possibly empty"
                     },
                     "enabled": {
                         "type": "boolean",
@@ -110,7 +155,48 @@
                         "minimum": -1,
                         "maximum": 10,
                         "title": "confidence",
-                        "description": "How much to trust this feed, 1-10; -1 means not rated (e.g. a community subscription)"
+                        "description": "How much to trust this feed, 1-10; -1 means not rated (e.g. a community subscription or a custom blocklist)"
+                    },
+                    "custom": {
+                        "type": "boolean",
+                        "title": "custom",
+                        "description": "True for a custom blocklist"
+                    },
+                    "url": {
+                        "type": "string",
+                        "title": "url",
+                        "description": "URL of a custom blocklist, empty for catalog feeds"
+                    }
+                }
+            }
+        },
+        "allowlists": {
+            "type": "array",
+            "title": "allowlists",
+            "description": "The built-in Nethesis allowlist (only with a subscription), then the custom allowlists",
+            "items": {
+                "type": "object",
+                "required": ["name", "url", "description", "enabled", "builtin"],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "\"nethesis\" for the built-in row, else the custom allowlist name"
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "URL of a custom allowlist, empty for the built-in row"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description as entered, possibly empty"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "True if the allowlist is imported"
+                    },
+                    "builtin": {
+                        "type": "boolean",
+                        "description": "True for the Nethesis global allowlist, read-only and enabled only with a subscription"
                     }
                 }
             }
@@ -130,6 +216,11 @@
                     "type": ["string", "null"],
                     "title": "error",
                     "description": "Error that aborted the whole run, null when the run completed"
+                },
+                "allowlists": {
+                    "type": "object",
+                    "title": "allowlists",
+                    "description": "Per-allowlist outcome, keyed by allowlist name (\"nethesis\" for the built-in one), same shape as feeds"
                 },
                 "feeds": {
                     "type": "object",
@@ -153,7 +244,7 @@
                             "error": {
                                 "type": ["string", "null"],
                                 "title": "error",
-                                "description": "Failure reason, null on success"
+                                "description": "Failure reason, or a notice such as a truncated custom list; null otherwise"
                             },
                             "timestamp": {
                                 "type": "string",

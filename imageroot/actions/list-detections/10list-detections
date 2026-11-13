@@ -22,6 +22,6 @@ fi
 if [[ $list == 'null' ]]; then
     echo '[]'
 else
-    # Threat Shield imports are not detections and have their own page.
-    echo "$list" | jq -c 'map(select(any(.decisions[]?; (.scenario // "") | startswith("threat-shield/")) | not))'
+    # Threat Shield imports and permanent bans are not detections and have their own pages.
+    echo "$list" | jq -c 'map(select(any(.scenario, .decisions[]?.scenario; (. // "") | startswith("threat-shield/") or startswith("permanent:")) | not))'
 fi

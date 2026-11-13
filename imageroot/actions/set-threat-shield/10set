@@ -9,26 +9,63 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 
 sys.path.insert(0, os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin"))
 
 import agent
 import threat_shield
 
+
+def fail(field, value, error):
+    agent.set_status("validation-failed")
+    json.dump([{
+        "field": field,
+        "parameter": field,
+        "value": value,
+        "error": error,
+    }], fp=sys.stdout)
+    sys.exit(3)
+
+
 request = json.load(sys.stdin)
-catalog = threat_shield.load_catalog()
+lists, err = threat_shield.try_load_lists()
+if err:
+    # Broken file: the request rewrites it.
+    print(agent.SD_WARNING + f"ignoring {threat_shield.LISTS_FILE}: {err}", file=sys.stderr)
+
+# A missing custom_* field keeps the current rows.
+for kind in ("allowlists", "blocklists"):
+    field = "custom_" + kind
+    if field not in request:
+        continue
+    names = set()
+    rows = []
+    for row in request[field]:
+        # Keeps catalog names and the built-in "nethesis" row apart.
+        if row["name"].startswith(threat_shield.RESERVED_PREFIXES):
+            fail(field, row["name"], "reserved_name")
+        if row["name"] in names:
+            fail(field, row["name"], "duplicated_name")
+        names.add(row["name"])
+        rows.append({"name": row["name"], "url": row["url"],
+                     "description": row.get("description", "")})
+        if kind == "allowlists":
+            rows[-1]["enabled"] = bool(row.get("enabled", True))
+    lists[kind] = rows
+
+# Catalog feeds, then the custom blocklists.
+catalog = threat_shield.all_feeds(threat_shield.load_catalog(), lists)
 requested = request.get("feeds", [])
 
 unknown = [key for key in requested if key not in catalog]
 if unknown:
-    agent.set_status("validation-failed")
-    json.dump([{
-        "field": "feeds",
-        "parameter": "feeds",
-        "value": unknown[0],
-        "error": "unknown_feed",
-    }], fp=sys.stdout)
-    sys.exit(3)
+    fail("feeds", unknown[0], "unknown_feed")
+
+fd, temp = tempfile.mkstemp(dir=".")
+with os.fdopen(fd, "w") as fp:
+    json.dump(lists, fp)
+os.replace(temp, threat_shield.LISTS_FILE)
 
 # Deduplicate and keep a stable order.
 feeds = [key for key in catalog if key in requested]
@@ -40,6 +77,9 @@ else:
 
 # Refresh the entitlement cache now: the import below depends on it.
 threat_shield.probe_status(refresh=True)
+
+# Custom lists need the timer even without a subscription.
+subprocess.run(["sync-threat-shield-timer"], stdout=sys.stderr, check=True)
 
 module_id = os.environ["MODULE_ID"]
 
