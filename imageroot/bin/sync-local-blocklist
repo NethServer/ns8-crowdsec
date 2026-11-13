@@ -49,13 +49,16 @@ def current():
 
 
 def in_firewall():
-    """Addresses held by the bouncer's nft sets."""
+    """Addresses held by the bouncer's own nft sets, not by the cscli-import
+    ones: the Threat Shield import refreshes those, the bouncer never clears them."""
     found = set()
     for table in (["ip", "crowdsec"], ["ip6", "crowdsec6"]):
         result = subprocess.run(["nft", "-j", "list", "table", *table], capture_output=True, text=True)
         if result.returncode != 0:
             continue
         for item in json.loads(result.stdout).get("nftables", []):
+            if item.get("set", {}).get("name", "").endswith("-cscli-import"):
+                continue
             for elem in item.get("set", {}).get("elem", []):
                 value = elem.get("elem", {}).get("val") if isinstance(elem, dict) else elem
                 if isinstance(value, str):
@@ -66,9 +69,13 @@ def in_firewall():
 want = wanted()
 have = current()
 
-for ip in sorted(set(have) - want):
+removed = sorted(set(have) - want)
+for ip in removed:
     for decision_id in have[ip]:
         cscli("decisions", "delete", "--id", str(decision_id))
+if removed:
+    # The Threat Shield import keeps a copy of every ban: drop the removed ones now.
+    subprocess.run(["refresh-threat-shield-firewall"], stdout=sys.stderr)
 
 add = sorted(want - set(have))
 # cscli refuses an allowlisted address: skip it, set-local-blocklist rejects it on save.

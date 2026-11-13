@@ -18,6 +18,7 @@ set -e
 readarray -t input < <(jq -r '.action, .ip')
 action=${input[0]:?missing action argument}
 ip=${input[1]:?missing ip argument}
+rc=0
 
 if [[ "$action" == "unban" ]]; then
     set -o pipefail
@@ -35,16 +36,20 @@ if [[ "$action" == "unban" ]]; then
             podman exec "${MODULE_ID}" cscli decisions delete --id "${id}" </dev/null
         done
 elif [[ "$action" == "unban_all" ]]; then
-    # Unban all IPs
-    # Using xargs to parallelize the deletion process for efficiency
-    # The command lists all decisions, extracts their ids, and deletes them in parallel
-    # Note: Adjust the -P value in xargs based on system capabilities for optimal performance
-    # The counter will be handled more accurately by the bouncer, since a single IP can appear in multiple jails.
-    # Skip Threat Shield and permanent bans and delete by id, so their copy of an IP stays.
-    podman exec ${MODULE_ID} cscli decisions list --limit 0 -o json \
-        | jq -r '.[]?.decisions[]? | select((.scenario // "") | startswith("threat-shield/") or startswith("permanent:") | not) | .id' \
-        | podman exec -i "${MODULE_ID}" xargs -l -P10 cscli decision delete --id &>/dev/null
+    set -o pipefail
+    # Delete active temporary bans by id from all alerts: decisions list hides an address behind its newest alert.
+    podman exec "${MODULE_ID}" cscli alerts list --limit 0 -o json \
+        | jq -r '[.[]?.decisions[]?
+            | select((.duration // "-") | startswith("-") | not)
+            | select((.origin // "") | IN("CAPI", "lists") | not)
+            | select((.scenario // "") | startswith("threat-shield/") or startswith("permanent:") | not)
+            | .id] | unique[]' \
+        | podman exec -i "${MODULE_ID}" xargs -r -l -P10 cscli decision delete --id &>/dev/null || rc=$?
 else
     echo "Unknown action: $action"
     exit 1
 fi
+
+# The Threat Shield import keeps a copy of every ban: drop the unbanned ones now.
+refresh-threat-shield-firewall || :
+exit "${rc}"
