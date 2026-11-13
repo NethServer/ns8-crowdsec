@@ -16,3 +16,6 @@ rm -f crowdsec_config/local_api_credentials.yaml
 # reload the restored API key.
 systemctl restart "${MODULE_ID}.service"
 systemctl restart "${MODULE_ID}-firewall-bouncer.service"
+
+# The restored custom lists may need the import timer.
+sync-threat-shield-timer

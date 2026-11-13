@@ -9,11 +9,11 @@
     @modal-hidden="$emit('hide')"
     @primary-click="$emit('confirm')"
   >
-    <template slot="title"
-      >{{ $t("unban.unban_ip") }}: {{ ban.value }}</template
-    >
+    <template slot="title">{{ $t("unban.unban_ip") }}</template>
     <template slot="content">
-      <div>{{ $t("unban.confirm_unban_ip_message") }}</div>
+      <div>
+        {{ $t("unban.confirm_unban_ip_message", { ip: ban && ban.value }) }}
+      </div>
     </template>
     <template slot="secondary-button">{{ core.$t("common.cancel") }}</template>
     <template slot="primary-button">{{ $t("unban.delete") }}</template>

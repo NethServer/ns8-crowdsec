@@ -3,13 +3,14 @@
 # Copyright (C) 2023 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# list the current banned IP
+# list the active permanent bans
 
-list=$(podman exec $MODULE_ID cscli decisions list --output json)
+set -e
 
-if [[ $list == 'null' ]];then
-    echo '[]'
-else
-    # Threat Shield imports have their own page.
-    echo "$list" | jq -c 'map(select(any(.decisions[]?; (.scenario // "") | startswith("threat-shield/")) | not))'
-fi
+# Read the manual alerts: cscli decisions list shows an address once, under
+# its newest alert, so a newer ban of the same address could hide a permanent one.
+podman exec $MODULE_ID cscli alerts list --origin cscli --limit 0 --output json | jq -c '
+    [.[]? | .decisions = ((.decisions // []) | map(select(
+        ((.scenario // "") | startswith("permanent:"))
+        and ((.duration // "-") | startswith("-") | not))))
+    | select(.decisions | length > 0)]'

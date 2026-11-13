@@ -59,3 +59,36 @@ An address on two Threat Shield feeds is found in both
     ${found}=    Execute Command    echo '{"ip": "192.0.2.80"}' | api-cli run search-threat-shield-decision --agent module/${module_id} --data - | jq -r '.found'
     Should Be Equal    ${found}    false
     [Teardown]    Execute Command    runagent -m ${module_id} cscli decisions delete -i 192.0.2.80
+
+Custom lists are listed and enable the timer without a subscription
+    # port 9 refuses at once, so the import run by the action ends quickly
+    ${output}    ${rc}=    Run Module Action    set-threat-shield    {"feeds": ["custom-mylist"], "custom_allowlists": [{"name": "office", "url": "http://user:pass@127.0.0.1:9/allow.txt", "description": "Office", "enabled": true}], "custom_blocklists": [{"name": "mylist", "url": "http://127.0.0.1:9/block.txt", "description": "My list"}]}
+    Should Be Equal As Integers    ${rc}    0
+    ${output}=    Execute Command    api-cli run list-threat-shield --agent module/${module_id}
+    ${feed}=    Execute Command    echo '${output}' | jq -c '.feeds[] | select(.key == "custom-mylist") | [.custom, .enabled, .confidence, .description]'
+    Should Be Equal    ${feed}    [true,true,-1,"My list"]
+    # CI has no subscription: the built-in Nethesis row is listed as disabled
+    ${rows}=    Execute Command    echo '${output}' | jq -c '[.allowlists[] | [.name, .builtin, .enabled]]'
+    Should Be Equal    ${rows}    [["nethesis",true,false],["office",false,true]]
+    ${rc}=    Execute Command    systemctl is-active ${module_id}-threat-shield.timer    return_rc=True    return_stdout=False
+    Should Be Equal As Integers    ${rc}    0
+    # removing the lists drops the custom feed and turns the timer off again
+    ${output}    ${rc}=    Run Module Action    set-threat-shield    {"feeds": [], "custom_allowlists": [], "custom_blocklists": []}
+    Should Be Equal As Integers    ${rc}    0
+    ${left}=    Execute Command    api-cli run list-threat-shield --agent module/${module_id} | jq -c '[.feeds[] | select(.custom)] + [.allowlists[] | select(.builtin | not)]'
+    Should Be Equal    ${left}    []
+    ${rc}=    Execute Command    systemctl is-active ${module_id}-threat-shield.timer    return_rc=True    return_stdout=False
+    Should Not Be Equal As Integers    ${rc}    0
+
+Invalid, duplicated or reserved custom list names are rejected
+    FOR    ${lists}    IN
+    ...    {"feeds": [], "custom_blocklists": [{"name": "Bad_Name", "url": "https://example.org/a.txt"}]}
+    ...    {"feeds": [], "custom_blocklists": [{"name": "ab", "url": "https://example.org/a.txt"}]}
+    ...    {"feeds": [], "custom_blocklists": [{"name": "my-list", "url": "https://example.org/a.txt"}]}
+    ...    {"feeds": [], "custom_blocklists": [{"name": "dup", "url": "https://example.org/a.txt"}, {"name": "dup", "url": "https://example.org/b.txt"}]}
+    ...    {"feeds": [], "custom_allowlists": [{"name": "nethesis", "url": "https://example.org/a.txt"}]}
+    ...    {"feeds": [], "custom_blocklists": [{"name": "yoroiextra", "url": "https://example.org/a.txt"}]}
+    ...    {"feeds": [], "custom_allowlists": [{"name": "office", "url": "https://u@p@example.org/a.txt"}]}
+        ${output}    ${rc}=    Run Module Action    set-threat-shield    ${lists}
+        Should Not Be Equal As Integers    ${rc}    0
+    END

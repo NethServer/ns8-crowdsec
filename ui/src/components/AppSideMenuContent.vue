@@ -22,25 +22,11 @@
         <span>{{ $t("status.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
-        @click="goToAppPage(instanceName, 'detections')"
-        :class="{ 'current-page': isLinkActive('detections') }"
+        @click="goToAppPage(instanceName, 'activity')"
+        :class="{ 'current-page': isLinkActive('activity') }"
       >
         <template v-slot:nav-icon><Report20 /></template>
-        <span>{{ $t("detections.title") }}</span>
-      </cv-side-nav-link>
-      <cv-side-nav-link
-        @click="goToAppPage(instanceName, 'collections')"
-        :class="{ 'current-page': isLinkActive('collections') }"
-      >
-        <template v-slot:nav-icon><Catalog20 /></template>
-        <span>{{ $t("collections.title") }}</span>
-      </cv-side-nav-link>
-      <cv-side-nav-link
-        @click="goToAppPage(instanceName, 'blocklists')"
-        :class="{ 'current-page': isLinkActive('blocklists') }"
-      >
-        <template v-slot:nav-icon><FirewallClassic20 /></template>
-        <span>{{ $t("blocklists.title") }}</span>
+        <span>{{ $t("activity.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
         @click="goToAppPage(instanceName, 'threat-shield')"
@@ -48,6 +34,13 @@
       >
         <template v-slot:nav-icon><Security20 /></template>
         <span>{{ $t("threat_shield.title") }}</span>
+      </cv-side-nav-link>
+      <cv-side-nav-link
+        @click="goToAppPage(instanceName, 'collections')"
+        :class="{ 'current-page': isLinkActive('collections') }"
+      >
+        <template v-slot:nav-icon><Catalog20 /></template>
+        <span>{{ $t("collections.title") }}</span>
       </cv-side-nav-link>
       <cv-side-nav-link
         @click="goToAppPage(instanceName, 'settings')"
@@ -73,7 +66,6 @@ import Information20 from "@carbon/icons-vue/es/information/20";
 import Activity20 from "@carbon/icons-vue/es/activity/20";
 import Catalog20 from "@carbon/icons-vue/es/catalog/20";
 import Report20 from "@carbon/icons-vue/es/report/20";
-import FirewallClassic20 from "@carbon/icons-vue/es/firewall--classic/20";
 import Security20 from "@carbon/icons-vue/es/security/20";
 import { mapState } from "vuex";
 import { QueryParamService, UtilService } from "@nethserver/ns8-ui-lib";
@@ -86,7 +78,6 @@ export default {
     Activity20,
     Catalog20,
     Report20,
-    FirewallClassic20,
     Security20,
   },
   mixins: [QueryParamService, UtilService],
