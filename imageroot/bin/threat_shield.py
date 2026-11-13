@@ -9,6 +9,7 @@
 
 import base64
 import http.client
+import ipaddress
 import json
 import os
 import re
@@ -74,6 +75,15 @@ URL_RE = re.compile(r"https?://([^/?#@\s]+@)?[^/?#@\s]+([/?#]\S*)?")
 # The Nethesis global allowlist and the prefix of the custom ones in cscli.
 NETHESIS_ALLOWLIST = "nethesis_threat_shield"
 CUSTOM_ALLOWLIST_PREFIX = "threat_shield_"
+
+# About twice the 30-minute timer interval, so one failed run keeps the bans.
+DECISION_DURATION = "65m"
+
+# Bouncer sets holding the cscli-import decisions, by IP version.
+NFT_SETS = {
+    4: "ip crowdsec crowdsec-blacklists-cscli-import",
+    6: "ip6 crowdsec6 crowdsec6-blacklists-cscli-import",
+}
 
 # Larger bodies are refused, not truncated: a cut line could be another address.
 MAX_BODY = 64 * 1024 * 1024
@@ -317,6 +327,57 @@ def nft(script, *args):
             raise
         return None
     return result.stdout
+
+
+def add_elements(target, values):
+    """nft lines adding values to the set target, 1000 per line."""
+    return [f"add element {target} {{ "
+            + ", ".join(f"{value} timeout {DECISION_DURATION}" for value in values[start:start + 1000])
+            + " }" for start in range(0, len(values), 1000)]
+
+
+def refresh_firewall():
+    """Rewrite the bouncer's cscli-import sets from the active bans: the bouncer
+    adds an address once and never renews its timeout. Returns the addresses
+    now in the bouncer sets by IP version, or None when the bans cannot be listed."""
+    try:
+        # Filtered in Python: --origin/--type make cscli take tens of seconds.
+        result = subprocess.run(["podman", "exec", os.environ["MODULE_ID"], "cscli", "decisions",
+                                 "list", "--limit", "0", "--output", "json"],
+                                text=True, check=True, capture_output=True)
+        rows = json.loads(result.stdout or "null") or []
+    except (subprocess.CalledProcessError, ValueError) as err:
+        print(agent.SD_WARNING + f"threat-shield cannot list the decisions, firewall "
+              f"not refreshed: {getattr(err, 'stderr', None) or err}", file=sys.stderr)
+        return None
+    addresses = {4: set(), 6: set()}
+    for row in rows:
+        for decision in row.get("decisions") or []:
+            # cscli lists an address once, under its newest ban: take any origin.
+            if decision.get("type") != "ban" or decision.get("simulated"):
+                continue
+            # Expired siblings of an active decision in the same alert, e.g. an unbanned IP.
+            if (decision.get("duration") or "").startswith("-"):
+                continue
+            try:
+                address = ipaddress.ip_address(decision.get("value", ""))
+            except ValueError:
+                continue  # ranges are dropped at import
+            addresses[address.version].add(str(address))
+    enforced = {4: set(), 6: set()}
+    for version, target in NFT_SETS.items():
+        values = sorted(addresses[version])
+        # One file is one transaction: no address is ever unblocked.
+        script = "\n".join([f"flush set {target}"] + add_elements(target, values)) + "\n"
+        try:
+            # A missing set is created by the bouncer with its first import decision.
+            if nft(script) is not None:
+                enforced[version] = addresses[version]
+        except (OSError, subprocess.CalledProcessError) as err:
+            print(agent.SD_WARNING + f"threat-shield could not refresh {target}: "
+                  f"{getattr(err, 'stderr', None) or err}", file=sys.stderr)
+    # Missing sets (e.g. the bouncer is stopped) block nothing: count nothing.
+    return enforced
 
 
 def remove_counting():
