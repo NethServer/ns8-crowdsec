@@ -22,7 +22,7 @@
       <div v-if="error.restartModule">
         <NsInlineNotification
           kind="error"
-          :title="$t('action.restart-module')"
+          :title="$t('error_title.restart-module')"
           :description="error.restartModule"
           :showCloseButton="false"
         />
