@@ -1,19 +1,51 @@
-#!/bin/bash
+#!/usr/bin/env python3
+
 #
 # Copyright (C) 2026 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Flush all alerts from the database
 
-set -e
+"""Delete the alerts without an active decision: banned addresses stay listed.
+Deleting an alert drops its decisions, so the bans and the firewall are untouched."""
 
-podman exec "$MODULE_ID" cscli alerts delete --all
+import json
+import os
+import subprocess
+import sys
+import urllib.error
+import urllib.request
 
-# The flush drops the permanent bans too: ban the local blocklist again.
-sync-local-blocklist 1>&2 || :
+import yaml
 
-# --all also drops the Threat Shield imports: bring them back now, not in 30 minutes.
-if systemctl -q is-enabled "${MODULE_ID}-threat-shield.timer"; then
-    systemctl restart "${MODULE_ID}-threat-shield.service" 1>&2 || :
-fi
-echo '{}'
+
+def active(alert):
+    return any(not (d.get("duration") or "-").startswith("-") for d in alert.get("decisions") or [])
+
+
+# Without --all the list skips the CAPI and lists alerts, as list-detections does.
+alerts = json.loads(subprocess.run(["podman", "exec", os.environ["MODULE_ID"], "cscli", "alerts", "list",
+                                    "--limit", "0", "-o", "json"],
+                                   check=True, stdout=subprocess.PIPE, text=True).stdout or "null") or []
+ids = [alert["id"] for alert in alerts if not active(alert)]
+
+if ids:
+    # One cscli call per alert logs in each time: one LAPI login is ~100 times faster.
+    base = "http://127.0.0.1:" + os.environ["TCP_PORTS"].split(",")[0]
+    with open("crowdsec_config/local_api_credentials.yaml") as f:
+        creds = yaml.safe_load(f)
+    login = urllib.request.Request(base + "/v1/watchers/login", headers={"Content-Type": "application/json"},
+                                   data=json.dumps({"machine_id": creds["login"], "password": creds["password"]}).encode())
+    with urllib.request.urlopen(login, timeout=30) as response:
+        token = json.load(response)["token"]
+    for alert_id in ids:
+        request = urllib.request.Request(f"{base}/v1/alerts/{alert_id}", method="DELETE",
+                                         headers={"Authorization": "Bearer " + token})
+        try:
+            urllib.request.urlopen(request, timeout=30).close()
+        except urllib.error.HTTPError as err:
+            # Already gone, e.g. flushed by CrowdSec meanwhile: the LAPI answers 500.
+            if b"not found" not in err.read():
+                raise
+    print(f"{len(ids)} detections deleted, {len(alerts) - len(ids)} kept", file=sys.stderr)
+
+json.dump({}, fp=sys.stdout)

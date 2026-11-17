@@ -58,6 +58,13 @@
               </NsButton>
             </div>
             <NsInlineNotification
+              v-if="error.deleteAlerts"
+              kind="error"
+              :title="$t('error_title.delete-detections')"
+              :description="error.deleteAlerts"
+              :showCloseButton="false"
+            />
+            <NsInlineNotification
               v-if="error.unban"
               kind="error"
               :title="$t('error_title.unban-ip')"
@@ -118,7 +125,9 @@
               :noSearchResultsDescription="
                 core.$t('common.no_search_results_description')
               "
-              :isLoading="loading.listAlerts || loading.unban"
+              :isLoading="
+                loading.listAlerts || loading.unban || loading.deleteAlerts
+              "
               :skeletonRows="5"
               :isErrorShown="!!error.listAlerts"
               :errorTitle="$t('error_title.list-detections')"
