@@ -8,9 +8,24 @@
 # Terminate on error
 set -e
 
+crowdsec_image="docker.io/crowdsecurity/crowdsec:v1.8.2-debian"
+metadata_file="ui/public/metadata.json"
+metadata_backup=$(mktemp)
+cp "${metadata_file}" "${metadata_backup}"
+
 # cleanup on exit
-cleanup_list=()
-trap 'rm -rf "${bouncer_tmp_dir}" crowdsec-firewall-bouncer-linux-amd64.tgz' EXIT
+cleanup() {
+    rm -rf "${bouncer_tmp_dir}" crowdsec-firewall-bouncer-linux-amd64.tgz
+    cp "${metadata_backup}" "${metadata_file}"
+    rm -f "${metadata_backup}"
+}
+trap cleanup EXIT
+
+# Show the CrowdSec version, taken from the image tag, in the About page
+crowdsec_tag="${crowdsec_image##*:v}"
+jq --arg v "${crowdsec_tag%-debian}" \
+   '.upstream_name |= gsub("version set automatically"; $v)' \
+   "${metadata_file}" > "${metadata_file}.tmp" && mv "${metadata_file}.tmp" "${metadata_file}"
 
 # Prepare variables for later use
 images=()
@@ -81,7 +96,7 @@ buildah config --entrypoint=/ \
     --label="org.nethserver.max-per-node=1" \
     --label="org.nethserver.authorizations=" \
     --label="org.nethserver.rootfull=1" \
-    --label="org.nethserver.images=docker.io/crowdsecurity/crowdsec:v1.8.2-debian ${repobase}/crowdsec-firewall-bouncer:${IMAGETAG:-latest}" \
+    --label="org.nethserver.images=${crowdsec_image} ${repobase}/crowdsec-firewall-bouncer:${IMAGETAG:-latest}" \
     --label="org.nethserver.tcp-ports-demand=2" \
     --label="org.nethserver.min-core=3.20.1" \
     "${container}"
