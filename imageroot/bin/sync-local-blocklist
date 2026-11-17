@@ -6,8 +6,8 @@
 #
 
 """Make the permanent bans match LOCAL_BLOCKLIST: add the missing addresses,
-delete the bans of the removed ones. Run by set-local-blocklist, at service
-start and after delete-detections, which flushes them."""
+delete the bans of the removed ones. Run by set-local-blocklist and at
+service start."""
 
 import json
 import os

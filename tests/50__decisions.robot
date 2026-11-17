@@ -30,11 +30,21 @@ List alerts and inspect the manual alert
     Should Be Equal As Integers    ${rc}    0
     Should Be Equal    ${ip}    10.10.10.10
 
-Flush alerts
+Deleting all detections keeps the banned ones
+    ${rc}=    Execute Command    runagent -m ${module_id} cscli decisions add -i 192.0.2.10 -d 10m    return_rc=True    return_stdout=False
+    Should Be Equal As Integers    ${rc}    0
+    Wait Until Keyword Succeeds    20x    5s    Check IP In Ruleset    192.0.2.10
     ${out}    ${rc}=    Run Module Action    delete-detections
     Should Be Equal As Integers    ${rc}    0
-    ${count}=    Execute Command    echo '{}' | api-cli run list-detections --agent module/${module_id} --data - | jq 'length'
+    ${count}=    Execute Command    echo '{}' | api-cli run list-detections --agent module/${module_id} --data - | jq '[.[] | select(.source.value == "192.0.2.10")] | length'
+    Should Be Equal As Integers    ${count}    1
+    # only detections with an active ban are left
+    ${count}=    Execute Command    echo '{}' | api-cli run list-detections --agent module/${module_id} --data - | jq '[.[] | select(any(.decisions[]?; .duration | startswith("-") | not) | not)] | length'
     Should Be Equal As Integers    ${count}    0
+    Check IP In Ruleset    192.0.2.10
+    ${out}    ${rc}=    Run Module Action    unban-ip    {"action": "unban", "ip": "192.0.2.10"}
+    Should Be Equal As Integers    ${rc}    0
+    Wait Until Keyword Succeeds    20x    5s    IP Not In Ruleset    192.0.2.10
 
 Unban an IP through the module action
     ${rc}=    Execute Command    runagent -m ${module_id} cscli decisions add -i 1.2.3.4    return_rc=True    return_stdout=False
@@ -92,10 +102,14 @@ Unban removes only the temporary bans
     Should Contain    ${scenarios}    permanent: local blocklist
     Should Contain    ${scenarios}    threat-shield/robot
 
-Deleting all detections keeps the local blocklist
+Deleting all detections keeps the local blocklist and Threat Shield bans
+    ${rc}=    Execute Command    echo 192.0.2.79 | runagent -m ${module_id} cscli decisions import -i - --format values -d 10m -R threat-shield/robot    return_rc=True    return_stdout=False
+    Should Be Equal As Integers    ${rc}    0
     ${out}    ${rc}=    Run Module Action    delete-detections
     Should Be Equal As Integers    ${rc}    0
     Ban Has Scenario    198.51.100.77    permanent: local blocklist
+    Ban Has Scenario    192.0.2.79    threat-shield/robot
+    Execute Command    runagent -m ${module_id} cscli decisions delete -i 192.0.2.79
 
 Removing an address from the local blocklist unbans it
     ${out}    ${rc}=    Run Module Action    set-local-blocklist    {"local_blocklist": []}

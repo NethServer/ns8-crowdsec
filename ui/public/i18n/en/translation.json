@@ -148,7 +148,7 @@
         "history_all": "All events",
         "delete_alerts": "Delete all detections",
         "confirm_delete_title": "Delete all detections",
-        "confirm_delete_message": "All CrowdSec detection events and the bans they created will be permanently removed from the database. Banned addresses stay in the firewall until their ban expires. Threat Shield, community blocklist and local blocklist bans are applied again automatically; other manually added bans are lost. This action cannot be undone."
+        "confirm_delete_message": "Detections without an active ban will be permanently deleted. Detections of banned IP addresses are kept, so you can still review and unban them. This action cannot be undone."
     },
     "collections": {
         "title": "Collections",
@@ -341,6 +341,7 @@
         "configure-module": "Cannot save settings",
         "list-collections": "Cannot load collections",
         "unban-ip": "Cannot unban IP address",
+        "delete-detections": "Cannot delete detections",
         "list-detections": "Cannot load detections",
         "restart-module": "Cannot restart application",
         "set-local-blocklist": "Cannot save local blocklist",
