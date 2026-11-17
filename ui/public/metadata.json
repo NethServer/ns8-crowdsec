@@ -1,5 +1,6 @@
 {
   "name": "CrowdSec",
+  "upstream_name": "CrowdSec version set automatically",
   "description": {
     "en": "The collaborative malicious activity detection and remediation ban tool.",
     "it": "Strumento collaborativo per il rilevamento e il blocco di attività malevole"
