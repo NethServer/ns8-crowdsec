@@ -107,7 +107,9 @@ Deleting all detections keeps the local blocklist and Threat Shield bans
     Should Be Equal As Integers    ${rc}    0
     ${out}    ${rc}=    Run Module Action    delete-detections
     Should Be Equal As Integers    ${rc}    0
-    Ban Has Scenario    198.51.100.77    permanent: local blocklist
+    # the previous test left a newer threat-shield ban on this address, which hides the permanent one from decisions list
+    ${scenarios}=    Active Scenarios    198.51.100.77
+    Should Contain    ${scenarios}    permanent: local blocklist
     Ban Has Scenario    192.0.2.79    threat-shield/robot
     Execute Command    runagent -m ${module_id} cscli decisions delete -i 192.0.2.79
 
