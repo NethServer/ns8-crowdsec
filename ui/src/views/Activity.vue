@@ -48,6 +48,14 @@
                 :disabled="busy"
                 >{{ $t("detections.reload_alerts") }}
               </NsButton>
+              <NsButton
+                kind="ghost"
+                :icon="Export20"
+                class="toolbar-end"
+                @click="exportCsv"
+                :disabled="busy || !filteredAlerts.length"
+                >{{ $t("detections.export_csv") }}
+              </NsButton>
             </div>
             <NsInlineNotification
               v-if="error.unban"
@@ -268,6 +276,8 @@ import InspectDetectionModal from "@/components/InspectDetectionModal.vue";
 import ConfirmUnbanIpModal from "@/components/ConfirmUnbanIpModal.vue";
 import ConfirmUnbanAllIpsModal from "@/components/ConfirmUnbanAllIpsModal.vue";
 import { formatCountry } from "@/lib/country";
+import { toCsv, downloadCsv } from "@/lib/csv";
+import Export20 from "@carbon/icons-vue/es/export/20";
 import Restart20 from "@carbon/icons-vue/es/restart/20";
 import Reset20 from "@carbon/icons-vue/es/reset/20";
 import TrashCan20 from "@carbon/icons-vue/es/trash-can/20";
@@ -299,6 +309,7 @@ export default {
         page: "activity",
       },
       urlCheckInterval: null,
+      Export20,
       Restart20,
       Reset20,
       TrashCan20,
@@ -438,6 +449,30 @@ export default {
     },
     isBlocked(row) {
       return !!row.decision_types && !row.decision_expired;
+    },
+    // Export the rows the table shows, on every page, with UTC ISO dates.
+    exportCsv() {
+      const rows = this.filteredAlerts.map((a) => [
+        new Date(a.created_at).toISOString(),
+        a.scenario,
+        a.source_ip,
+        a.source_cn,
+        this.isBlocked(a)
+          ? this.$t("detections.decision_ban")
+          : a.decision_expired
+          ? this.$t("detections.inspect_block_expired")
+          : "",
+        a.events_count,
+      ]);
+      const stamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/[-:]/g, "")
+        .replace("T", "-");
+      downloadCsv(
+        `${this.instanceName}-detections-${stamp}.csv`,
+        toCsv(this.i18nTableColumns, rows)
+      );
     },
     resetFilters() {
       this.alertsSearchFilter = "";
@@ -665,6 +700,10 @@ export default {
   display: flex;
   align-items: center;
   margin-bottom: $spacing-05;
+}
+
+.toolbar-end {
+  margin-left: auto;
 }
 
 .mg-top-sm {

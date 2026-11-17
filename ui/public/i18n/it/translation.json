@@ -170,6 +170,7 @@
         "inspect_country": "Nazione",
         "history_label": "Eventi da mostrare",
         "inspect_events_list_hint": "CrowdSec memorizza solo un campione degli eventi che hanno attivato questo avviso, per questo registro può contenere meno voci del numero totale di eventi rilevati.",
+        "export_csv": "Esporta in CSV",
         "reload_alerts": "Ricarica",
         "inspect_simulated": "Solo simulazione",
         "inspect_details": "Mostra dettagli",

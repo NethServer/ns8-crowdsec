@@ -110,6 +110,7 @@
         "no_alerts_description": "CrowdSec has not detected any suspicious activity yet.",
         "no_alerts_filtered": "No detections found",
         "no_alerts_filtered_description": "Try changing your search filters.",
+        "export_csv": "Export to CSV",
         "reload_alerts": "Refresh",
         "search_alerts": "Filter detections",
         "col_created_at": "Detected at",
