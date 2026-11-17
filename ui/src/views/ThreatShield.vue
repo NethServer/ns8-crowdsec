@@ -231,6 +231,7 @@
                       <cv-data-table-cell class="table-overflow-menu-cell">
                         <div v-if="feed.custom" class="row-actions">
                           <NsButton
+                            type="button"
                             kind="ghost"
                             size="small"
                             :disabled="loading.setThreatShield"
@@ -460,6 +461,7 @@
                       <cv-data-table-cell class="table-overflow-menu-cell">
                         <div v-if="!row.builtin" class="row-actions">
                           <NsButton
+                            type="button"
                             kind="ghost"
                             size="small"
                             :disabled="loading.setThreatShield"
