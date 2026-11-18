@@ -465,7 +465,7 @@ export default {
         new Date(a.created_at).toISOString(),
         a.scenario,
         a.source_ip,
-        a.source_cn,
+        a.source_cn === "-" ? "" : a.source_cn,
         this.isBlocked(a)
           ? this.$t("detections.decision_ban")
           : a.decision_expired
