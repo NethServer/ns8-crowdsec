@@ -16,6 +16,17 @@ The NethVoice middleware parser and scenario match a failed login
     Should Contain    ${output}    evt.Meta.source_ip : 203.0.113.8
     Should Contain    ${output}    🟢 nethserver/nethvoice-middleware-bf
 
+The NethVoice middleware scenario matches a wrong OTP
+    ${output}=    Explain Log Line    ${SYSLOG_PREFIX} nethvoice-cti-middleware[123]: [GIN] 2026/10/06 - 10:00:00 | 400 |${SPACE * 9}1.2ms |${SPACE * 5}203.0.113.15 | POST${SPACE * 5}"/2fa/verify-otp"
+    Should Contain    ${output}    🟢 nethserver/nethvoice-middleware-logs
+    Should Contain    ${output}    evt.Meta.source_ip : 203.0.113.15
+    Should Contain    ${output}    🟢 nethserver/nethvoice-middleware-bf
+
+The NethVoice whitelist skips 404 answers on the removed legacy CTI paths
+    ${output}=    Explain Log Line    ${SYSLOG_PREFIX} traefik[123]: 203.0.113.16 - - [06/Oct/2026:07:29:27 +0000] "GET /webrest/user/me HTTP/1.1" 404 10 "-" "-" 1 "nethvoice1-ui@file" "http://127.0.0.1:3000" 3ms
+    Should Contain    ${output}    nethserver/nethvoice-whitelist-http-probing
+    Should Not Contain    ${output}    🟢 crowdsecurity/http-probing
+
 The NethVoice reports parser and scenario match a failed login
     ${output}=    Explain Log Line    ${SYSLOG_PREFIX} reports-api[123]: [GIN] 2026/10/06 - 10:00:00 | 401 |${SPACE * 9}1.2ms |${SPACE * 5}203.0.113.9 | POST${SPACE * 5}"/api/login"
     Should Contain    ${output}    🟢 nethserver/nethvoice-reports-logs
