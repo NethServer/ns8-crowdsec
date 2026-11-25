@@ -9,8 +9,6 @@ whitelist:
    - evt.Meta.http_status == '401' && evt.Meta.http_verb == 'GET' && evt.Meta.http_path contains '/webrest/astproxy/extensions'
    - evt.Meta.http_status == '401' && evt.Meta.http_verb == 'POST' && evt.Meta.http_path contains '/webrest/authentication/login'
    - evt.Meta.http_status == '401' && evt.Meta.http_verb == 'POST' && evt.Meta.http_path contains '/webrest/authentication/logout'
-   # NethVoice 1.9 no longer publishes the legacy CTI server: clients not yet
-   # updated keep calling several /webrest paths, which now answer 404
    - evt.Meta.http_status == '404' && evt.Meta.http_path startsWith '/webrest/'
    - evt.Meta.http_status == '404' && evt.Meta.http_verb == 'GET' && evt.Meta.http_path contains '/freepbx/rest/webrtc/201'
    - evt.Meta.http_status == '404' && evt.Meta.http_verb == 'GET' && evt.Meta.http_path contains '/freepbx/rest/mobiles'
